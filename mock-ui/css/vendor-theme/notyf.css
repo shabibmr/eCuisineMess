@@ -1,0 +1,10 @@
+/* vendor-theme/notyf.css - Token-driven Notyf toast styling */
+
+.notyf {
+  z-index: var(--z-toast);
+}
+
+.notyf__toast {
+  border-radius: var(--radius-control);
+  box-shadow: var(--elev-pop);
+}

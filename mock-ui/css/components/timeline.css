@@ -1,0 +1,39 @@
+/* timeline.css - Meal timeline bar (06:00-22:30 track with meal windows) */
+
+.meal-timeline-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.timeline-track {
+  position: relative;
+  height: 16px;
+  background-color: var(--canvas);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-chip);
+  overflow: hidden;
+}
+
+.timeline-window {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-chip);
+}
+
+.timeline-window--b { background-color: var(--meal-b); opacity: 0.85; }
+.timeline-window--l { background-color: var(--meal-l); opacity: 0.85; }
+.timeline-window--d { background-color: var(--meal-d); opacity: 0.85; }
+
+.timeline-now-marker {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 4px;
+  background-color: var(--ink);
+  border-radius: 2px;
+  z-index: 10;
+  box-shadow: 0 0 4px rgba(0,0,0,0.4);
+}

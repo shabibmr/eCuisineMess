@@ -1,0 +1,78 @@
+/* clay.css - Clay skin definitions (soft extruded surfaces, inset highlight/shade, sinking press) */
+
+[data-skin="clay"] {
+  --font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+
+  --radius-shell: 28px;
+  --radius-panel: 20px;
+  --radius-control: 12px;
+  --radius-chip: 9999px;
+
+  /* Clay Light Mode */
+  --canvas: #DCE3EE;
+  --surface: #E8EDF5;
+  --surface-raised: #E8EDF5;
+  --surface-strong: #E8EDF5;
+  --highlight: #FFFFFF;
+  --shade: #B4BFD3;
+  --ink: #26304A;
+  --ink-2: #5D6782;
+  --separator: #C7D1E2;
+  --primary: #26304A;
+  --primary-soft: rgba(38, 48, 74, 0.12);
+  --primary-text: #F3F5FA;
+
+  /* Clay Extruded Elevation Recipes */
+  --elev-panel: inset 2px 2px 4px var(--highlight), inset -2px -2px 4px var(--shade), 4px 8px 20px rgba(38, 48, 74, 0.08);
+  --elev-pop: 6px 12px 28px rgba(38, 48, 74, 0.18), inset 1px 1px 2px var(--highlight);
+  --press: inset -2px -2px 4px var(--highlight), inset 2px 2px 4px var(--shade);
+  --focus-ring: 3px solid rgba(38, 48, 74, 0.35);
+}
+
+[data-skin="clay"][data-mode="dark"] {
+  /* Clay Dark Mode */
+  --canvas: #1F2433;
+  --surface: #272D3F;
+  --surface-raised: #272D3F;
+  --surface-strong: #272D3F;
+  --highlight: #353C52;
+  --shade: #141826;
+  --ink: #E6E9F2;
+  --ink-2: #9AA3BA;
+  --separator: #1D2232;
+  --primary: #E6E9F2;
+  --primary-soft: rgba(230, 233, 242, 0.18);
+  --primary-text: #1F2433;
+
+  --elev-panel: inset 2px 2px 4px var(--highlight), inset -2px -2px 4px var(--shade), 4px 8px 24px rgba(0, 0, 0, 0.35);
+  --elev-pop: 8px 16px 36px rgba(0, 0, 0, 0.55), inset 1px 1px 2px var(--highlight);
+  --press: inset -2px -2px 4px var(--highlight), inset 2px 2px 4px var(--shade);
+  --focus-ring: 3px solid rgba(230, 233, 242, 0.35);
+}
+
+/* Clay-specific component adjustments */
+[data-skin="clay"] .app-main,
+[data-skin="clay"] .app-sidebar,
+[data-skin="clay"] .app-topbar {
+  box-shadow: var(--elev-panel);
+}
+
+[data-skin="clay"] .btn--primary {
+  background-color: var(--primary);
+  color: var(--primary-text);
+  box-shadow: 3px 5px 12px rgba(0, 0, 0, 0.15), inset 1px 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+[data-skin="clay"] .btn:active,
+[data-skin="clay"] button:active {
+  box-shadow: var(--press);
+  transform: translateY(1px);
+}
+
+/* Clay Inset Well for Tables to prevent Card Soup */
+[data-skin="clay"] .tabulator,
+[data-skin="clay"] .table-well {
+  box-shadow: inset 3px 3px 6px var(--shade), inset -3px -3px 6px var(--highlight);
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+}

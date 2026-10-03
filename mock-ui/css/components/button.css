@@ -1,0 +1,83 @@
+/* button.css - Button styles across skins */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition: background var(--motion-fast), border-color var(--motion-fast), color var(--motion-fast), box-shadow var(--motion-fast);
+  white-space: nowrap;
+  user-select: none;
+  border: 1px solid transparent;
+  color: var(--ink);
+  background-color: var(--surface);
+}
+
+/* Primary Button (Pill in Clay/Glass, System Blue/Ink) */
+.btn--primary {
+  background-color: var(--primary);
+  color: var(--primary-text);
+  border-color: var(--primary);
+}
+
+.btn--primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+/* Secondary Button */
+.btn--secondary {
+  background-color: var(--surface);
+  border-color: var(--separator);
+  color: var(--ink);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background-color: var(--canvas);
+}
+
+/* Quiet / Ghost Button */
+.btn--quiet {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--ink);
+}
+
+.btn--quiet:hover:not(:disabled) {
+  background-color: var(--primary-soft);
+}
+
+/* Danger Button */
+.btn--danger {
+  background-color: var(--danger);
+  color: #FFFFFF;
+  border-color: var(--danger);
+}
+
+.btn--danger:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+/* Icon Button */
+.btn--icon {
+  padding: 8px;
+  border-radius: var(--radius-control);
+  width: 36px;
+  height: 36px;
+}
+
+/* Disabled & Invalid States */
+.btn:disabled,
+.btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn:active:not(:disabled) {
+  opacity: var(--press-opacity, 0.8);
+}

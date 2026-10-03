@@ -1,0 +1,18 @@
+/* cuisine-editor.css - Styles for Screen 5 Cuisine Editor */
+
+.cuisine-editor-screen {
+  width: 100%;
+}
+
+.no-mapping-warning {
+  border-left: 4px solid var(--meal-b);
+}
+
+.dual-pane-container {
+  min-height: 380px;
+}
+
+.dual-pane-item.selected {
+  background-color: var(--highlight);
+  border-color: var(--primary);
+}

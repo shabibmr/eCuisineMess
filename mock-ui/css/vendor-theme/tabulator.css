@@ -1,0 +1,102 @@
+/* vendor-theme/tabulator.css - Token-driven Tabulator Theme for Flat, Clay & Glass skins */
+
+.tabulator {
+  background-color: transparent;
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-panel);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--ink);
+  overflow: hidden;
+}
+
+.tabulator-header {
+  background-color: var(--canvas);
+  border-bottom: 1px solid var(--separator);
+  color: var(--ink-2);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.tabulator-header .tabulator-col {
+  background-color: transparent;
+  border-right: 1px solid var(--separator);
+  padding: 10px 12px;
+}
+
+.tabulator-header .tabulator-col:last-child {
+  border-right: none;
+}
+
+.tabulator-row {
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--separator);
+  color: var(--ink);
+  transition: background-color var(--motion-fast);
+}
+
+.tabulator-row:nth-child(even) {
+  background-color: var(--surface-raised);
+}
+
+.tabulator-row:hover {
+  background-color: var(--primary-soft);
+}
+
+.tabulator-row.tabulator-selected {
+  background-color: var(--primary-soft) !important;
+  font-weight: 600;
+}
+
+.tabulator-cell {
+  padding: 10px 12px;
+  border-right: 1px solid var(--separator);
+  display: inline-flex;
+  align-items: center;
+}
+
+.tabulator-cell:last-child {
+  border-right: none;
+}
+
+/* Group Headers */
+.tabulator-group {
+  background-color: var(--canvas) !important;
+  border-bottom: 1px solid var(--separator);
+  color: var(--ink);
+  font-weight: 750;
+  padding: 8px 12px;
+}
+
+/* Totals / Bottom Calc Row */
+.tabulator-footer {
+  background-color: var(--canvas);
+  border-top: 2px solid var(--separator);
+  color: var(--ink);
+  font-weight: 750;
+}
+
+.tabulator-footer .tabulator-calcs-holder {
+  background-color: transparent !important;
+}
+
+/* Pagination Controls */
+.tabulator-paginator {
+  color: var(--ink);
+  padding: 8px 12px;
+}
+
+.tabulator-page {
+  border-radius: var(--radius-control);
+  border: 1px solid var(--separator);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 4px 10px;
+  margin: 0 2px;
+}
+
+.tabulator-page.active {
+  background: var(--primary);
+  color: var(--primary-text);
+  border-color: var(--primary);
+}

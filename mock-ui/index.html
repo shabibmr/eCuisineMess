@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en" data-skin="flat" data-mode="light" data-meal="none">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mess Module</title>
+  
+  <!-- Inline No-Flash Theme Initialization -->
+  <script>
+    (function() {
+      try {
+        var raw = localStorage.getItem('mess-mock:theme');
+        var theme = raw ? JSON.parse(raw) : {};
+        var skin = theme.skin || 'flat';
+        var mode = theme.mode || 'auto';
+        
+        if (mode === 'auto') {
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          mode = prefersDark ? 'dark' : 'light';
+        }
+        
+        document.documentElement.setAttribute('data-skin', skin);
+        document.documentElement.setAttribute('data-mode', mode);
+      } catch (e) {
+        document.documentElement.setAttribute('data-skin', 'flat');
+        document.documentElement.setAttribute('data-mode', 'light');
+      }
+    })();
+  </script>
+
+  <!-- Vendor Stylesheets -->
+  <link rel="stylesheet" href="vendor/tabulator.min.css">
+  <link rel="stylesheet" href="vendor/flatpickr.min.css">
+  <link rel="stylesheet" href="vendor/notyf.min.css">
+  <link rel="stylesheet" href="vendor/apexcharts.css">
+
+  <!-- Base Styles -->
+  <link rel="stylesheet" href="css/base/fonts.css">
+  <link rel="stylesheet" href="css/base/reset.css">
+  <link rel="stylesheet" href="css/base/tokens.css">
+  <link rel="stylesheet" href="css/base/typography.css">
+  <link rel="stylesheet" href="css/base/layout.css">
+  <link rel="stylesheet" href="css/base/a11y.css">
+
+  <!-- Skins -->
+  <link rel="stylesheet" href="css/skins/flat.css">
+  <link rel="stylesheet" href="css/skins/clay.css">
+  <link rel="stylesheet" href="css/skins/glass.css">
+
+  <!-- Component Styles -->
+  <link rel="stylesheet" href="css/components/button.css">
+  <link rel="stylesheet" href="css/components/field.css">
+  <link rel="stylesheet" href="css/components/check-switch.css">
+  <link rel="stylesheet" href="css/components/segmented.css">
+  <link rel="stylesheet" href="css/components/tabs.css">
+  <link rel="stylesheet" href="css/components/badge.css">
+  <link rel="stylesheet" href="css/components/avatar.css">
+  <link rel="stylesheet" href="css/components/dialog.css">
+  <link rel="stylesheet" href="css/components/sheet.css">
+  <link rel="stylesheet" href="css/components/toast.css">
+  <link rel="stylesheet" href="css/components/tooltip.css">
+  <link rel="stylesheet" href="css/components/context-menu.css">
+  <link rel="stylesheet" href="css/components/picker.css">
+  <link rel="stylesheet" href="css/components/banner.css">
+  <link rel="stylesheet" href="css/components/empty.css">
+  <link rel="stylesheet" href="css/components/toolbar.css">
+  <link rel="stylesheet" href="css/components/dual-pane.css">
+  <link rel="stylesheet" href="css/components/timeline.css">
+  <link rel="stylesheet" href="css/components/token-slip.css">
+
+  <!-- Vendor Theme Customizations -->
+  <link rel="stylesheet" href="css/vendor-theme/tabulator.css">
+  <link rel="stylesheet" href="css/vendor-theme/flatpickr.css">
+  <link rel="stylesheet" href="css/vendor-theme/notyf.css">
+  <link rel="stylesheet" href="css/vendor-theme/apex.css">
+
+  <!-- Screen Styles -->
+  <link rel="stylesheet" href="css/screens/home.css">
+  <link rel="stylesheet" href="css/screens/counter.css">
+  <link rel="stylesheet" href="css/screens/menu-editor.css">
+  <link rel="stylesheet" href="css/screens/cuisine-editor.css">
+  <link rel="stylesheet" href="css/screens/customer-editor.css">
+  <link rel="stylesheet" href="css/screens/reports.css">
+
+  <!-- Print Styles -->
+  <link rel="stylesheet" href="css/print/token.css" media="print">
+  <link rel="stylesheet" href="css/print/report.css" media="print">
+</head>
+<body>
+  <!-- Glass Backdrop Layer (active for glass skin) -->
+  <div class="glass-backdrop" aria-hidden="true">
+    <div class="glass-pool glass-pool--b"></div>
+    <div class="glass-pool glass-pool--l"></div>
+    <div class="glass-pool glass-pool--d"></div>
+  </div>
+
+  <div id="app" class="app-layout" x-data="MessShell">
+    <!-- Topbar Landmark -->
+    <header class="app-topbar" role="banner">
+      <div class="topbar-left">
+        <button type="button" class="btn btn--icon sidebar-toggle" @click="toggleSidebar()" aria-label="Toggle navigation sidebar">
+          <i data-lucide="menu"></i>
+        </button>
+        <div class="brand">
+          <span class="brand-title">Mess Module</span>
+        </div>
+      </div>
+
+      <div class="topbar-center">
+        <div class="search-entry" tabindex="0" @click="openCommandPalette()" @keydown.enter="openCommandPalette()">
+          <i data-lucide="search"></i>
+          <span class="search-placeholder">Search screens, members, items...</span>
+          <kbd class="shortcut-badge">Ctrl+K</kbd>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Live Meal & Date indicator -->
+        <div class="topbar-date-meal">
+          <span class="today-date" x-text="todayFormatted"></span>
+        </div>
+
+        <!-- Audio Mute Toggle -->
+        <button type="button" class="btn btn--icon" @click="toggleMute()" :aria-label="muted ? 'Unmute audio' : 'Mute audio'">
+          <i :data-lucide="muted ? 'volume-x' : 'volume-2'"></i>
+        </button>
+
+        <!-- Theme Controls -->
+        <div class="theme-controls">
+          <div class="segmented-control skin-segmented" role="radiogroup" aria-label="Skin selection">
+            <button type="button" :class="{'active': skin === 'flat'}" @click="setSkin('flat', $event)" role="radio" :aria-checked="skin === 'flat'">Flat</button>
+            <button type="button" :class="{'active': skin === 'clay'}" @click="setSkin('clay', $event)" role="radio" :aria-checked="skin === 'clay'">Clay</button>
+            <button type="button" :class="{'active': skin === 'glass'}" @click="setSkin('glass', $event)" role="radio" :aria-checked="skin === 'glass'">Glass</button>
+          </div>
+          <button type="button" class="btn btn--icon mode-toggle" 
+                  @click="toggleMode($event)" 
+                  @contextmenu.prevent="setMode('auto', $event)" 
+                  x-data="{ pressTimer: null }"
+                  @pointerdown="pressTimer = setTimeout(() => setMode('auto', $event), 600)"
+                  @pointerup="clearTimeout(pressTimer)"
+                  @pointerleave="clearTimeout(pressTimer)"
+                  :aria-label="'Theme mode: ' + mode + (mode === 'auto' ? ' (Auto)' : '')">
+            <i :data-lucide="mode === 'dark' ? 'moon' : (mode === 'auto' ? 'sparkles' : 'sun')"></i>
+          </button>
+        </div>
+
+        <!-- User / Role Menu -->
+        <div class="user-menu" x-data="{ open: false }">
+          <button type="button" class="user-button" @click="open = !open" aria-haspopup="true" :aria-expanded="open">
+            <span class="user-role-badge" x-text="currentRole"></span>
+            <i data-lucide="chevron-down"></i>
+          </button>
+          <div class="menu-dropdown" x-show="open" @click.outside="open = false" style="display: none;">
+            <button type="button" class="menu-item" @click="setRole('admin'); open = false">Role: Admin</button>
+            <button type="button" class="menu-item" @click="setRole('supervisor'); open = false">Role: Supervisor</button>
+            <button type="button" class="menu-item" @click="setRole('counter'); open = false">Role: Counter Staff</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sidebar Landmark -->
+    <aside class="app-sidebar" role="navigation" :class="{'collapsed': sidebarCollapsed}">
+      <nav class="nav-groups">
+        <div class="nav-group">
+          <span class="nav-group-title">Main</span>
+          <a href="#/" class="nav-item" :class="{'active': currentRoute === '/'}">
+            <i data-lucide="layout-dashboard"></i>
+            <span class="nav-label">Today</span>
+          </a>
+          <a href="#/counter" class="nav-item nav-item--counter" :class="{'active': currentRoute === '/counter'}">
+            <i data-lucide="credit-card"></i>
+            <span class="nav-label">Counter</span>
+            <span class="live-meal-dot" :data-meal="currentMeal"></span>
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <span class="nav-group-title">Masters</span>
+          <a href="#/items" class="nav-item" :class="{'active': currentRoute.startsWith('/items')}">
+            <i data-lucide="utensils"></i>
+            <span class="nav-label">Items</span>
+          </a>
+          <a href="#/cuisines" class="nav-item" :class="{'active': currentRoute.startsWith('/cuisines')}">
+            <i data-lucide="chef-hat"></i>
+            <span class="nav-label">Cuisines</span>
+          </a>
+          <a href="#/customers" class="nav-item" :class="{'active': currentRoute.startsWith('/customers')}">
+            <i data-lucide="users"></i>
+            <span class="nav-label">Members</span>
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <span class="nav-group-title">Operations</span>
+          <a href="#/menu" class="nav-item" :class="{'active': currentRoute.startsWith('/menu') && !currentRoute.startsWith('/menu-history')}">
+            <i data-lucide="calendar"></i>
+            <span class="nav-label">Daily Menu</span>
+          </a>
+          <a href="#/menu-history" class="nav-item" :class="{'active': currentRoute.startsWith('/menu-history')}">
+            <i data-lucide="history"></i>
+            <span class="nav-label">Menu History</span>
+          </a>
+          <a href="#/bills" class="nav-item" :class="{'active': currentRoute.startsWith('/bills')}">
+            <i data-lucide="receipt"></i>
+            <span class="nav-label">Bills</span>
+          </a>
+          <a href="#/settings/meal-times" class="nav-item" :class="{'active': currentRoute === '/settings/meal-times'}">
+            <i data-lucide="clock"></i>
+            <span class="nav-label">Meal Times</span>
+          </a>
+        </div>
+
+        <div class="nav-group">
+          <span class="nav-group-title">Reports</span>
+          <a href="#/reports/members" class="nav-item" :class="{'active': currentRoute === '/reports/members'}">
+            <i data-lucide="file-user"></i>
+            <span class="nav-label">Members Reg.</span>
+          </a>
+          <a href="#/reports/headcount" class="nav-item" :class="{'active': currentRoute === '/reports/headcount'}">
+            <i data-lucide="calculator"></i>
+            <span class="nav-label">Headcount</span>
+          </a>
+          <a href="#/reports/items" class="nav-item" :class="{'active': currentRoute === '/reports/items'}">
+            <i data-lucide="trending-up"></i>
+            <span class="nav-label">Item Movement</span>
+          </a>
+          <a href="#/reports/attendance" class="nav-item" :class="{'active': currentRoute === '/reports/attendance'}">
+            <i data-lucide="user-check"></i>
+            <span class="nav-label">Attendance</span>
+          </a>
+          <a href="#/reports/time-based" class="nav-item" :class="{'active': currentRoute === '/reports/time-based'}">
+            <i data-lucide="bar-chart-3"></i>
+            <span class="nav-label">Time Slot</span>
+          </a>
+        </div>
+
+        <div class="nav-group nav-group--bottom">
+          <a href="#/styleguide" class="nav-item" :class="{'active': currentRoute === '/styleguide'}">
+            <i data-lucide="palette"></i>
+            <span class="nav-label">Styleguide</span>
+          </a>
+          <a href="#/widgets" class="nav-item" :class="{'active': currentRoute === '/widgets'}">
+            <i data-lucide="component"></i>
+            <span class="nav-label">Widgets</span>
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content Outlet Landmark -->
+    <main class="app-main" id="main-content" role="main">
+      <div id="outlet"></div>
+    </main>
+
+    <!-- Demo Panel (Ctrl+Shift+D) Container -->
+    <div id="demo-panel-container"></div>
+
+    <!-- Command Palette (Ctrl+K) Container -->
+    <div id="command-palette-container"></div>
+  </div>
+
+  <!-- Hidden Print Frame -->
+  <iframe id="print-frame" style="display:none;" aria-hidden="true"></iframe>
+
+  <!-- Vendor Scripts -->
+  <script src="vendor/dayjs.min.js"></script>
+  <script src="vendor/dayjs-customParseFormat.js"></script>
+  <script src="vendor/dayjs-isBetween.js"></script>
+  <script src="vendor/dayjs-isoWeek.js"></script>
+  <script src="vendor/tabulator.min.js"></script>
+  <script src="vendor/xlsx.full.min.js"></script>
+  <script src="vendor/jspdf.umd.min.js"></script>
+  <script src="vendor/jspdf.plugin.autotable.min.js"></script>
+  <script src="vendor/apexcharts.min.js"></script>
+  <script src="vendor/fuse.min.js"></script>
+  <script src="vendor/flatpickr.min.js"></script>
+  <script src="vendor/sortable.min.js"></script>
+  <script src="vendor/auto-animate.min.js"></script>
+  <script src="vendor/notyf.min.js"></script>
+  <script src="vendor/hotkeys.min.js"></script>
+  <script src="vendor/lucide.min.js"></script>
+  <script src="vendor/alpine.min.js" defer></script>
+
+  <!-- Core Services -->
+  <script src="js/core/prng.js"></script>
+  <script src="js/core/format.js"></script>
+  <script src="js/core/clock.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/persist.js"></script>
+  <script src="js/core/router.js"></script>
+  <script src="js/core/theme.js"></script>
+  <script src="js/core/hotkeys.js"></script>
+  <script src="js/core/audio.js"></script>
+  <script src="js/core/rfid.js"></script>
+  <script src="js/core/print.js"></script>
+  <script src="js/core/roles.js"></script>
+  <script src="js/core/screens.js"></script>
+
+  <!-- Sample Data Seed & Generators -->
+  <script src="js/data/seed-items.js"></script>
+  <script src="js/data/seed-cuisines.js"></script>
+  <script src="js/data/seed-mapping.js"></script>
+  <script src="js/data/seed-customers.js"></script>
+  <script src="js/data/seed-meal-times.js"></script>
+  <script src="js/data/gen-menus.js"></script>
+  <script src="js/data/gen-bills.js"></script>
+  <script src="js/data/integrity.js"></script>
+
+  <!-- Shared Components -->
+  <script src="js/components/search-picker.js"></script>
+  <script src="js/components/pickers.js"></script>
+  <script src="js/components/data-grid.js"></script>
+  <script src="js/components/list-frame.js"></script>
+  <script src="js/components/editor-frame.js"></script>
+  <script src="js/components/report-frame.js"></script>
+  <script src="js/components/dialog.js"></script>
+  <script src="js/components/dual-pane.js"></script>
+  <script src="js/components/rfid-capture.js"></script>
+  <script src="js/components/meal-timeline.js"></script>
+  <script src="js/components/token-slip.js"></script>
+  <script src="js/components/demo-panel.js"></script>
+  <script src="js/components/command-palette.js"></script>
+
+  <!-- Screen Modules -->
+  <script src="js/screens/home.js"></script>
+  <script src="js/screens/item-list.js"></script>
+  <script src="js/screens/item-editor.js"></script>
+  <script src="js/screens/widget-gallery.js"></script>
+  <script src="js/screens/cuisine-list.js"></script>
+  <script src="js/screens/cuisine-editor.js"></script>
+  <script src="js/screens/customer-list.js"></script>
+  <script src="js/screens/customer-editor.js"></script>
+  <script src="js/screens/meal-time-settings.js"></script>
+  <script src="js/screens/menu-editor.js"></script>
+  <script src="js/screens/menu-history.js"></script>
+  <script src="js/screens/counter.js"></script>
+  <script src="js/screens/bill-register.js"></script>
+  <script src="js/screens/token-preview.js"></script>
+  <script src="js/screens/report-members.js"></script>
+  <script src="js/screens/report-headcount.js"></script>
+  <script src="js/screens/report-items.js"></script>
+  <script src="js/screens/report-attendance.js"></script>
+  <script src="js/screens/report-time-based.js"></script>
+  <script src="js/screens/styleguide.js"></script>
+
+  <!-- Application Entry Point -->
+  <script src="js/app.js"></script>
+</body>
+</html>

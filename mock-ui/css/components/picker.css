@@ -1,0 +1,44 @@
+/* picker.css - Search picker input and popover dropdown */
+
+.search-picker {
+  position: relative;
+  width: 100%;
+}
+
+.picker-popover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background-color: var(--surface-strong);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-control);
+  box-shadow: var(--elev-pop);
+  z-index: var(--z-modal);
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+  border-bottom: 1px solid var(--separator);
+}
+
+.picker-row:last-child {
+  border-bottom: none;
+}
+
+.picker-row:hover,
+.picker-row.focused {
+  background-color: var(--primary-soft);
+  color: var(--primary);
+}

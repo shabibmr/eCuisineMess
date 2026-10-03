@@ -1,0 +1,72 @@
+/* counter.css - Kiosk layout & animations for Screen 13 Mess Counter */
+
+.counter-kiosk {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.counter-header-bar {
+  background-color: var(--surface);
+  border-radius: var(--radius-panel);
+  border: 1px solid var(--separator);
+  padding: 12px 20px;
+}
+
+.counter-danger-banner {
+  border-left: 5px solid var(--danger);
+  min-height: 48px;
+}
+
+.tap-target-area {
+  border: 2px dashed var(--separator);
+  border-radius: var(--radius-panel);
+  background-color: var(--canvas);
+  cursor: pointer;
+  transition: all var(--motion-normal);
+}
+
+.tap-target-area.idle {
+  border-color: var(--primary);
+  box-shadow: 0 0 12px rgba(var(--primary-rgb, 59, 130, 246), 0.2);
+}
+
+.tap-target-area:hover {
+  border-color: var(--primary-strong, var(--primary));
+}
+
+.member-pips-strip .pip-active {
+  font-weight: bold;
+}
+
+.counter-invoice-table th,
+.counter-invoice-table td {
+  padding: 10px 12px;
+}
+
+.printer-eject-slot {
+  position: absolute;
+  top: 60px;
+  right: 40px;
+  z-index: 50;
+  pointer-events: none;
+}
+
+@media (max-width: 1023px) {
+  .counter-kiosk::before {
+    content: "Notice: The Mess Counter Kiosk requires a display at least 1024 px wide for standard POS operation.";
+    display: block;
+    background: var(--warning-soft, #fef3c7);
+    color: var(--warning, #d97706);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+  }
+}
+

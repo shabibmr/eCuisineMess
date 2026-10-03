@@ -1,0 +1,35 @@
+/* empty.css - Empty state containers */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  gap: 16px;
+  background-color: var(--surface);
+  border: 1px dashed var(--separator);
+  border-radius: var(--radius-panel);
+  margin: 16px 0;
+}
+
+.empty-illustration {
+  width: 96px;
+  height: 96px;
+  color: var(--ink-2);
+  opacity: 0.6;
+}
+
+.empty-title {
+  font-size: 18px;
+  font-weight: 750;
+  color: var(--ink);
+}
+
+.empty-description {
+  font-size: 14px;
+  color: var(--ink-2);
+  max-width: 420px;
+  line-height: 1.45;
+}

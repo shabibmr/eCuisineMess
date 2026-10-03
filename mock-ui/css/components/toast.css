@@ -1,0 +1,21 @@
+/* toast.css - Toast overrides */
+
+.notyf__toast {
+  border-radius: var(--radius-control) !important;
+  box-shadow: var(--elev-pop) !important;
+  font-family: inherit !important;
+  font-size: 14px !important;
+  padding: 12px 16px !important;
+}
+
+.notyf__toast--success {
+  background-color: var(--surface-strong) !important;
+  color: var(--ink) !important;
+  border-left: 4px solid var(--meal-l) !important;
+}
+
+.notyf__toast--error {
+  background-color: var(--surface-strong) !important;
+  color: var(--danger) !important;
+  border-left: 4px solid var(--danger) !important;
+}

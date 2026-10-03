@@ -1,0 +1,44 @@
+/* sheet.css - Right side sheets */
+
+.side-sheet {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 480px;
+  max-width: 100vw;
+  background-color: var(--surface-strong);
+  box-shadow: var(--elev-pop);
+  border-left: 1px solid var(--separator);
+  z-index: var(--z-drawer);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform var(--motion-normal);
+}
+
+.side-sheet.open {
+  transform: translateX(0);
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--separator);
+}
+
+.sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.sheet-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--separator);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}

@@ -1,0 +1,34 @@
+/* customer-editor.css - Styles for Screen 8 Customer/Member Editor */
+
+.photo-drop-zone {
+  position: relative;
+  transition: border-color var(--motion-fast);
+}
+
+.photo-drop-zone:hover {
+  border-color: var(--primary);
+}
+
+.photo-drop-zone:hover .photo-overlay {
+  display: flex !important;
+}
+
+.attendance-day-box {
+  min-width: 48px;
+  transition: transform var(--motion-fast);
+}
+
+.attendance-day-box:hover {
+  transform: translateY(-2px);
+}
+
+.chip-validity-btn {
+  cursor: pointer;
+  border: 1px solid var(--separator);
+  background: var(--surface);
+  transition: background var(--motion-fast), border-color var(--motion-fast);
+}
+
+.chip-validity-btn:hover {
+  border-color: var(--primary);
+}

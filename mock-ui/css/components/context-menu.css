@@ -1,0 +1,33 @@
+/* context-menu.css - Dropdown context menus */
+
+.context-menu {
+  position: absolute;
+  z-index: var(--z-modal);
+  background-color: var(--surface-strong);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-control);
+  box-shadow: var(--elev-pop);
+  padding: 4px;
+  min-width: 160px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  border-radius: calc(var(--radius-control) - 2px);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  text-align: left;
+}
+
+.menu-item:hover {
+  background-color: var(--primary-soft);
+  color: var(--primary);
+}

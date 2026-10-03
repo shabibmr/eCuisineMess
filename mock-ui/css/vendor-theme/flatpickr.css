@@ -1,0 +1,37 @@
+/* vendor-theme/flatpickr.css - Token-driven Flatpickr calendar */
+
+.flatpickr-calendar {
+  background: var(--surface-strong) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--separator) !important;
+  border-radius: var(--radius-panel) !important;
+  box-shadow: var(--elev-pop) !important;
+  font-family: inherit !important;
+}
+
+.flatpickr-day {
+  color: var(--ink) !important;
+  border-radius: var(--radius-control) !important;
+}
+
+.flatpickr-day:hover {
+  background: var(--primary-soft) !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+  background: var(--primary) !important;
+  color: var(--primary-text) !important;
+  border-color: var(--primary) !important;
+}
+
+.flatpickr-months .flatpickr-month {
+  background: transparent !important;
+  color: var(--ink) !important;
+}
+
+.flatpickr-weekday {
+  color: var(--ink-2) !important;
+  font-weight: 600 !important;
+}

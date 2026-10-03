@@ -1,0 +1,49 @@
+/* dialog.css - Modal dialogs and backdrops */
+
+dialog {
+  padding: 0;
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-shell);
+  background-color: var(--surface-strong);
+  color: var(--ink);
+  box-shadow: var(--elev-pop);
+  max-width: 560px;
+  width: calc(100% - 32px);
+  margin: auto;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--separator);
+}
+
+.dialog-title {
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.dialog-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--separator);
+}

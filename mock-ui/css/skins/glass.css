@@ -1,0 +1,143 @@
+/* glass.css - Glass skin definitions with meal-aware backdrop and opaque fallbacks */
+
+[data-skin="glass"] {
+  --font-family: 'Sora', system-ui, -apple-system, sans-serif;
+
+  --radius-shell: 24px;
+  --radius-panel: 18px;
+  --radius-control: 12px;
+  --radius-chip: 9999px;
+
+  /* Glass Light Mode */
+  --canvas: #E7EDF3;
+  --canvas-fallback: #F0F4F8;
+  --surface: rgba(255, 255, 255, 0.58);
+  --surface-raised: rgba(255, 255, 255, 0.72);
+  --surface-strong: rgba(255, 255, 255, 0.85);
+  --glass-stroke: rgba(255, 255, 255, 0.65);
+  --ink: #12213A;
+  --ink-2: #4A5873;
+  --separator: rgba(18, 33, 58, 0.12);
+  --primary: #12213A;
+  --primary-soft: rgba(18, 33, 58, 0.12);
+  --primary-text: #FFFFFF;
+
+  --elev-panel: 0 8px 32px rgba(18, 33, 58, 0.08);
+  --elev-pop: 0 16px 40px rgba(18, 33, 58, 0.18);
+  --press: opacity 0.8;
+  --focus-ring: 2px solid #FFFFFF, 4px solid rgba(18, 33, 58, 0.3);
+}
+
+[data-skin="glass"][data-mode="dark"] {
+  /* Glass Dark Mode */
+  --canvas: #070B16;
+  --canvas-fallback: #121A2D;
+  --surface: rgba(22, 30, 52, 0.55);
+  --surface-raised: rgba(22, 30, 52, 0.70);
+  --surface-strong: rgba(22, 30, 52, 0.82);
+  --glass-stroke: rgba(255, 255, 255, 0.12);
+  --ink: #EEF2FA;
+  --ink-2: #9AA6BF;
+  --separator: rgba(255, 255, 255, 0.10);
+  --primary: #EEF2FA;
+  --primary-soft: rgba(238, 242, 250, 0.18);
+  --primary-text: #12213A;
+
+  --elev-panel: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --elev-pop: 0 16px 48px rgba(0, 0, 0, 0.65);
+  --press: opacity 0.8;
+  --focus-ring: 2px solid #000000, 4px solid rgba(238, 242, 250, 0.3);
+}
+
+/* Glass Backdrop Layer Container & Light Pools */
+.glass-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background-color: var(--canvas);
+}
+
+[data-skin="glass"] .glass-backdrop {
+  display: block;
+}
+
+.glass-pool {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.35;
+  transition: all var(--motion-slow);
+}
+
+.glass-pool--b {
+  top: -10%;
+  left: -5%;
+  width: 45vw;
+  height: 45vw;
+  background: var(--meal-b);
+}
+
+.glass-pool--l {
+  top: 20%;
+  right: -5%;
+  width: 40vw;
+  height: 40vw;
+  background: var(--meal-l);
+}
+
+.glass-pool--d {
+  bottom: -10%;
+  left: 25%;
+  width: 50vw;
+  height: 50vw;
+  background: var(--meal-d);
+}
+
+/* Active Meal Pool Dominance */
+html[data-skin="glass"][data-meal="B"] .glass-pool--b {
+  opacity: 0.70;
+  transform: scale(1.25);
+}
+
+html[data-skin="glass"][data-meal="L"] .glass-pool--l {
+  opacity: 0.70;
+  transform: scale(1.25);
+}
+
+html[data-skin="glass"][data-meal="D"] .glass-pool--d {
+  opacity: 0.70;
+  transform: scale(1.25);
+}
+
+/* Apply Frosted Glass Surface Styling */
+[data-skin="glass"] .app-main,
+[data-skin="glass"] .app-sidebar,
+[data-skin="glass"] .app-topbar,
+[data-skin="glass"] .card,
+[data-skin="glass"] .panel {
+  background: var(--surface);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid var(--glass-stroke);
+  box-shadow: var(--elev-panel);
+}
+
+/* Glass Strong for Dense Content (Grids, Forms, Invoices) */
+[data-skin="glass"] .tabulator,
+[data-skin="glass"] .glass-strong,
+[data-skin="glass"] form {
+  background: var(--surface-strong);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+}
+
+/* Opaque Fallback for Unsupported Backdrop Filter or Reduced Transparency */
+@supports not (backdrop-filter: blur(1px)) {
+  [data-skin="glass"] {
+    --surface: var(--canvas-fallback);
+    --surface-strong: var(--canvas-fallback);
+  }
+}

@@ -1,0 +1,80 @@
+/* typography.css - Font scale, weight, tabular nums, and counter scale */
+
+body {
+  font-family: var(--font-family, system-ui, -apple-system, sans-serif);
+  font-size: var(--font-size-base, 15px);
+  color: var(--ink);
+}
+
+/* Typography scale */
+.text-xs   { font-size: 12px; line-height: 1.4; }
+.text-sm   { font-size: 13px; line-height: 1.4; }
+.text-base { font-size: 15px; line-height: 1.45; }
+.text-md   { font-size: 18px; line-height: 1.35; }
+.text-lg   { font-size: 22px; line-height: 1.25; }
+.text-xl   { font-size: 27px; line-height: 1.2; }
+.text-2xl  { font-size: 32px; line-height: 1.15; }
+
+/* Font weights */
+.font-normal   { font-weight: 400; }
+.font-semibold { font-weight: 600; }
+.font-bold     { font-weight: 750; }
+
+/* Tabular numerals for quantities, prices, times, tokens */
+.tabular-nums,
+.counter-clock,
+.counter-token,
+.qty-col,
+.time-col,
+.token-col,
+.count-col {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Monospace restricted to thermal token slip */
+.thermal-slip {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 750;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+h1 { font-size: 27px; }
+h2 { font-size: 22px; }
+h3 { font-size: 18px; }
+h4 { font-size: 15px; }
+
+/* Counter Route Kiosk Scale */
+.counter {
+  font-size: 20px;
+}
+
+.counter-name {
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.counter-token {
+  font-size: 96px;
+  font-weight: 750;
+  line-height: 1.0;
+  font-variant-numeric: tabular-nums;
+  color: var(--meal-active-color, var(--ink));
+}
+
+.counter-clock {
+  font-size: 40px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.counter-error {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.25;
+}

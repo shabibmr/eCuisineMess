@@ -1,0 +1,170 @@
+/* reports.css - Styles for Screen 16-20 Report Frames, Matrices, Calendar Grid & Drill-down Drawer */
+
+.report-frame {
+  width: 100%;
+  height: 100%;
+}
+
+.report-drill-drawer {
+  background-color: var(--surface-strong);
+  border-left: 1px solid var(--separator);
+  box-shadow: var(--elev-sheet);
+  transition: transform var(--dur-sheet) var(--ease-out);
+}
+
+.report-drawer-backdrop {
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  transition: opacity var(--dur-sheet) var(--ease-out);
+}
+
+.drawer-breadcrumb {
+  user-select: none;
+  font-size: 11px;
+}
+
+/* Headcount Table & Heat Cells */
+.headcount-table td.cell-headcount,
+.headcount-table td.cell-headcount-day,
+.headcount-table td.cell-headcount-row-total,
+.headcount-table td.cell-headcount-col-total,
+.headcount-table td.cell-headcount-grand-total {
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.headcount-table td.cell-headcount:hover,
+.headcount-table td.cell-headcount-day:hover,
+.headcount-table td.cell-headcount-row-total:hover,
+.headcount-table td.cell-headcount-col-total:hover,
+.headcount-table td.cell-headcount-grand-total:hover {
+  filter: brightness(0.95);
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+[data-mode="dark"] .headcount-table td.cell-headcount:hover,
+[data-mode="dark"] .headcount-table td.cell-headcount-day:hover,
+[data-mode="dark"] .headcount-table td.cell-headcount-row-total:hover,
+[data-mode="dark"] .headcount-table td.cell-headcount-col-total:hover,
+[data-mode="dark"] .headcount-table td.cell-headcount-grand-total:hover {
+  filter: brightness(1.2);
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+/* Item Movement & Attendance Rows */
+.item-movement-row:hover,
+.attendance-summary-row:hover,
+.time-slot-row:hover,
+.token-row:hover,
+.item-date-row:hover,
+.member-token-row:hover,
+.slot-token-row:hover {
+  background-color: var(--canvas) !important;
+}
+
+/* Hourly Heat Map Cells */
+.hourly-cell {
+  transition: transform 0.1s ease;
+}
+
+.hourly-cell:hover {
+  box-shadow: inset 0 0 0 2px var(--primary);
+}
+
+/* Calendar Grid & Pips */
+.cal-grid-container {
+  scrollbar-width: thin;
+}
+
+.cal-grid-cell {
+  outline: none;
+  transition: background-color 0.15s ease;
+}
+
+.cal-grid-cell:focus {
+  box-shadow: inset 0 0 0 2px var(--primary) !important;
+  background-color: var(--canvas) !important;
+}
+
+.cal-pip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+  cursor: default;
+}
+
+.cal-pip--b {
+  background-color: var(--meal-b);
+  color: #ffffff;
+}
+
+.cal-pip--l {
+  background-color: var(--meal-l);
+  color: #ffffff;
+}
+
+.cal-pip--d {
+  background-color: var(--meal-d);
+  color: #ffffff;
+}
+
+.cal-pip--empty {
+  background-color: transparent;
+  border: 1px dashed var(--ink-4);
+  color: var(--ink-3);
+  font-weight: normal;
+}
+
+/* Print Overrides for Reports */
+@media print {
+  .app-sidebar,
+  .app-topbar,
+  .toolbar-filters,
+  .report-view-switcher,
+  .report-print-btn,
+  .dropdown-export-wrapper,
+  .report-drawer-container,
+  #demo-panel-container,
+  #command-palette-container {
+    display: none !important;
+  }
+
+  .app-main,
+  .app-layout,
+  .report-frame,
+  .table-well {
+    height: auto !important;
+    overflow: visible !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .report-content-well {
+    border: none !important;
+    overflow: visible !important;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+}

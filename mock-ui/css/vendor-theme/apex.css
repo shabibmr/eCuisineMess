@@ -1,0 +1,27 @@
+/* vendor-theme/apex.css - ApexCharts CSS customization */
+
+.apexcharts-canvas {
+  font-family: inherit !important;
+}
+
+.apexcharts-tooltip {
+  background: var(--surface-strong) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--separator) !important;
+  box-shadow: var(--elev-pop) !important;
+  border-radius: var(--radius-control) !important;
+}
+
+.apexcharts-tooltip-title {
+  background: var(--canvas) !important;
+  border-bottom: 1px solid var(--separator) !important;
+  font-weight: 750 !important;
+}
+
+.apexcharts-text {
+  fill: var(--ink) !important;
+}
+
+.apexcharts-gridline {
+  stroke: var(--separator) !important;
+}

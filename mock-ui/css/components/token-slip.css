@@ -1,0 +1,41 @@
+/* token-slip.css - Thermal KOT token slip styling */
+
+.token-slip {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #FFFFFF;
+  color: #000000;
+  padding: 16px;
+  border: 1px solid #CCCCCC;
+  border-radius: 4px;
+  width: 280px; /* 80mm default preview */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin: auto;
+  position: relative;
+  text-align: center;
+}
+
+.token-slip.width-58mm {
+  width: 200px;
+}
+
+.slip-header-title {
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.slip-token-number {
+  font-size: 48px;
+  font-weight: bold;
+  margin: 12px 0;
+  line-height: 1;
+}
+
+.slip-duplicate-watermark {
+  font-size: 18px;
+  font-weight: bold;
+  border: 2px dashed #000000;
+  padding: 4px;
+  margin: 8px 0;
+  text-transform: uppercase;
+}
