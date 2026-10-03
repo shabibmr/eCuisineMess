@@ -1,0 +1,108 @@
+{
+ "actions": [],
+ "creation": "2026-10-03 21:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "member_code",
+  "member_name",
+  "rfid_tag",
+  "cuisine",
+  "status",
+  "contact_section",
+  "phone",
+  "email",
+  "validity_section",
+  "validity_start",
+  "validity_end"
+ ],
+ "fields": [
+  {
+   "fieldname": "member_code",
+   "fieldtype": "Data",
+   "label": "Member Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "member_name",
+   "fieldtype": "Data",
+   "label": "Member Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rfid_tag",
+   "fieldtype": "Data",
+   "label": "RFID Tag UID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "cuisine",
+   "fieldtype": "Link",
+   "label": "Assigned Cuisine",
+   "options": "Mess Cuisine"
+  },
+  {
+   "default": "ACTIVE",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "ACTIVE\nEXPIRED\nSUSPENDED"
+  },
+  {
+   "fieldname": "contact_section",
+   "fieldtype": "Section Break",
+   "label": "Contact Info"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "validity_section",
+   "fieldtype": "Section Break",
+   "label": "Subscription Validity"
+  },
+  {
+   "fieldname": "validity_start",
+   "fieldtype": "Date",
+   "label": "Validity Start",
+   "reqd": 1
+  },
+  {
+   "fieldname": "validity_end",
+   "fieldtype": "Date",
+   "label": "Validity End",
+   "reqd": 1
+  }
+ ],
+ "modified": "2026-10-03 21:00:00.000000",
+ "module": "Mess Module",
+ "name": "Mess Member",
+ "naming_rule": "By fieldname",
+ "autoname": "field:member_code",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

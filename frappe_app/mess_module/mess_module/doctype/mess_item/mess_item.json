@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "creation": "2026-10-03 21:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "category",
+  "unit",
+  "is_active"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Data",
+   "label": "Item Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "reqd": 1
+  },
+  {
+   "default": "Main",
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "label": "Category",
+   "options": "Main\nSide\nBread\nBeverage\nDessert"
+  },
+  {
+   "default": "Nos",
+   "fieldname": "unit",
+   "fieldtype": "Select",
+   "label": "Unit",
+   "options": "Nos\nPlate\nBowl\nCup"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Is Active"
+  }
+ ],
+ "modified": "2026-10-03 21:00:00.000000",
+ "module": "Mess Module",
+ "name": "Mess Item",
+ "naming_rule": "By fieldname",
+ "autoname": "field:item_code",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -1,55 +1,82 @@
-# Mess Billing & Canteen Management Module
+# eCuisine Mess Billing & Management Module
 
-A comprehensive Mess Management Module featuring complete functional specifications, workflow documentation, and a fully interactive, zero-dependency offline Mock UI replicating the counter billing, member management, menu planning, and reporting workflows.
+A complete full-stack Mess Billing and Canteen Entitlement Management solution featuring an interactive **Flutter Frontend**, **MariaDB Database**, a standalone **Python (FastAPI) Backend**, and a ready-to-deploy **Frappe / ERPNext Custom App**.
 
 ---
 
-## 📁 Repository Structure
+## 🏗️ Architecture & Component Overview
 
 ```
 Mess_Module/
-├── mock-ui/                             # Interactive HTML5/CSS3/Alpine.js Mock Application
-│   ├── assets/                          # Local webfonts (IBM Plex Sans Arabic, Nunito)
-│   ├── css/                             # Modular styling (Flat, Clay, Glass themes)
-│   ├── js/                              # Data store, state machine, views & controllers
-│   ├── qa/                              # Automated test suites & verification scripts
-│   ├── vendor/                          # Offline vendor libraries (Alpine, Tabulator, ApexCharts, etc.)
-│   ├── index.html                       # Application entry point
-│   ├── CLIENT_HANDOVER.md               # Acceptance criteria & client handover document
-│   └── README.md                        # Mock UI demo guide & keyboard map
-├── Mess_Modules.md                      # Core functional specifications breakdown
-├── Mess_Screens_Specification.md        # Detailed screen-by-screen architectural spec
-├── Mess_MockUI_Implementation_Plan.md   # Architectural and implementation blueprint
-├── Mess_MockUI_Tasks_Register.md        # Task execution register and progress log
-└── WhatsApp Image 2026-09-15 at 6.07.07 PM.jpeg  # Reference hardware & receipt layout
+├── database/                            # MariaDB Database Schema & Seed Data
+│   ├── schema.sql                       # Complete DDL relational schema for ecuisine_mess
+│   └── seed.sql                         # Initial seed dataset (members, cuisines, items, meal times)
+│
+├── backend_api/                         # Python FastAPI Standalone Server (Direct MariaDB)
+│   ├── main.py                          # REST API & Frappe RPC endpoints
+│   ├── db.py                            # MariaDB connection pool & queries
+│   ├── requirements.txt                 # Dependencies (fastapi, uvicorn, pymysql)
+│   └── run.bat                          # One-click start on port 8000
+│
+├── frappe_app/mess_module/              # Frappe / ERPNext Custom App
+│   ├── pyproject.toml / hooks.py        # Frappe app metadata & hooks
+│   ├── mess_module/api.py               # Whitelisted Frappe RPC methods (@frappe.whitelist)
+│   └── mess_module/doctype/             # DocTypes (Mess Member, Mess Item, Mess Cuisine, Mess Bill, etc.)
+│
+├── flutter_app/                         # Production-Ready Flutter Application
+│   ├── lib/
+│   │   ├── config/                      # Theme and API configuration
+│   │   ├── models/                      # Member, Cuisine, Item, Bill, RFID models
+│   │   ├── services/                    # ApiService (REST / Frappe RPC client)
+│   │   ├── providers/                   # State management (CounterProvider)
+│   │   ├── screens/                     # Kiosk Counter, Members, Cuisines, Bills, Reports
+│   │   └── widgets/                     # RFID Tap Simulator, Thermal Token Slip, Supervisor Override
+│   └── pubspec.yaml                     # Dependencies (http, provider, intl)
+│
+└── mock-ui/                             # Interactive HTML5/CSS3/Alpine.js Mock Prototype
 ```
 
 ---
 
-## 🚀 Quick Start (Mock UI)
+## ⚡ Quick Start
 
-The interactive UI is designed to run directly without build steps or node dependencies:
+### 1. Database Setup (MariaDB)
+Ensure MariaDB is running on port `3306`, then import the schema and seeds:
+```bash
+mysql -u root < database/schema.sql
+mysql -u root < database/seed.sql
+```
 
-1. Open [`mock-ui/index.html`](mock-ui/index.html) directly in any modern browser (`Chrome`, `Edge`, `Firefox`, `Safari`).
-2. Or serve locally with any static web server:
-   ```bash
-   cd mock-ui
-   python -m http.server 8080
-   ```
-   Navigate to `http://localhost:8080`.
+### 2. Start the Python Backend API
+```bash
+# In backend_api/
+pip install -r requirements.txt
+python -m uvicorn main:app --app-dir backend_api --host 0.0.0.0 --port 8000 --reload
+# Or simply double-click backend_api/run.bat
+```
+- API Base URL: `http://localhost:8000`
+- Interactive Swagger Docs: `http://localhost:8000/docs`
+
+### 3. Run the Flutter Frontend
+```bash
+cd flutter_app
+flutter pub get
+flutter run -d chrome    # Or flutter run -d windows
+```
+
+### 4. Optional: Install into Frappe / ERPNext Bench
+```bash
+# In your Frappe bench directory:
+bench get-app mess_module /path/to/frappe_app/mess_module
+bench --site <your-site> install-app mess_module
+bench --site <your-site> migrate
+```
 
 ---
 
-## ✨ Key Features & Highlights
+## 🏷️ Key Features
 
-- **RFID Tap-to-Bill Kiosk**: Sub-second meal entitlement billing at 0.00 price, duplicate-serve prevention, supervisor override authorization, and simulated thermal token slip printing.
-- **Dynamic Daily Menu Planning**: Cuisine-wise meal assignment (Breakfast, Lunch, Dinner) with automated item quantity mappings and bill locks.
-- **Member Management**: RFID card assignment, cuisine preferences, validity tracking, and renewal management.
-- **Reporting & Analytics**:
-  - Members Register with validity countdowns
-  - Cuisine × Meal Type Headcount Matrix (with 2-level drill-down)
-  - Item-wise Movement & Consumption
-  - Customer Attendance (Summary & Heatmap Grid)
-  - Rush Hour & Time-based Distribution
-- **Delimited CSV Exports**: All analytical exports adhere to standard pipe (`|`) delimiter compliance.
-- **Multi-Theme Design System**: Instant switching between **Flat**, **Clay** (Neumorphic), and **Glass** (Glassmorphic) themes with Light/Dark mode toggles.
+- **RFID Tap-to-Bill Kiosk**: Sub-second meal entitlement billing at `0.00` price, duplicate-serve prevention, and supervisor PIN override (`1234`).
+- **Interactive Thermal Token Slip**: Formatted thermal slip receipt with print cue and duplicate reprint watermark.
+- **RFID Demo Tap Simulator**: Built-in widget for one-click testing of valid members, already-served scenarios, expired cards, and unregistered tags.
+- **Analytical Reports & Delimited CSV Export**: Headcount matrix and customer attendance records with strict pipe (`|`) delimiter compliance.

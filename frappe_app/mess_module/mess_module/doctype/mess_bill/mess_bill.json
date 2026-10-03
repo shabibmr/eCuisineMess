@@ -1,0 +1,168 @@
+{
+ "actions": [],
+ "creation": "2026-10-03 21:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "bill_number",
+  "token_number",
+  "status",
+  "meal_type",
+  "bill_date",
+  "bill_time",
+  "member_section",
+  "member",
+  "cuisine",
+  "total_amount",
+  "override_section",
+  "is_override",
+  "override_by",
+  "override_reason",
+  "cancel_section",
+  "cancel_reason",
+  "cancelled_by",
+  "cancelled_at",
+  "items_section",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "bill_number",
+   "fieldtype": "Data",
+   "label": "Bill Number",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "token_number",
+   "fieldtype": "Data",
+   "label": "Token Number",
+   "reqd": 1
+  },
+  {
+   "default": "SERVED",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "SERVED\nCANCELLED"
+  },
+  {
+   "fieldname": "meal_type",
+   "fieldtype": "Select",
+   "label": "Meal Type",
+   "options": "BREAKFAST\nLUNCH\nDINNER",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bill_date",
+   "fieldtype": "Date",
+   "label": "Bill Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bill_time",
+   "fieldtype": "Time",
+   "label": "Bill Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "member_section",
+   "fieldtype": "Section Break",
+   "label": "Member & Cuisine"
+  },
+  {
+   "fieldname": "member",
+   "fieldtype": "Link",
+   "label": "Member",
+   "options": "Mess Member",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cuisine",
+   "fieldtype": "Link",
+   "label": "Cuisine",
+   "options": "Mess Cuisine",
+   "reqd": 1
+  },
+  {
+   "default": "0.00",
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount"
+  },
+  {
+   "fieldname": "override_section",
+   "fieldtype": "Section Break",
+   "label": "Supervisor Override"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_override",
+   "fieldtype": "Check",
+   "label": "Is Override"
+  },
+  {
+   "fieldname": "override_by",
+   "fieldtype": "Data",
+   "label": "Override Authorized By"
+  },
+  {
+   "fieldname": "override_reason",
+   "fieldtype": "Small Text",
+   "label": "Override Reason"
+  },
+  {
+   "fieldname": "cancel_section",
+   "fieldtype": "Section Break",
+   "label": "Cancellation Details"
+  },
+  {
+   "fieldname": "cancel_reason",
+   "fieldtype": "Small Text",
+   "label": "Cancel Reason"
+  },
+  {
+   "fieldname": "cancelled_by",
+   "fieldtype": "Data",
+   "label": "Cancelled By"
+  },
+  {
+   "fieldname": "cancelled_at",
+   "fieldtype": "Datetime",
+   "label": "Cancelled At"
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Entitlement Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Mess Bill Item"
+  }
+ ],
+ "modified": "2026-10-03 21:00:00.000000",
+ "module": "Mess Module",
+ "name": "Mess Bill",
+ "naming_rule": "By fieldname",
+ "autoname": "field:bill_number",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
