@@ -44,13 +44,15 @@ T-642,FE-2a,MemberListBloc + MemberListPage search RFID edit,T-641,1.25,Done
 T-643,FE-2a,DI routes delete legacy items/members screens,T-639;T-642,0.5,Done
 T-644,FE-2a,flutter analyze + flutter test green,T-643,0.5,Done
 T-645,FE-2a,FE-2a exit docs; halt before Cuisines/Meal Times,T-644,0.25,Done
-T-646,FE-2,features/cuisines domain dual-pane mapping,T-645,1.0,To do
-T-647,FE-2,Cuisines data layer,T-646,0.75,To do
-T-648,FE-2,CuisineListBloc + dual-pane page,T-647,1.5,To do
-T-649,FE-2,features/meal_times domain,T-645,0.75,To do
-T-650,FE-2,Meal times data layer,T-649,0.5,To do
-T-651,FE-2,MealTimeSettingsBloc + page,T-650,1.0,To do
-T-652,FE-2,Item categories polish if needed,T-645,0.5,To do
-T-653,FE-2,DI routes delete cuisines legacy screen,T-648;T-651,0.5,To do
-T-654,FE-2,analyze + tests for FE-2 remainder,T-653,0.5,To do
-T-655,FE-2,FE-2 exit docs registers Done,T-654,0.25,To do
+T-646,FE-2,features/cuisines domain dual-pane mapping,T-645,1.0,Done
+T-647,FE-2,Cuisines data layer,T-646,0.75,Done
+T-648,FE-2,CuisineListBloc + dual-pane page,T-647,1.5,Done
+T-649,FE-2,features/meal_times domain,T-645,0.75,Done
+T-650,FE-2,Meal times data layer,T-649,0.5,Done
+T-651,FE-2,MealTimeSettingsBloc + page,T-650,1.0,Done
+T-652,FE-2,Item categories polish if needed,T-645,0.5,Done
+T-653,FE-2,DI routes delete cuisines legacy screen,T-648;T-651,0.5,Done
+T-654,FE-2,analyze + tests for FE-2 remainder,T-653,0.5,Done
+T-655,FE-2,FE-2 exit docs registers Done,T-654,0.25,Done
+
+

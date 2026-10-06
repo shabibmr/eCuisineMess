@@ -22,6 +22,12 @@ class ApiEndpoints {
       '/members/by-rfid/${Uri.encodeComponent(tag)}';
 
   static const String cuisines = '/cuisines';
+  static String cuisine(String id) => '/cuisines/$id';
+  static String cuisineCopyMapping(String id) => '/cuisines/$id/copy-mapping';
+
+  static const String mealTimes = '/meal-times';
+
+  static String mealTime(String id) => '/meal-times/$id';
 
   static const String mealTimesCurrent = '/meal-times/current';
   static const String counterTap = '/counter/tap';

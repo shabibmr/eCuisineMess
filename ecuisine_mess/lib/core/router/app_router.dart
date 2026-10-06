@@ -7,7 +7,9 @@ import 'package:ecuisine_mess/features/counter/presentation/pages/counter_page.d
 import 'package:ecuisine_mess/features/item_categories/presentation/pages/item_category_list_page.dart';
 import 'package:ecuisine_mess/features/items/presentation/pages/item_list_page.dart';
 import 'package:ecuisine_mess/features/members/presentation/pages/member_list_page.dart';
-import 'package:ecuisine_mess/screens/cuisines_screen.dart';
+import 'package:ecuisine_mess/features/cuisines/presentation/pages/cuisine_editor_page.dart';
+import 'package:ecuisine_mess/features/cuisines/presentation/pages/cuisine_list_page.dart';
+import 'package:ecuisine_mess/features/meal_times/presentation/pages/meal_time_settings_page.dart';
 import 'package:ecuisine_mess/screens/reports_screen.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/app_shell.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +58,31 @@ class AppRouter {
               GoRoute(
                 name: AppRoutes.cuisines.name,
                 path: AppRoutes.cuisines.path,
-                builder: (context, state) => const CuisinesScreen(),
+                builder: (context, state) => const CuisineListPage(),
+                routes: [
+                  GoRoute(
+                    name: AppRoutes.cuisineNew.name,
+                    path: 'new',
+                    builder: (context, state) => const CuisineEditorPage(),
+                  ),
+                  GoRoute(
+                    name: AppRoutes.cuisineEdit.name,
+                    path: ':id',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id'];
+                      return CuisineEditorPage(cuisineId: id);
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                name: AppRoutes.mealTimes.name,
+                path: AppRoutes.mealTimes.path,
+                builder: (context, state) => const MealTimeSettingsPage(),
               ),
             ],
           ),

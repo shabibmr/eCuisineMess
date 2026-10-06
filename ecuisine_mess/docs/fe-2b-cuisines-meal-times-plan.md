@@ -1,5 +1,6 @@
 # FE-2b — Cuisines + Meal Times (FE-2 remainder)
 
+**Status:** **Done** (T-646–T-655; analyze clean; 27 tests green).  
 **Approved:** user chose **Full remainder now** (2026-10-06).  
 **Scope:** Flutter `ecuisine_mess/` only. Completes FE-2 after FE-2a.  
 **Out of scope:** Daily menu (FE-3), reports, roles, item_categories polish, photo.

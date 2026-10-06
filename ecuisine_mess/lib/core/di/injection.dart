@@ -26,6 +26,16 @@ import 'package:ecuisine_mess/features/counter/domain/usecases/get_current_meal_
 import 'package:ecuisine_mess/features/counter/domain/usecases/issue_token.dart';
 import 'package:ecuisine_mess/features/counter/domain/usecases/tap_rfid.dart';
 import 'package:ecuisine_mess/features/counter/presentation/bloc/counter_bloc.dart';
+import 'package:ecuisine_mess/features/cuisines/data/datasources/cuisine_remote_datasource.dart';
+import 'package:ecuisine_mess/features/cuisines/data/repositories/cuisine_repository_impl.dart';
+import 'package:ecuisine_mess/features/cuisines/domain/repositories/cuisine_repository.dart';
+import 'package:ecuisine_mess/features/cuisines/domain/usecases/copy_cuisine_mapping.dart';
+import 'package:ecuisine_mess/features/cuisines/domain/usecases/delete_cuisine.dart';
+import 'package:ecuisine_mess/features/cuisines/domain/usecases/get_cuisine.dart';
+import 'package:ecuisine_mess/features/cuisines/domain/usecases/get_cuisines.dart';
+import 'package:ecuisine_mess/features/cuisines/domain/usecases/save_cuisine.dart';
+import 'package:ecuisine_mess/features/cuisines/presentation/bloc/cuisine_editor_bloc.dart';
+import 'package:ecuisine_mess/features/cuisines/presentation/bloc/cuisine_list_bloc.dart';
 import 'package:ecuisine_mess/features/item_categories/data/datasources/item_category_remote_datasource.dart';
 import 'package:ecuisine_mess/features/item_categories/data/repositories/item_category_repository_impl.dart';
 import 'package:ecuisine_mess/features/item_categories/domain/repositories/item_category_repository.dart';
@@ -40,6 +50,12 @@ import 'package:ecuisine_mess/features/items/domain/usecases/get_items.dart';
 import 'package:ecuisine_mess/features/items/domain/usecases/get_uoms.dart';
 import 'package:ecuisine_mess/features/items/domain/usecases/save_item.dart';
 import 'package:ecuisine_mess/features/items/presentation/bloc/item_list_bloc.dart';
+import 'package:ecuisine_mess/features/meal_times/data/datasources/meal_time_remote_datasource.dart';
+import 'package:ecuisine_mess/features/meal_times/data/repositories/meal_time_repository_impl.dart';
+import 'package:ecuisine_mess/features/meal_times/domain/repositories/meal_time_repository.dart';
+import 'package:ecuisine_mess/features/meal_times/domain/usecases/get_meal_times.dart';
+import 'package:ecuisine_mess/features/meal_times/domain/usecases/save_meal_time.dart';
+import 'package:ecuisine_mess/features/meal_times/presentation/bloc/meal_time_settings_bloc.dart';
 import 'package:ecuisine_mess/features/members/data/datasources/member_remote_datasource.dart';
 import 'package:ecuisine_mess/features/members/data/repositories/member_repository_impl.dart';
 import 'package:ecuisine_mess/features/members/domain/repositories/member_repository.dart';
@@ -83,6 +99,8 @@ Future<void> configureDependencies() async {
   _registerItemCategories();
   _registerItems();
   _registerMembers();
+  _registerCuisines();
+  _registerMealTimes();
   _registerCounter();
   _registerBills();
 
@@ -197,6 +215,52 @@ void _registerMembers() {
   );
 }
 
+void _registerCuisines() {
+  sl.registerLazySingleton<CuisineRemoteDataSource>(
+    () => CuisineRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<CuisineRepository>(
+    () => CuisineRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton(() => GetCuisines(sl()));
+  sl.registerLazySingleton(() => GetCuisine(sl()));
+  sl.registerLazySingleton(() => SaveCuisine(sl()));
+  sl.registerLazySingleton(() => DeleteCuisine(sl()));
+  sl.registerLazySingleton(() => CopyCuisineMapping(sl()));
+  sl.registerFactory(
+    () => CuisineListBloc(
+      getCuisines: sl(),
+      deleteCuisine: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => CuisineEditorBloc(
+      getCuisine: sl(),
+      getCuisines: sl(),
+      getItems: sl(),
+      saveCuisine: sl(),
+    ),
+  );
+}
+
+void _registerMealTimes() {
+  sl.registerLazySingleton<MealTimeRemoteDataSource>(
+    () => MealTimeRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<MealTimeRepository>(
+    () => MealTimeRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton(() => GetMealTimes(sl()));
+  sl.registerLazySingleton(() => SaveMealTime(sl()));
+  sl.registerFactory(
+    () => MealTimeSettingsBloc(
+      getCuisineOptions: sl(),
+      getMealTimes: sl(),
+      saveMealTime: sl(),
+    ),
+  );
+}
+
 void _registerCounter() {
   sl.registerLazySingleton<CounterRemoteDataSource>(
     () => CounterRemoteDataSourceImpl(sl()),
@@ -234,3 +298,4 @@ void _registerBills() {
     ),
   );
 }
+

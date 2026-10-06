@@ -31,6 +31,11 @@ const List<NavDestination> kNavDestinations = [
     route: AppRoutes.cuisines,
   ),
   NavDestination(
+    label: 'Meal Times',
+    icon: Icons.schedule_outlined,
+    route: AppRoutes.mealTimes,
+  ),
+  NavDestination(
     label: 'Items',
     icon: Icons.restaurant_menu_outlined,
     route: AppRoutes.items,

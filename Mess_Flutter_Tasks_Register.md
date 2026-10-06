@@ -19,17 +19,32 @@
 | FE-0 Foundations | T-601 – T-620 | **Done** |
 | FE-1 Counter + Bills | T-621 – T-635 | **Done** |
 | FE-2a Items + Members | T-636 – T-645 | **Done** |
-| FE-2 Masters (remainder) | T-646 – T-655 | To do (Cuisines / Meal Times) |
+| FE-2 Masters (remainder) | T-646 – T-655 | **Done** (Cuisines / Meal Times) |
 | FE-3 Daily menu | T-656 – T-665 | To do |
 | FE-4 Reports + Dashboard | T-666 – T-680 | To do |
 | FE-5 Roles + Users | T-681 – T-690 | To do |
 | FE-6 Polish | T-691 – T-700 | To do |
 
-**Critical path:** T-601 → T-610 → T-615 → T-618 → T-620 → T-627 → T-631 → T-633 → T-635 → **T-645** → T-655
+**Critical path:** T-601 → T-610 → T-615 → T-618 → T-620 → T-627 → T-631 → T-633 → T-635 → T-645 → **T-655** → T-665
 
 ---
 
-## FE-2a – Items + Members (partial FE-2)
+## FE-2b – Cuisines + Meal Times (remainder of FE-2)
+
+| ID | Task | Depends | Est | Status | Done when |
+|---|---|---|---|---|---|
+| T-646 | ApiEndpoints: cuisine(id), cuisineCopyMapping(id), mealTimes, mealTime(id) | T-645 | 0.25 | Done | Endpoints compile |
+| T-647 | Shared `DualPaneList<T>` widget | T-646 | 1.0 | Done | Available & Mapped dual pane |
+| T-648 | `features/cuisines` domain: Cuisine, CuisineItemMapping, DeleteResult, usecases | T-646 | 0.75 | Done | UseCases compile |
+| T-649 | Cuisines data: models, Dio remote DS, repo impl | T-648 | 0.75 | Done | CRUD + copy mapping via ApiClient |
+| T-650 | CuisineListBloc + CuisineEditorBloc + CuisineListPage + CuisineEditorPage | T-649,T-647 | 1.5 | Done | Dual-pane mapping, unmap conflict dialog |
+| T-651 | `features/meal_times` domain + data: MealTime entity, GetMealTimes, SaveMealTime | T-645 | 0.75 | Done | Meal times data/domain ready |
+| T-652 | MealTimeSettingsBloc + MealTimeSettingsPage (cuisine selector + 3 windows) | T-651 | 1.0 | Done | Meal times configuration UI |
+| T-653 | DI + routes + nav; delete legacy `screens/cuisines_screen.dart` | T-650,T-652 | 0.5 | Done | Routes wired, legacy screen removed |
+| T-654 | `dart analyze` + `flutter test` green | T-653 | 0.5 | Done | 0 issues; 27 tests pass |
+| T-655 | Docs/register: FE-2 full milestone complete | T-654 | 0.25 | Done | Gate signed; FE-2 complete |
+
+---
 
 | ID | Task | Depends | Est | Status | Done when |
 |---|---|---|---|---|---|
@@ -42,9 +57,9 @@
 | T-642 | MemberListBloc + MemberListPage (search, add/edit, RFID Check, dates) | T-641 | 1.25 | Done | RFID conflict blocks save; expired highlight |
 | T-643 | DI `_registerItems`/`_registerMembers`; routes; delete legacy screens | T-639,T-642 | 0.5 | Done | `/items` + `/members` feature pages |
 | T-644 | `flutter analyze` + `flutter test` green | T-643 | 0.5 | Done | 0 issues; tests pass |
-| T-645 | Docs/register: FE-2a Done; halt before Cuisines/Meal Times (T-646+) | T-644 | 0.25 | Done | Gate signed; FE-2 remainder To do |
+| T-645 | Docs/register: FE-2a Done; halt before Cuisines/Meal Times (T-646+) | T-644 | 0.25 | Done | Gate signed; FE-2a complete |
 
-**Paused:** T-646–T-655 Cuisines dual-pane mapping + Meal Times — do not start until asked.
+**FE-2 complete** (T-646–T-655 Done). Next: FE-3 Daily menu when asked.
 
 ---
 

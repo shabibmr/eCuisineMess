@@ -68,9 +68,9 @@ widgets/         master_page, app_form_dialog, server_settings, supervisor_overr
 | Counter | ✅ FE-1 | `counter` | Done |
 | Bills | ✅ FE-1 filters/detail/cancel | `bills` | Done |
 | Members | ✅ BLoC list+editor+RFID (FE-2a) | `members` | Done |
-| Cuisines | ⚠ list+create legacy | `cuisines` | FE-2 dual-pane mapping |
+| Cuisines | ✅ BLoC list + dual-pane editor (FE-2b) | `cuisines` | Done |
 | Reports | ⚠ 2 basic | `reports` ×5 | FE-4 |
-| Meal Times | ⬜ | `meal_times` | FE-2 remainder |
+| Meal Times | ✅ BLoC settings (FE-2b) | `meal_times` | Done |
 | Daily Menu / History | ⬜ | `daily_menu` | FE-3 |
 | Dashboard | ⬜ | `dashboard` | FE-4 |
 | Users admin | ⬜ | `users` | FE-5 |
@@ -191,20 +191,19 @@ Aligned with roadmap **P0–P6** as **FE-0 … FE-6**. Backend blockers noted pe
 | [MODIFY] | `ApiEndpoints`, DI, GoRouter `/items` `/members` | Done |
 | [DELETE] | `screens/items_screen.dart`, `screens/members_screen.dart` | Done |
 
-**Verify (FE-2a):** `flutter analyze` clean; `flutter test` green; routes use feature pages. **Halted** before Cuisines/Meal Times.
+**Verify (FE-2a):** `flutter analyze` clean; `flutter test` green; routes use feature pages.
 
-#### FE-2 remainder — Cuisines + Meal Times (**pending** — T-646–T-655)
+#### FE-2b — Cuisines + Meal Times (**Done** — T-646–T-655)
 
-| Action | Path |
-|---|---|
-| [NEW] | `lib/features/cuisines/**` — list + dual-pane `DualPaneList` mapper |
-| [NEW] | `lib/features/meal_times/**` — MealTimeSettingsPage |
-| [MODIFY] | `lib/shared/widgets/pickers/**` — Item/Cuisine/Member pickers |
-| [DELETE] | old `screens/cuisines_screen.dart` (and categories legacy when empty) |
+| Action | Path | Status |
+|---|---|---|
+| [NEW] | `lib/features/cuisines/**` — list + dual-pane `DualPaneList` mapper | Done |
+| [NEW] | `lib/features/meal_times/**` — MealTimeSettingsPage | Done |
+| [NEW] | `lib/shared/widgets/dual_pane_list.dart` | Done |
+| [MODIFY] | DI, GoRouter `/cuisines` `/meal-times`, nav | Done |
+| [DELETE] | `screens/cuisines_screen.dart` | Done |
 
-**Verify (full FE-2):** CRUD + Mark inactive; mapping save; meal overlap UI; no codes shown; analyze/tests.
-
-**Est:** ~3–4 days total (FE-2a done; remainder ~1.5–2 days).
+**Verify (full FE-2):** analyze clean; 27 tests green; `/cuisines` + `/meal-times` wired. **FE-2 complete.**
 
 ---
 

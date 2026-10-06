@@ -10,6 +10,9 @@ class AppRoutes {
   static const counter = AppRoute('counter', '/counter');
   static const members = AppRoute('members', '/members');
   static const cuisines = AppRoute('cuisines', '/cuisines');
+  static const cuisineNew = AppRoute('cuisineNew', '/cuisines/new');
+  static const cuisineEdit = AppRoute('cuisineEdit', '/cuisines/:id');
+  static const mealTimes = AppRoute('mealTimes', '/meal-times');
   static const items = AppRoute('items', '/items');
   static const itemCategories = AppRoute('itemCategories', '/item-categories');
   static const bills = AppRoute('bills', '/bills');
