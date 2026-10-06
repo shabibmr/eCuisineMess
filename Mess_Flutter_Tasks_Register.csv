@@ -1,58 +1,66 @@
-ID,Milestone,Task,Depends,Est,Status
-T-601,FE-0,Add target deps and analysis_options,,0.5,Doing
-T-602,FE-0,core config error usecase,T-601,0.5,To do
-T-603,FE-0,core network Dio ApiClient,T-602,1.0,To do
-T-604,FE-0,core di get_it,T-603,0.5,To do
-T-605,FE-0,core theme,T-601,0.25,To do
-T-606,FE-0,core router GoRouter guards,T-604,1.0,To do
-T-607,FE-0,shared AppShell MasterPage FormDialog,T-605,1.0,To do
-T-608,FE-0,auth feature AuthBloc,T-603,1.0,To do
-T-609,FE-0,auth LoginPage,T-608,0.5,To do
-T-610,FE-0,wire main app bridge ApiService token,T-606;T-608,0.5,To do
-T-611,FE-0,settings ServerSettingsCubit,T-603,0.5,To do
-T-612,FE-0,item_categories feature slice,T-603;T-607,1.5,To do
-T-613,FE-0,route item-categories + legacy shell,T-610;T-612,0.5,To do
-T-614,FE-0,port tests,T-610,0.5,To do
-T-615,FE-0,flutter analyze,T-613,0.5,To do
-T-616,FE-0,docs approved + register link,T-601,0.25,Doing
-T-617,FE-0,CounterProvider bridge,T-610,0.25,To do
-T-618,FE-0,smoke login categories logout,T-615,0.5,Done
-T-619,FE-0,update docs/05 status note,T-618,0.25,Done
-T-620,FE-0,FE-0 exit gate,T-618,0.25,Done
-T-621,FE-1,Add counter/bills/meal-window paths to ApiEndpoints,T-620,0.25,Done
-T-622,FE-1,Move token slip supervisor dialog RFID simulator under shared/widgets,T-620,0.5,Done
-T-623,FE-1,core/shortcuts F10 F8 Esc Ctrl+Shift+L,T-622,0.5,Done
-T-624,FE-1,features/counter domain entities repo usecases,T-621,1.0,Done
-T-625,FE-1,Counter data remote DS models repo impl,T-624,1.0,Done
-T-626,FE-1,CounterBloc + MealClockCubit,T-625,1.0,Done
-T-627,FE-1,CounterPage banners today strip focus actions,T-626;T-623,1.5,Done
-T-628,FE-1,features/bills domain Bill entity repo usecases,T-621,0.75,Done
-T-629,FE-1,Bills data layer list get cancel,T-628,0.75,Done
-T-630,FE-1,BillListBloc with filters,T-629,0.75,Done
-T-631,FE-1,Bill list page filters reprint cancel,T-630;T-622,1.0,Done
-T-632,FE-1,Bill detail sheet voucher view,T-629,0.5,Done
-T-633,FE-1,DI routes remove CounterProvider legacy screens,T-627;T-631,0.5,Done
-T-634,FE-1,Tests + flutter analyze clean,T-633,0.75,Done
-T-635,FE-1,FE-1 exit docs registers Done,T-634,0.25,Done
-T-636,FE-2a,ApiEndpoints items uoms members by-rfid cuisines,T-635,0.25,Done
-T-637,FE-2a,features/items domain Item Uom repo usecases,T-636,0.75,Done
-T-638,FE-2a,Items data models remote DS repo impl,T-637,0.75,Done
-T-639,FE-2a,ItemListBloc + ItemListPage category UOM dialogs,T-638,1.0,Done
-T-640,FE-2a,features/members domain Member RFID usecases,T-636,0.75,Done
-T-641,FE-2a,Members data models remote DS cuisine lookup,T-640,0.75,Done
-T-642,FE-2a,MemberListBloc + MemberListPage search RFID edit,T-641,1.25,Done
-T-643,FE-2a,DI routes delete legacy items/members screens,T-639;T-642,0.5,Done
-T-644,FE-2a,flutter analyze + flutter test green,T-643,0.5,Done
-T-645,FE-2a,FE-2a exit docs; halt before Cuisines/Meal Times,T-644,0.25,Done
-T-646,FE-2,features/cuisines domain dual-pane mapping,T-645,1.0,Done
-T-647,FE-2,Cuisines data layer,T-646,0.75,Done
-T-648,FE-2,CuisineListBloc + dual-pane page,T-647,1.5,Done
-T-649,FE-2,features/meal_times domain,T-645,0.75,Done
-T-650,FE-2,Meal times data layer,T-649,0.5,Done
-T-651,FE-2,MealTimeSettingsBloc + page,T-650,1.0,Done
-T-652,FE-2,Item categories polish if needed,T-645,0.5,Done
-T-653,FE-2,DI routes delete cuisines legacy screen,T-648;T-651,0.5,Done
-T-654,FE-2,analyze + tests for FE-2 remainder,T-653,0.5,Done
-T-655,FE-2,FE-2 exit docs registers Done,T-654,0.25,Done
-
-
+ID|Milestone|Task|Depends|Est|Status|Done when
+T-601|FE-0|Add target deps (flutter_bloc, go_router, get_it, dio, ...) and analysis_options|-|0.5|Done|flutter pub get OK
+T-602|FE-0|core config error usecase|T-601|0.5|Done|Failures + UseCase compile
+T-603|FE-0|core network Dio ApiClient + interceptors + endpoints|T-602|1.0|Done|Login request works via Dio
+T-604|FE-0|core di get_it registrations|T-603|0.5|Done|configureDependencies() runs
+T-605|FE-0|core theme (light Flat from existing)|T-601|0.25|Done|Theme applied
+T-606|FE-0|core router routes + GoRouter + refresh stream + auth guard|T-604|1.0|Done|/login <-> shell redirect
+T-607|FE-0|Shared layout: AppShell, MasterPage, FormDialog, banners|T-605|1.0|Done|Shell shows nav
+T-608|FE-0|auth feature: entities, datasource, repo, usecases, AuthBloc|T-603|1.0|Done|Login/restore/logout/401
+T-609|FE-0|auth LoginPage + form|T-608|0.5|Done|UI matches prior login
+T-610|FE-0|Wire main.dart / app.dart to BLoC + router; bridge ApiService.authToken|T-606,T-608|0.5|Done|App boots; old screens still auth'd
+T-611|FE-0|settings ServerSettingsCubit + dialog (ping health)|T-603|0.5|Done|URL save updates Dio + prefs
+T-612|FE-0|item_categories data/domain/presentation (template slice)|T-603,T-607|1.5|Done|List + add/edit via BLoC
+T-613|FE-0|Route /item-categories -> new page; legacy screens as shell children|T-610,T-612|0.5|Done|Nav opens new categories
+T-614|FE-0|Port api_config_test + auth widget test to new stack|T-610|0.5|Done|flutter test green
+T-615|FE-0|flutter analyze clean for new + bridged code|T-613|0.5|Done|No errors
+T-616|FE-0|Docs: mark FE plan Approved; link register|T-601|0.25|Done|Links correct
+T-617|FE-0|Keep CounterProvider bridge for legacy counter|T-610|0.25|Done|Counter still opens
+T-618|FE-0|Manual/automated smoke: login -> categories CRUD -> logout|T-615|0.5|Done|analyze + 5 tests; API :8000 was down
+T-619|FE-0|Update docs/05 live-stack notes for categories (BLoC)|T-618|0.25|Done|Status note
+T-620|FE-0|FE-0 exit: gate checklist signed in task.md|T-618|0.25|Done|FE-0 Done - stop
+T-621|FE-1|Add counter/bills/meal-window paths to ApiEndpoints|T-620|0.25|Done|Endpoints compile
+T-622|FE-1|Move token slip, supervisor dialog, RFID simulator under shared/widgets|T-620|0.5|Done|Shared widgets used by features
+T-623|FE-1|core/shortcuts - F10 save/print, F8 override, Esc clear, Ctrl+Shift+L exit|T-622|0.5|Done|Shortcuts fire on CounterPage
+T-624|FE-1|features/counter domain: TapResult/MealWindow entities, repo, usecases|T-621|1.0|Done|UseCases compile
+T-625|FE-1|Counter data: remote DS via Dio, models, repo impl|T-624|1.0|Done|Tap/issue/window via ApiClient
+T-626|FE-1|CounterBloc + MealClockCubit (cosmetic clock; server owns meal)|T-625|1.0|Done|States cover idle/loading/reject/ready/issued
+T-627|FE-1|CounterPage: meal banner, RFID focus, error banners, today strip, member+invoice, action bar|T-626,T-623|1.5|Done|UX matches docs/05 sec 3
+T-628|FE-1|features/bills domain: Bill entity, repo, list/get/cancel usecases|T-621|0.75|Done|UseCases compile
+T-629|FE-1|Bills data layer (list filters, get by id, cancel)|T-628|0.75|Done|Dio list/get/cancel work
+T-630|FE-1|BillListBloc with search/date/meal/status filters|T-629|0.75|Done|Filter+refresh states
+T-631|FE-1|Bill list page: filters, reprint slip, cancel + supervisor fields|T-630,T-622|1.0|Done|List UX parity + filters
+T-632|FE-1|Bill detail (drawer or /bills/:id) voucher view|T-629|0.5|Done|Detail shows lines
+T-633|FE-1|DI + routes; delete CounterProvider, legacy counter/bill screens; drop Provider from app.dart|T-627,T-631|0.5|Done|App boots without CounterProvider
+T-634|FE-1|Widget/unit tests + flutter analyze clean|T-633|0.75|Done|analyze 0 issues; tests green
+T-635|FE-1|FE-1 exit: docs/registers Done; plan status FE-1 Done|T-634|0.25|Done|Gate signed in task.md
+T-636|FE-2a|ApiEndpoints: items, item(id), uoms, members, member(id), membersByRfid, cuisines|T-635|0.25|Done|Endpoints compile
+T-637|FE-2a|features/items domain: Item/Uom entities, repo, GetItems/GetUoms/SaveItem/DeleteItem|T-636|0.75|Done|UseCases compile
+T-638|FE-2a|Items data: models, Dio remote DS, repo impl (delete->deactivated parse)|T-637|0.75|Done|List/create/update/delete via ApiClient
+T-639|FE-2a|ItemListBloc + ItemListPage (Active chip, category+UOM dialogs, Nos default)|T-638|1.0|Done|UX parity with legacy ItemsScreen
+T-640|FE-2a|features/members domain: Member, CuisineOption, RFID check, usecases|T-636|0.75|Done|UseCases compile
+T-641|FE-2a|Members data: models, remote DS (+ GET /cuisines lookup), repo impl|T-640|0.75|Done|CRUD + by-rfid + cuisine list
+T-642|FE-2a|MemberListBloc + MemberListPage (search, add/edit, RFID Check, dates)|T-641|1.25|Done|RFID conflict blocks save; expired highlight
+T-643|FE-2a|DI _registerItems/_registerMembers; routes; delete legacy screens|T-639,T-642|0.5|Done|/items + /members feature pages
+T-644|FE-2a|flutter analyze + flutter test green|T-643|0.5|Done|0 issues; tests pass
+T-645|FE-2a|Docs/register: FE-2a Done; halt before Cuisines/Meal Times (T-646+)|T-644|0.25|Done|Gate signed; FE-2a complete
+T-646|FE-2b|ApiEndpoints: cuisine(id), cuisineCopyMapping(id), mealTimes, mealTime(id)|T-645|0.25|Done|Endpoints compile
+T-647|FE-2b|Shared DualPaneList<T> widget|T-646|1.0|Done|Available & Mapped dual pane
+T-648|FE-2b|features/cuisines domain: Cuisine, CuisineItemMapping, DeleteResult, usecases|T-646|0.75|Done|UseCases compile
+T-649|FE-2b|Cuisines data: models, Dio remote DS, repo impl|T-648|0.75|Done|CRUD + copy mapping via ApiClient
+T-650|FE-2b|CuisineListBloc + CuisineEditorBloc + CuisineListPage + CuisineEditorPage|T-649,T-647|1.5|Done|Dual-pane mapping, unmap conflict dialog
+T-651|FE-2b|features/meal_times domain + data: MealTime entity, GetMealTimes, SaveMealTime|T-645|0.75|Done|Meal times data/domain ready
+T-652|FE-2b|MealTimeSettingsBloc + MealTimeSettingsPage (cuisine selector + 3 windows)|T-651|1.0|Done|Meal times configuration UI
+T-653|FE-2b|DI + routes + nav; delete legacy screens/cuisines_screen.dart|T-650,T-652|0.5|Done|Routes wired, legacy screen removed
+T-654|FE-2b|dart analyze + flutter test green|T-653|0.5|Done|0 issues; 27 tests pass
+T-655|FE-2b|Docs/register: FE-2 full milestone complete|T-654|0.25|Done|Gate signed; FE-2 complete
+T-656|FE-3a|ApiEndpoints: menus, menusToday, menusStatus, menusHistory, menusSaveDay, menusCopy, menusCopyMeal, menu(id)|T-655|0.25|Done|Endpoints compile; FE-3 register rows written
+T-657|FE-3a|features/daily_menu domain: DailyMenu, DailyMenuItem, CuisineMenuStatus, usecases|T-656|1.0|Done|UseCases compile
+T-658|FE-3a|daily_menu data: models, Dio remote DS, repo impl|T-657|1.0|Done|Load/save/copy/status via ApiClient
+T-659|FE-3a|DailyMenuEditorBloc (date, cuisine, meal, dirty, lock/past, save, copy)|T-658|1.25|Done|States cover load/edit/save/error
+T-660|FE-3a|DailyMenuEditorPage + widgets (date bar, cuisine pane, meal tabs, item grid, banners, dialogs)|T-659|1.5|Done|UX matches mock-ui editor
+T-661|FE-3a|DI + /menu route + nav Daily Menu; History button stub|T-660|0.5|Done|Nav opens editor
+T-662|FE-3a|flutter analyze + flutter test; FE-3a Done; halt before History|T-661|0.5|Done|Gate signed
+T-663|FE-3b|MenuHistoryBloc + MenuHistoryPage (/menu/history)|T-662|1.0|Done|History list filters work
+T-664|FE-3b|History read-only view + Copy to date into editor|T-663|0.75|Done|Copy handoff opens /menu
+T-665|FE-3b|Docs/register: FE-3 full milestone Done|T-664|0.25|Done|Gate signed

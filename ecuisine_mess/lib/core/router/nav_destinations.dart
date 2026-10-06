@@ -46,6 +46,11 @@ const List<NavDestination> kNavDestinations = [
     route: AppRoutes.itemCategories,
   ),
   NavDestination(
+    label: 'Daily Menu',
+    icon: Icons.menu_book_outlined,
+    route: AppRoutes.menu,
+  ),
+  NavDestination(
     label: 'Bill Register',
     icon: Icons.receipt_long_outlined,
     route: AppRoutes.bills,

@@ -1,7 +1,7 @@
 # Flutter Front-end Implementation Plan — `ecuisine_mess`
 
-**Status:** **Approved** 2026-10-05 — **FE-0 Done**; **FE-1 Done** (Counter + Bills)  
-**Tasks:** [Mess_Flutter_Tasks_Register.md](../../Mess_Flutter_Tasks_Register.md) (T-601–T-635 Done)  
+**Status:** **Approved** 2026-10-05 — **FE-0 Done**; **FE-1 Done**; **FE-2 Done** (FE-2a + FE-2b); **FE-3a In Progress** (T-656–T-657 Done)  
+**Tasks:** [Mess_Flutter_Tasks_Register.md](../../Mess_Flutter_Tasks_Register.md) (T-601–T-657 Done)  
 **Scope:** Flutter Windows client only (`ecuisine_mess/`). Backend/DB work is listed as **dependencies**, not executed in this plan.  
 **Skip:** `mock-ui/` (reference only), `frappe_app/` (parked).  
 **Authoritative refs:**

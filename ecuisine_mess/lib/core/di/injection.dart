@@ -36,6 +36,17 @@ import 'package:ecuisine_mess/features/cuisines/domain/usecases/get_cuisines.dar
 import 'package:ecuisine_mess/features/cuisines/domain/usecases/save_cuisine.dart';
 import 'package:ecuisine_mess/features/cuisines/presentation/bloc/cuisine_editor_bloc.dart';
 import 'package:ecuisine_mess/features/cuisines/presentation/bloc/cuisine_list_bloc.dart';
+import 'package:ecuisine_mess/features/daily_menu/data/datasources/daily_menu_remote_datasource.dart';
+import 'package:ecuisine_mess/features/daily_menu/data/repositories/daily_menu_repository_impl.dart';
+import 'package:ecuisine_mess/features/daily_menu/domain/repositories/daily_menu_repository.dart';
+import 'package:ecuisine_mess/features/daily_menu/domain/usecases/copy_from_date.dart';
+import 'package:ecuisine_mess/features/daily_menu/domain/usecases/copy_meal_to_cuisines.dart';
+import 'package:ecuisine_mess/features/daily_menu/domain/usecases/get_day_menu.dart';
+import 'package:ecuisine_mess/features/daily_menu/domain/usecases/get_menu_history.dart';
+import 'package:ecuisine_mess/features/daily_menu/domain/usecases/get_menu_status.dart';
+import 'package:ecuisine_mess/features/daily_menu/domain/usecases/save_day_menu.dart';
+import 'package:ecuisine_mess/features/daily_menu/presentation/bloc/daily_menu_editor_bloc.dart';
+import 'package:ecuisine_mess/features/daily_menu/presentation/bloc/menu_history_bloc.dart';
 import 'package:ecuisine_mess/features/item_categories/data/datasources/item_category_remote_datasource.dart';
 import 'package:ecuisine_mess/features/item_categories/data/repositories/item_category_repository_impl.dart';
 import 'package:ecuisine_mess/features/item_categories/domain/repositories/item_category_repository.dart';
@@ -101,6 +112,7 @@ Future<void> configureDependencies() async {
   _registerMembers();
   _registerCuisines();
   _registerMealTimes();
+  _registerDailyMenu();
   _registerCounter();
   _registerBills();
 
@@ -298,4 +310,36 @@ void _registerBills() {
     ),
   );
 }
+
+void _registerDailyMenu() {
+  sl.registerLazySingleton<DailyMenuRemoteDataSource>(
+    () => DailyMenuRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<DailyMenuRepository>(
+    () => DailyMenuRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton(() => GetDayMenu(sl()));
+  sl.registerLazySingleton(() => GetMenuStatus(sl()));
+  sl.registerLazySingleton(() => GetMenuHistory(sl()));
+  sl.registerLazySingleton(() => SaveDayMenu(sl()));
+  sl.registerLazySingleton(() => CopyFromDate(sl()));
+  sl.registerLazySingleton(() => CopyMealToCuisines(sl()));
+  sl.registerFactory(
+    () => DailyMenuEditorBloc(
+      getCuisineOptions: sl(),
+      getDayMenu: sl(),
+      saveDayMenu: sl(),
+      copyFromDate: sl(),
+      copyMealToCuisines: sl(),
+      getCuisine: sl(),
+    ),
+  );
+  sl.registerFactory(
+    () => MenuHistoryBloc(
+      getMenuHistory: sl(),
+      getCuisineOptions: sl(),
+    ),
+  );
+}
+
 

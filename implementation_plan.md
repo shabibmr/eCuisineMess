@@ -11,7 +11,7 @@
 | Layer | Plan | Status |
 |---|---|---|
 | **History (Phases 1–5)** | This file §Completed | **Done** |
-| **Flutter front-end (next)** | [`ecuisine_mess/docs/implementation-plan.md`](ecuisine_mess/docs/implementation-plan.md) · [Mess_Flutter_Tasks_Register.md](Mess_Flutter_Tasks_Register.md) · [FE-2b](ecuisine_mess/docs/fe-2b-cuisines-meal-times-plan.md) | **FE-0 + FE-1 + FE-2 Done**; next FE-3 when asked |
+| **Flutter front-end (next)** | [`ecuisine_mess/docs/implementation-plan.md`](ecuisine_mess/docs/implementation-plan.md) · [Mess_Flutter_Tasks_Register.md](Mess_Flutter_Tasks_Register.md) | **FE-0 + FE-1 + FE-2 + FE-3 Done** |
 | **Backend remaining** | [`backend_api/docs/implementation-plan.md`](backend_api/docs/implementation-plan.md) | Planned (correctness, roles, menus, reports) |
 | **Roadmap / gaps** | [`docs/08-gap-analysis-roadmap.md`](docs/08-gap-analysis-roadmap.md) | P0–P6 |
 | **Common specs** | [`docs/`](docs/README.md) | Authoritative for product/API/UX |
@@ -47,7 +47,7 @@ Full detail, files, gates, and open-question locks:
 | **FE-0** ✅ | Core + Dio + GoRouter + Auth/Settings + Item Categories template | — | Login on BLoC/GoRouter; analyze green |
 | **FE-1** ✅ | Counter + Bills (full UX) | Counter F1–F5 / supervisor / token race | Spec counter + cancel/reprint |
 | **FE-2** ✅ | Items+Members+Cuisines+Meal Times (FE-2a/2b) | Mapping/RFID/meal rules | Masters match mock |
-| **FE-3** | Daily menu + history | Menu save/copy/lock/history APIs | BR-D1…D8 |
+| **FE-3** ✅ | Daily menu + history | Menu save/copy/lock/history APIs | BR-D1…D8 |
 | **FE-4** | Reports ×5 + Dashboard | Members report + `/dashboard/summary` | CSV + home KPIs |
 | **FE-5** | Roles + Users admin | `mess_users.role` + route auth | Counter cannot open masters |
 | **FE-6** | Dark mode, print, kiosk, packaging | — | Pilot-ready Windows build |
@@ -56,7 +56,7 @@ Full detail, files, gates, and open-question locks:
 
 **Migration strategy:** strangler — see [`ecuisine_mess/docs/migration-plan.md`](ecuisine_mess/docs/migration-plan.md). One feature per PR; `flutter run -d windows` always works.
 
-**Current slice:** FE-2 complete. Next FE-3 Daily menu when asked — see [`ecuisine_mess/docs/implementation-plan.md`](ecuisine_mess/docs/implementation-plan.md).
+**Current slice:** FE-3 complete (T-656–T-665 Done). Next: FE-4 Reports + Dashboard.
 
 ---
 
@@ -85,5 +85,6 @@ Tracked in [`backend_api/docs/implementation-plan.md`](backend_api/docs/implemen
 - [x] FE-1 complete (Counter + Bills; T-621–T-635)  
 - [x] FE-2a Items + Members (T-636–T-645)  
 - [x] FE-2b Cuisines + Meal Times (T-646–T-655) — FE-2 complete  
+- [x] FE-3 Daily Menu + History (T-656–T-665) — FE-3 complete  
 
-**Next:** FE-3 Daily menu (when asked).
+**Next:** FE-4 Reports + Dashboard (T-666+).

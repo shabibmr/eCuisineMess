@@ -30,6 +30,17 @@ class ApiEndpoints {
   static String mealTime(String id) => '/meal-times/$id';
 
   static const String mealTimesCurrent = '/meal-times/current';
+
+  static const String menus = '/menus';
+  static const String menusToday = '/menus/today';
+  static const String menusStatus = '/menus/status';
+  static const String menusHistory = '/menus/history';
+  static const String menusSaveDay = '/menus/save-day';
+  static const String menusCopy = '/menus/copy';
+  static const String menusCopyMeal = '/menus/copy-meal';
+
+  static String menu(String id) => '/menus/$id';
+
   static const String counterTap = '/counter/tap';
   static const String counterIssueToken = '/counter/issue-token';
   static const String bills = '/bills';

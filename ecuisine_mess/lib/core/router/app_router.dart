@@ -10,6 +10,8 @@ import 'package:ecuisine_mess/features/members/presentation/pages/member_list_pa
 import 'package:ecuisine_mess/features/cuisines/presentation/pages/cuisine_editor_page.dart';
 import 'package:ecuisine_mess/features/cuisines/presentation/pages/cuisine_list_page.dart';
 import 'package:ecuisine_mess/features/meal_times/presentation/pages/meal_time_settings_page.dart';
+import 'package:ecuisine_mess/features/daily_menu/presentation/pages/daily_menu_editor_page.dart';
+import 'package:ecuisine_mess/features/daily_menu/presentation/pages/menu_history_page.dart';
 import 'package:ecuisine_mess/screens/reports_screen.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/app_shell.dart';
 import 'package:flutter/material.dart';
@@ -101,6 +103,40 @@ class AppRouter {
                 name: AppRoutes.itemCategories.name,
                 path: AppRoutes.itemCategories.path,
                 builder: (context, state) => const ItemCategoryListPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                name: AppRoutes.menu.name,
+                path: AppRoutes.menu.path,
+                builder: (context, state) {
+                  return DailyMenuEditorPage(
+                    menuDate: state.uri.queryParameters['date'] ??
+                        state.uri.queryParameters['menu_date'],
+                    cuisineId: state.uri.queryParameters['cuisine_id'] ??
+                        state.uri.queryParameters['cuisineId'],
+                    mealType: state.uri.queryParameters['meal'] ??
+                        state.uri.queryParameters['meal_type'],
+                  );
+                },
+                routes: [
+                  GoRoute(
+                    name: AppRoutes.menuHistory.name,
+                    path: 'history',
+                    builder: (context, state) {
+                      return MenuHistoryPage(
+                        fromDate: state.uri.queryParameters['from'] ??
+                            state.uri.queryParameters['from_date'],
+                        toDate: state.uri.queryParameters['to'] ??
+                            state.uri.queryParameters['to_date'],
+                        cuisineId: state.uri.queryParameters['cuisine_id'] ??
+                            state.uri.queryParameters['cuisineId'],
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),

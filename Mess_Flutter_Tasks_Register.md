@@ -20,12 +20,12 @@
 | FE-1 Counter + Bills | T-621 – T-635 | **Done** |
 | FE-2a Items + Members | T-636 – T-645 | **Done** |
 | FE-2 Masters (remainder) | T-646 – T-655 | **Done** (Cuisines / Meal Times) |
-| FE-3 Daily menu | T-656 – T-665 | To do |
+| FE-3 Daily menu | T-656 – T-665 | **Done** |
 | FE-4 Reports + Dashboard | T-666 – T-680 | To do |
 | FE-5 Roles + Users | T-681 – T-690 | To do |
 | FE-6 Polish | T-691 – T-700 | To do |
 
-**Critical path:** T-601 → T-610 → T-615 → T-618 → T-620 → T-627 → T-631 → T-633 → T-635 → T-645 → **T-655** → T-665
+**Critical path:** T-601 → T-610 → T-615 → T-618 → T-620 → T-627 → T-631 → T-633 → T-635 → T-645 → T-655 → **T-659** → T-662 → T-665
 
 ---
 
@@ -59,7 +59,31 @@
 | T-644 | `flutter analyze` + `flutter test` green | T-643 | 0.5 | Done | 0 issues; tests pass |
 | T-645 | Docs/register: FE-2a Done; halt before Cuisines/Meal Times (T-646+) | T-644 | 0.25 | Done | Gate signed; FE-2a complete |
 
-**FE-2 complete** (T-646–T-655 Done). Next: FE-3 Daily menu when asked.
+**FE-2 complete** (T-646–T-655 Done).
+
+---
+
+## FE-3a – Daily Menu Editor (pause before History)
+
+Plan: [ecuisine_mess/docs/fe-3a-daily-menu-editor-plan.md](ecuisine_mess/docs/fe-3a-daily-menu-editor-plan.md)
+
+| ID | Task | Depends | Est | Status | Done when |
+|---|---|---|---|---|---|
+| T-656 | ApiEndpoints: menus, menusToday, menusStatus, menusHistory, menusSaveDay, menusCopy, menusCopyMeal, menu(id) | T-655 | 0.25 | Done | Endpoints compile; FE-3 register rows written |
+| T-657 | `features/daily_menu` domain: DailyMenu, DailyMenuItem, CuisineMenuStatus, usecases | T-656 | 1.0 | Done | UseCases compile |
+| T-658 | daily_menu data: models, Dio remote DS, repo impl | T-657 | 1.0 | Done | Load/save/copy/status via ApiClient |
+| T-659 | DailyMenuEditorBloc (date, cuisine, meal, dirty, lock/past, save, copy) | T-658 | 1.25 | Done | States cover load/edit/save/error |
+| T-660 | DailyMenuEditorPage + widgets (date bar, cuisine pane, meal tabs, item grid, banners, dialogs) | T-659 | 1.5 | Done | UX matches mock-ui editor |
+| T-661 | DI + `/menu` route + nav Daily Menu; History button stub | T-660 | 0.5 | Done | Nav opens editor |
+| T-662 | `flutter analyze` + `flutter test`; FE-3a Done; halt before History | T-661 | 0.5 | Done | Gate signed |
+
+### FE-3b – History (deferred)
+
+| ID | Task | Depends | Est | Status | Done when |
+|---|---|---|---|---|---|
+| T-663 | MenuHistoryBloc + MenuHistoryPage (`/menu/history`) | T-662 | 1.0 | Done | History list filters work |
+| T-664 | History read-only view + Copy to date into editor | T-663 | 0.75 | Done | Copy handoff opens `/menu` |
+| T-665 | Docs/register: FE-3 full milestone Done | T-664 | 0.25 | Done | Gate signed |
 
 ---
 
