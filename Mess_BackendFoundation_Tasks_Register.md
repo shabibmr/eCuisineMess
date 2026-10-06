@@ -1,0 +1,93 @@
+# Mess Module – Backend Foundation Tasks Register (FastAPI / MariaDB)
+
+| | |
+|---|---|
+| Plan | [implementation_plan.md](implementation_plan.md) |
+| Architecture | [SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md) |
+| Scope | `backend_api/` layered architecture, database pool, transactions, auth, CRUD, counter engine, reports |
+| Status | All tasks completed and verified with automated test suite |
+
+**Status legend:** `To do` · `Doing` · `Review` · `Done` · `Blocked`  
+**Ref column:** `BF` = Backend Foundation.
+
+---
+
+## Progress summary
+
+| Milestone | Tasks | Est (h) | Done | Status |
+|---|---|---|---|---|
+| M1 Core Engine & DB Pool | T-401 – T-405 | 3.5 | 5 / 5 | Done |
+| M2 Schemas & Data Contracts | T-406 – T-410 | 2.5 | 5 / 5 | Done |
+| M3 Domain Services | T-411 – T-413 | 4.0 | 3 / 3 | Done |
+| M4 Modular API Routers | T-414 – T-420 | 6.0 | 7 / 7 | Done |
+| M5 Application Assembly | T-421 – T-423 | 2.0 | 3 / 3 | Done |
+| M6 Automated Verification | T-424 – T-426 | 2.0 | 3 / 3 | Done |
+| **Total** | **26** | **20.0** | **26 / 26** | **Done** |
+
+---
+
+## M1 – Core Engine & DB Pool
+
+| ID | Task | Ref | Depends | Est | Status | Done when |
+|---|---|---|---|---|---|---|
+| T-401 | Add `core/config.py` with environment variable settings and defaults | BF Core | – | 0.5 | Done | Settings accessible across modules |
+| T-402 | Add `core/database.py` with `DBUtils.pooled_db.PooledDB` connection pool | BF DB | T-401 | 1.0 | Done | Thread-safe connection pooling active |
+| T-403 | Implement `transaction()` atomic context manager with commit/rollback | BF DB | T-402 | 0.75 | Done | Multi-statement writes are ACID atomic |
+| T-404 | Refactor `db.py` as backward-compatibility facade to `core/database.py` | BF DB | T-402 | 0.25 | Done | Existing imports resolve without breaking changes |
+| T-405 | Implement `core/security.py` (bcrypt, sessions, auth dependencies, supervisor PIN) | BF Sec | T-402 | 1.0 | Done | Auth dependencies and supervisor check ready |
+
+---
+
+## M2 – Schemas & Data Contracts
+
+| ID | Task | Ref | Depends | Est | Status | Done when |
+|---|---|---|---|---|---|---|
+| T-406 | Add `schemas/common.py` (BaseResponse, DataResponse, ErrorResponse) | BF Schema | – | 0.5 | Done | Common response envelopes available |
+| T-407 | Add `schemas/auth.py` (LoginRequest, UserCreate, PasswordChange, SupervisorVerify) | BF Schema | – | 0.5 | Done | Auth input validation schemas defined |
+| T-408 | Add `schemas/members.py` (MemberCreate, MemberUpdate, MemberStatusUpdate) | BF Schema | – | 0.5 | Done | Member lifecycle schemas ready |
+| T-409 | Add `schemas/items.py` & `schemas/cuisines.py` | BF Schema | – | 0.5 | Done | Item, category, and cuisine mapping schemas ready |
+| T-410 | Add `schemas/counter.py`, `schemas/meal_times.py`, `schemas/menus.py`, `schemas/reports.py` | BF Schema | – | 0.5 | Done | Counter transaction and reporting filter schemas ready |
+
+---
+
+## M3 – Domain Services
+
+| ID | Task | Ref | Depends | Est | Status | Done when |
+|---|---|---|---|---|---|---|
+| T-411 | Implement `services/counter_service.py` (meal window, member validity, duplicate serve, menu items) | BF Service | T-402, T-410 | 1.5 | Done | RFID tap entitlement resolution complete |
+| T-412 | Implement `services/billing_service.py` (atomic token creation, line items, cancellation) | BF Service | T-403, T-410 | 1.5 | Done | Token issuing and bill cancellation atomic |
+| T-413 | Implement `services/report_service.py` (headcount, attendance, item movement, time distribution) | BF Service | T-402 | 1.0 | Done | 4 domain reports and pipe-delimited CSV generation ready |
+
+---
+
+## M4 – Modular API Routers
+
+| ID | Task | Ref | Depends | Est | Status | Done when |
+|---|---|---|---|---|---|---|
+| T-414 | Implement `routers/health.py` with DB connectivity probe and active meal info | BF Router | T-411 | 0.5 | Done | GET `/api/v1/health` reports status |
+| T-415 | Implement `routers/auth.py` (login, logout, me, change-password, verify-supervisor, users) | BF Router | T-405, T-407 | 1.0 | Done | Full auth and supervisor PIN verification active |
+| T-416 | Implement `routers/members.py` (list, get, create, update, status patch, delete/suspend) | BF Router | T-408 | 1.0 | Done | Full Members CRUD active |
+| T-417 | Implement `routers/item_categories.py` & `routers/items.py` | BF Router | T-409 | 1.0 | Done | Full Items and Categories CRUD active |
+| T-418 | Implement `routers/cuisines.py` with atomic item mappings and reference checks | BF Router | T-409, T-403 | 1.0 | Done | Cuisine master and item mappings active |
+| T-419 | Implement `routers/meal_times.py` and `routers/menus.py` | BF Router | T-410, T-403 | 0.75 | Done | Meal window and daily menu planning active |
+| T-420 | Implement `routers/counter.py` and `routers/bills.py` (dual REST and Frappe RPC routes) | BF Router | T-411, T-412 | 0.75 | Done | Kiosk counter tap, issue, and bill register active |
+
+---
+
+## M5 – Application Assembly & Reports
+
+| ID | Task | Ref | Depends | Est | Status | Done when |
+|---|---|---|---|---|---|---|
+| T-421 | Implement `routers/reports.py` with JSON and pipe-delimited CSV exports | BF Router | T-413 | 0.75 | Done | All 4 reports available via REST and CSV |
+| T-422 | Refactor `main.py` into modular app factory with global exception handlers and CORS | BF App | T-414 – T-421 | 1.0 | Done | Clean modular startup and exception formatting |
+| T-423 | Update `requirements.txt` with `DBUtils` and `python-dotenv` | BF Deps | – | 0.25 | Done | Dependency specifications complete |
+
+---
+
+## M6 – Automated Verification & Evidence
+
+| ID | Task | Ref | Depends | Est | Status | Done when |
+|---|---|---|---|---|---|---|
+| T-424 | Create `tests/test_backend_foundation.py` covering health, auth, CRUD, counter, reports | BF Test | T-422 | 1.0 | Done | Test suite created |
+| T-425 | Execute test suite against live MariaDB database | BF Test | T-424 | 0.5 | Done | 8/8 test suites pass (100% success) |
+| T-426 | Verify CSV pipe-delimiter compliance (`|`) on all 4 report exports | BF Test | T-425 | 0.5 | Done | Verified pipe separator on all CSV outputs |

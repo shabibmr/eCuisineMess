@@ -1,0 +1,56 @@
+ID,Milestone,Task,Depends,Est,Status
+T-601,FE-0,Add target deps and analysis_options,,0.5,Doing
+T-602,FE-0,core config error usecase,T-601,0.5,To do
+T-603,FE-0,core network Dio ApiClient,T-602,1.0,To do
+T-604,FE-0,core di get_it,T-603,0.5,To do
+T-605,FE-0,core theme,T-601,0.25,To do
+T-606,FE-0,core router GoRouter guards,T-604,1.0,To do
+T-607,FE-0,shared AppShell MasterPage FormDialog,T-605,1.0,To do
+T-608,FE-0,auth feature AuthBloc,T-603,1.0,To do
+T-609,FE-0,auth LoginPage,T-608,0.5,To do
+T-610,FE-0,wire main app bridge ApiService token,T-606;T-608,0.5,To do
+T-611,FE-0,settings ServerSettingsCubit,T-603,0.5,To do
+T-612,FE-0,item_categories feature slice,T-603;T-607,1.5,To do
+T-613,FE-0,route item-categories + legacy shell,T-610;T-612,0.5,To do
+T-614,FE-0,port tests,T-610,0.5,To do
+T-615,FE-0,flutter analyze,T-613,0.5,To do
+T-616,FE-0,docs approved + register link,T-601,0.25,Doing
+T-617,FE-0,CounterProvider bridge,T-610,0.25,To do
+T-618,FE-0,smoke login categories logout,T-615,0.5,Done
+T-619,FE-0,update docs/05 status note,T-618,0.25,Done
+T-620,FE-0,FE-0 exit gate,T-618,0.25,Done
+T-621,FE-1,Add counter/bills/meal-window paths to ApiEndpoints,T-620,0.25,Done
+T-622,FE-1,Move token slip supervisor dialog RFID simulator under shared/widgets,T-620,0.5,Done
+T-623,FE-1,core/shortcuts F10 F8 Esc Ctrl+Shift+L,T-622,0.5,Done
+T-624,FE-1,features/counter domain entities repo usecases,T-621,1.0,Done
+T-625,FE-1,Counter data remote DS models repo impl,T-624,1.0,Done
+T-626,FE-1,CounterBloc + MealClockCubit,T-625,1.0,Done
+T-627,FE-1,CounterPage banners today strip focus actions,T-626;T-623,1.5,Done
+T-628,FE-1,features/bills domain Bill entity repo usecases,T-621,0.75,Done
+T-629,FE-1,Bills data layer list get cancel,T-628,0.75,Done
+T-630,FE-1,BillListBloc with filters,T-629,0.75,Done
+T-631,FE-1,Bill list page filters reprint cancel,T-630;T-622,1.0,Done
+T-632,FE-1,Bill detail sheet voucher view,T-629,0.5,Done
+T-633,FE-1,DI routes remove CounterProvider legacy screens,T-627;T-631,0.5,Done
+T-634,FE-1,Tests + flutter analyze clean,T-633,0.75,Done
+T-635,FE-1,FE-1 exit docs registers Done,T-634,0.25,Done
+T-636,FE-2a,ApiEndpoints items uoms members by-rfid cuisines,T-635,0.25,Done
+T-637,FE-2a,features/items domain Item Uom repo usecases,T-636,0.75,Done
+T-638,FE-2a,Items data models remote DS repo impl,T-637,0.75,Done
+T-639,FE-2a,ItemListBloc + ItemListPage category UOM dialogs,T-638,1.0,Done
+T-640,FE-2a,features/members domain Member RFID usecases,T-636,0.75,Done
+T-641,FE-2a,Members data models remote DS cuisine lookup,T-640,0.75,Done
+T-642,FE-2a,MemberListBloc + MemberListPage search RFID edit,T-641,1.25,Done
+T-643,FE-2a,DI routes delete legacy items/members screens,T-639;T-642,0.5,Done
+T-644,FE-2a,flutter analyze + flutter test green,T-643,0.5,Done
+T-645,FE-2a,FE-2a exit docs; halt before Cuisines/Meal Times,T-644,0.25,Done
+T-646,FE-2,features/cuisines domain dual-pane mapping,T-645,1.0,To do
+T-647,FE-2,Cuisines data layer,T-646,0.75,To do
+T-648,FE-2,CuisineListBloc + dual-pane page,T-647,1.5,To do
+T-649,FE-2,features/meal_times domain,T-645,0.75,To do
+T-650,FE-2,Meal times data layer,T-649,0.5,To do
+T-651,FE-2,MealTimeSettingsBloc + page,T-650,1.0,To do
+T-652,FE-2,Item categories polish if needed,T-645,0.5,To do
+T-653,FE-2,DI routes delete cuisines legacy screen,T-648;T-651,0.5,To do
+T-654,FE-2,analyze + tests for FE-2 remainder,T-653,0.5,To do
+T-655,FE-2,FE-2 exit docs registers Done,T-654,0.25,To do

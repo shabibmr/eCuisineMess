@@ -1,0 +1,20 @@
+ID,Milestone,Task,Ref,Depends,Est_h,Status,Done_when
+T-301,M1 HTTP client,Add ApiException in api_service.dart; message from FastAPI detail; toString is the message,P3 HTTP,—,0.5,Done,Callers show e.toString() without an Exception prefix
+T-302,M1 HTTP client,Add _send and route every ApiService method through it,P3 HTTP,T-301,1.5,Done,No method builds its own status check except checkHealth
+T-303,M1 HTTP client,Send Bearer when a token is set; login sends none; login 401 does not call onUnauthorized,P3 HTTP,T-302,0.5,Done,Bad password stays a login error; other 401s call onUnauthorized then throw
+T-304,M1 HTTP client,checkHealth stays a bool and does not raise or end the session,P3 HTTP,T-302,0.25,Done,Health probe cannot log the user out
+T-305,M2 Session 401,AuthProvider onUnauthorized clears token user and mess_auth_token; no POST logout,P3 Session,T-303,0.75,Done,main.dart gate shows LoginScreen; no new navigator
+T-306,M3 Saved API URL,ApiConfig load/save mess_api_base_url; strip slash; reject non-http(s); default 127.0.0.1:8000,P3 Config,—,0.5,Done,Restart keeps the saved URL; a bad value is refused
+T-307,M3 Saved API URL,main awaits ApiConfig.load before runApp then restoreSession,P3 Config,T-306,0.25,Done,First request uses the saved URL
+T-308,M3 Saved API URL,server_settings_dialog used by Login and shell; remove the two copied dialogs,P3 Config,T-306,0.75,Done,One dialog; save persists; cancel leaves the URL unchanged
+T-309,M4 Nav registry,app_destinations.dart label icon screen builder; same six destinations same order,P3 Nav,—,0.5,Done,One list is the only place a destination is declared
+T-310,M4 Nav registry,main_layout rail and body read that list; keep index; no IndexedStack,P3 Nav,T-309,0.5,Done,Leaving a screen still disposes it
+T-311,M5 Shared list and form,master_page.dart title subtitle actions then loading error+retry empty or child,P3 UI,—,0.75,Done,A screen passes its list as the child
+T-312,M5 Shared list and form,showAppFormDialog title body confirm validator; true only when valid; no API call inside,P3 UI,—,0.5,Done,Caller saves after the dialog closes
+T-313,M5 Shared list and form,Item Categories uses MasterPage and showAppFormDialog; double-click payload unchanged,P3 UI,T-302;T-311;T-312,1.0,Done,List add and double-click edit still work
+T-314,M5 Shared list and form,Members uses MasterPage; search and tiles stay; failed load shows error and retry,P3 UI,T-302;T-311,0.75,Done,catch (_) is gone; search still filters
+T-315,M5 Shared list and form,Cuisines uses MasterPage; cards stay; failed load shows error and retry,P3 UI,T-302;T-311,0.75,Done,Cards unchanged when the API is up
+T-316,M6 Verify and docs,Phase 3 section in implementation_plan.md and one paragraph in SYSTEM_OVERVIEW.md,P3 Docs,T-310;T-313,0.5,Done,Both docs name the shell and say Python is unchanged
+T-317,M6 Verify and docs,flutter analyze on ecuisine_mess,P3 Verify,T-305;T-308;T-310;T-313;T-314;T-315,0.5,Done,No new analyzer issues in touched files
+T-318,M6 Verify and docs,Windows pass: saved URL bad URL rejected category list add double-click edit,P3 Verify,T-317,0.5,Done,ApiConfig tests + categories API + Windows build/smoke
+T-319,M6 Verify and docs,Windows pass: members/cuisines error+retry; bad password stays; dead session restart shows Login,P3 Verify,T-318,0.5,Done,API 401 + login widget test + error+retry wired

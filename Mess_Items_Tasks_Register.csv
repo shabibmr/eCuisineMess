@@ -1,0 +1,17 @@
+ID,Milestone,Task,Ref,Depends,Est_h,Status,Done_when
+T-501,M1 Database,Add mess_uoms to schema.sql; mess_items.unit to uom_id FK,P5 DB,,0.75,Done,Fresh schema creates UOM + items with uom_id
+T-502,M1 Database,Seed 9 UOMs; remap items to uom_id in seed.sql,P5 DB,T-501,0.5,Done,Seed loads without free-text unit
+T-503,M1 Database,Migration 004_mess_uoms.sql create seed backfill FK drop unit,P5 DB,T-501,0.75,Done,Existing UUID DB migrates
+T-504,M2 API,GET /api/v1/uoms read-only include_inactive,P5 API,T-503,0.5,Done,Returns 9 seeded rows
+T-505,M2 API,Items list/get/create/update use uom_id; join uom_name AS unit,P5 API,T-503,1.0,Done,POST/PUT reject bad uom_id
+T-506,M2 API,ItemCreate/ItemUpdate schemas uom_id replaces write unit,P5 API,T-505,0.25,Done,OpenAPI shows uom_id
+T-507,M2 API,Fix joins in counter_service cuisines menus report_service,P5 API,T-505,0.75,Done,unit string still returned
+T-508,M3 Flutter,Add lib/models/uom.dart,P5 UI,,0.25,Done,Parses API UOM rows
+T-509,M3 Flutter,MessItem adds uomId; unit stays display name,P5 UI,,0.25,Done,fromJson reads both
+T-510,M3 Flutter,ApiService fetchUoms createItem updateItem fetchItems includeInactive,P5 UI,T-505,0.75,Done,Calls match API
+T-511,M3 Flutter,ItemsScreen MasterPage list add double-click edit dropdowns,P5 UI,T-510,2.0,Done,CRUD works against live API
+T-512,M3 Flutter,Register Items in app_destinations before Item Categories,P5 UI,T-511,0.25,Done,Rail shows Items
+T-513,M4 Docs,Phase 5 in implementation_plan.md link register CSV,P5 Docs,,0.25,Done,Plan points here
+T-514,M4 Docs,SYSTEM_OVERVIEW mess_uoms and items uom_id,P5 Docs,T-501,0.25,Done,Overview matches schema
+T-515,M4 Verify,Apply migration; API smoke uoms items CRUD,P5 Verify,T-507,0.5,Done,Smoke passes
+T-516,M4 Verify,flutter analyze test; Windows build smoke,P5 Verify,T-512,0.5,Done,Analyze clean tests pass

@@ -1,0 +1,37 @@
+ID,Milestone,Task,Ref,Depends,Est_h,Status,Done_when
+T-101,M1 Users — Database,Add mess_users and mess_user_sessions to database/schema.sql,P1 Data,—,0.75,Done,Tables FKs indexes match plan
+T-102,M1 Users — Database,Create database/migrations/001_mess_users.sql for existing DBs,P1 Files,T-101,0.5,Done,Script runs clean on existing mess DB
+T-103,M1 Users — Database,Seed admin user in database/seed.sql (admin / admin123 bcrypt),P1 Data,T-101,1.0,Done,Hash verifies; login accepts credentials
+T-104,M1 Users — Database,Document migrate vs full re-import in migration header,P1,T-102,0.25,Done,Operator can apply without guessing
+T-105,M2 Users — Backend API,Add passlib[bcrypt] and bcrypt to requirements; pip install,P1 Files,—,0.25,Done,Import passlib succeeds
+T-106,M2 Users — Backend API,Password hash/verify helpers and session token create/delete,P1 API,T-105;T-101,1.5,Done,Hash round-trip works
+T-107,M2 Users — Backend API,POST /api/v1/auth/login → user + token; 401 on bad/inactive,P1 API,T-106;T-103,1.5,Done,Good login 200; bad 401
+T-108,M2 Users — Backend API,POST /api/v1/auth/logout and GET /api/v1/auth/me with Bearer,P1 API,T-107,1.0,Done,me returns user; after logout me is 401
+T-109,M2 Users — Backend API,POST /api/v1/users create requiring auth,P1 API,T-108,1.25,Done,Auth create works; duplicate username rejected
+T-110,M3 Users — Flutter login,Add shared_preferences to pubspec; flutter pub get,P1 Files,—,0.25,Done,Package resolves
+T-111,M3 Users — Flutter login,Add ecuisine_mess/lib/models/user.dart,P1 Files,—,0.5,Done,fromJson covers id username display_name
+T-112,M3 Users — Flutter login,Extend ApiService with login logout me,P1 Flutter,T-111,1.25,Done,Calls match API paths
+T-113,M3 Users — Flutter login,Add AuthProvider (login/logout/restore via /me),P1 Flutter,T-112;T-108,1.5,Done,Token persisted; cold start restores or clears
+T-114,M3 Users — Flutter login,Add LoginScreen (username password error submit),P1 Flutter,T-113,1.5,Done,UI submits and surfaces API errors
+T-115,M3 Users — Flutter login,Gate main.dart LoginScreen vs MainLayout,P1 Flutter,T-114,1.0,Done,Unauthenticated never sees MainLayout
+T-116,M3 Users — Flutter login,MainLayout show display name + Logout,P1 Flutter,T-115,1.0,Done,Logout returns to LoginScreen
+T-117,M4 Users — Verify & docs,E2E verify login bad-password session-restore logout,P1 Verify,T-116,1.0,Done,All four cases pass
+T-118,M4 Users — Verify & docs,flutter analyze on changed Dart; fix issues,P1 Verify,T-116,0.5,Done,No new errors in touched files
+T-119,M4 Users — Verify & docs,Update README with credentials and auth endpoints,P1 Files,T-117,0.5,Done,README documents admin/admin123 and /auth/*
+T-201,M5 Item Category — Database,Add mess_item_categories; mess_items.category_id FK in schema.sql,P2 Data,T-119,1.0,Done,Fresh schema has no VARCHAR category on items
+T-202,M5 Item Category — Database,Create migrations/002_mess_item_categories.sql backfill drop column,P2 Files,T-201,1.5,Done,Existing DB migrates without orphan items
+T-203,M5 Item Category — Database,Rewrite seed.sql categories first then items with category_id,P2 Data,T-201,0.75,Done,Seed imports clean; all items linked
+T-204,M5 Item Category — Database,Confirm seed codes CAT-MAIN SIDE BREAD BEV DESSERT,P2 Data,T-203,0.25,Done,Codes and sort_order match plan
+T-205,M6 Item Category — Backend API,GET/POST /api/v1/item-categories + Pydantic models,P2 API,T-201,1.25,Done,List and create work in Swagger
+T-206,M6 Item Category — Backend API,PUT /api/v1/item-categories/{id},P2 API,T-205,0.75,Done,Update name/code/active/sort
+T-207,M6 Item Category — Backend API,Update GET/POST items join category_id filter,P2 API,T-205;T-203,1.5,Done,Response has category_id + category_name
+T-208,M6 Item Category — Backend API,Stop accepting free-text category on item create,P2 API,T-207,0.5,Done,Create requires category_id
+T-209,M7 Item Category — Flutter,Add item_category.dart model,P2 Files,—,0.5,Done,fromJson for id code name sort active
+T-210,M7 Item Category — Flutter,Update item.dart categoryId categoryName,P2 Files,T-209,0.5,Done,Parses new API JSON
+T-211,M7 Item Category — Flutter,ApiService categories CRUD + items filter by category_id,P2 Files,T-210;T-207,1.25,Done,Methods match endpoints
+T-212,M7 Item Category — Flutter,Add item_categories_screen.dart list + add,P2 Flutter,T-211,2.0,Done,List loads; add persists and refreshes
+T-213,M7 Item Category — Flutter,Wire nav in main_layout after Cuisines,P2 Flutter,T-212,0.5,Done,Screen reachable from shell
+T-214,M7 Item Category — Flutter,Counter kiosk shows categoryName,P2 Flutter,T-210,0.75,Done,Label readable after API change
+T-215,M8 Item Category — Verify & docs,Verify migration seed API Flutter screen counter label,P2 Verify,T-213;T-214,1.0,Done,Fresh and migrated paths OK
+T-216,M8 Item Category — Verify & docs,flutter analyze on Phase 2 Dart,P2 Verify,T-214,0.5,Done,No new errors in touched files
+T-217,M8 Item Category — Verify & docs,Update SYSTEM_OVERVIEW entity list; refresh Done counts,P2 Docs,T-215,0.5,Done,Overview lists Item Category + User

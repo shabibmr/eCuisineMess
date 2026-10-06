@@ -2,6 +2,14 @@
 
 A complete full-stack Mess Billing and Canteen Entitlement Management solution featuring an interactive **Flutter Frontend**, **MariaDB Database**, a standalone **Python (FastAPI) Backend**, and a ready-to-deploy **Frappe / ERPNext Custom App**.
 
+## 📚 Documentation
+
+| Scope | Start here |
+|---|---|
+| **Common** (rules, DB, API contract, UX, standards, Windows setup, roadmap) | [`docs/README.md`](docs/README.md) |
+| **Front-end** (Flutter · flutter_bloc + go_router + feature-first) | [`ecuisine_mess/docs/README.md`](ecuisine_mess/docs/README.md) |
+| **Back-end** (FastAPI + MariaDB) | [`backend_api/docs/README.md`](backend_api/docs/README.md) |
+
 ---
 
 ## 🏗️ Architecture & Component Overview
@@ -23,15 +31,15 @@ Mess_Module/
 │   ├── mess_module/api.py               # Whitelisted Frappe RPC methods (@frappe.whitelist)
 │   └── mess_module/doctype/             # DocTypes (Mess Member, Mess Item, Mess Cuisine, Mess Bill, etc.)
 │
-├── flutter_app/                         # Production-Ready Flutter Application
+├── ecuisine_mess/                       # Production Flutter client (replaces flutter_app)
 │   ├── lib/
 │   │   ├── config/                      # Theme and API configuration
-│   │   ├── models/                      # Member, Cuisine, Item, Bill, RFID models
+│   │   ├── models/                      # Member, Cuisine, Item, Category, User, Bill, RFID
 │   │   ├── services/                    # ApiService (REST / Frappe RPC client)
-│   │   ├── providers/                   # State management (CounterProvider)
-│   │   ├── screens/                     # Kiosk Counter, Members, Cuisines, Bills, Reports
+│   │   ├── providers/                   # AuthProvider, CounterProvider
+│   │   ├── screens/                     # Login, Counter, Members, Cuisines, Categories, Bills, Reports
 │   │   └── widgets/                     # RFID Tap Simulator, Thermal Token Slip, Supervisor Override
-│   └── pubspec.yaml                     # Dependencies (http, provider, intl)
+│   └── pubspec.yaml                     # Dependencies (http, provider, intl, shared_preferences)
 │
 └── mock-ui/                             # Interactive HTML5/CSS3/Alpine.js Mock Prototype
 ```
@@ -47,22 +55,34 @@ mysql -u root < database/schema.sql
 mysql -u root < database/seed.sql
 ```
 
+**Existing database** — UUID cutover is breaking. Rebuild:
+```powershell
+& "D:\xampp\mysql\bin\mysql.exe" -u root -e "DROP DATABASE IF EXISTS ecuisine_mess;"
+& "D:\xampp\mysql\bin\mysql.exe" -u root -e "SOURCE D:/QtWorkspace/DIT/DITUAE/counter/Mess_Module/database/schema.sql"
+& "D:\xampp\mysql\bin\mysql.exe" -u root -e "SOURCE D:/QtWorkspace/DIT/DITUAE/counter/Mess_Module/database/seed.sql"
+```
+Or run `database/migrations/003_uuid_ids_drop_codes.sql` (drops and reloads).
+
 ### 2. Start the Python Backend API
-```bash
-# In backend_api/
+```powershell
+cd backend_api
 pip install -r requirements.txt
-python -m uvicorn main:app --app-dir backend_api --host 0.0.0.0 --port 8000 --reload
-# Or simply double-click backend_api/run.bat
+pwsh -File .\run.ps1
+# Or double-click run.bat
 ```
 - API Base URL: `http://localhost:8000`
 - Interactive Swagger Docs: `http://localhost:8000/docs`
+- Auth: `POST /api/v1/auth/login`, `GET /api/v1/auth/me`, `POST /api/v1/auth/logout`
+- Default login: **admin** / **admin123**
 
-### 3. Run the Flutter Frontend
+### 3. Run the Flutter Frontend on Windows (`ecuisine_mess`)
 ```bash
-cd flutter_app
+cd ecuisine_mess
 flutter pub get
-flutter run -d chrome    # Or flutter run -d windows
+flutter run -d windows
 ```
+Sign in with `admin` / `admin123` before using the app shell.  
+API default: `http://127.0.0.1:8000` (change via the gear icon on the login screen if needed).
 
 ### 4. Optional: Install into Frappe / ERPNext Bench
 ```bash
