@@ -8,6 +8,14 @@ analyzer:
     use_super_parameters: ignore
     prefer_initializing_formals: ignore
     prefer_const_constructors_in_immutables: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
 
 linter:
   rules:
