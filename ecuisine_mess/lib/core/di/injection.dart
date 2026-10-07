@@ -87,8 +87,10 @@ import 'package:ecuisine_mess/features/members/domain/usecases/get_member.dart';
 import 'package:ecuisine_mess/features/members/domain/usecases/get_members.dart';
 import 'package:ecuisine_mess/features/members/domain/usecases/save_member.dart';
 import 'package:ecuisine_mess/features/members/presentation/bloc/member_list_bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecuisine_mess/features/settings/presentation/cubit/server_settings_cubit.dart';
 import 'package:ecuisine_mess/services/api_service.dart';
+import 'package:ecuisine_mess/shared/services/firestore_service.dart';
 import 'package:ecuisine_mess/shared/services/printer_service.dart';
 import 'package:ecuisine_mess/shared/services/printer_settings.dart';
 import 'package:get_it/get_it.dart';
@@ -96,7 +98,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance;
 
-Future<void> configureDependencies() async {
+Future<void> configureDependencies({FirebaseFirestore? firestore}) async {
   final prefs = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(prefs);
 
@@ -119,6 +121,14 @@ Future<void> configureDependencies() async {
 
   sl.registerLazySingleton(() => PrinterSettings(sl()));
   sl.registerLazySingleton<PrinterService>(() => ConfiguredPrinterService(sl()));
+
+  // Cloud Firestore
+  if (firestore != null) {
+    sl.registerSingleton<FirebaseFirestore>(firestore);
+  } else {
+    sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
+  }
+  sl.registerLazySingleton<FirestoreService>(() => FirestoreService(firestore: sl()));
 
   _registerAuth();
   _registerSettings();

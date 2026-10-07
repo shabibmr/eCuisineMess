@@ -27,6 +27,8 @@ dependencies:
   win32: ^5.5.4
   ffi: ^2.2.0
   path: ^1.9.1
+  firebase_core: ^4.15.0
+  cloud_firestore: ^6.10.0
 
 dev_dependencies:
   flutter_test:
