@@ -118,5 +118,12 @@ class ReportCubit<T> extends Cubit<ReportState<T>> {
     }
   }
 
+  /// Fetches raw pipe-delimited CSV bytes for the currently active report query.
+  Future<List<int>> getCsvBytes() async {
+    final query = state.query;
+    if (query == null) throw StateError('No report generated yet.');
+    return _export.getCsvBytes(ExportReportCsvParams(kind, query));
+  }
+
   void noticeShown() => emit(state.copyWith(clearNotice: true));
 }

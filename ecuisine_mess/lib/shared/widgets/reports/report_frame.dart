@@ -8,6 +8,7 @@ class ReportFrame extends StatelessWidget {
     required this.filters,
     required this.onGenerate,
     required this.onExport,
+    this.onEmail,
     required this.child,
     this.loading = false,
     this.exporting = false,
@@ -23,6 +24,9 @@ class ReportFrame extends StatelessWidget {
 
   /// Null disables the button (nothing generated yet).
   final VoidCallback? onExport;
+
+  /// Null disables or hides the email button.
+  final VoidCallback? onEmail;
   final bool loading;
   final bool exporting;
   final String? error;
@@ -62,6 +66,14 @@ class ReportFrame extends StatelessWidget {
                       : const Icon(Icons.download, size: 18),
                   label: const Text('Export CSV'),
                 ),
+                if (onEmail != null) ...[
+                  const SizedBox(width: 8),
+                  OutlinedButton.icon(
+                    onPressed: loading || exporting ? null : onEmail,
+                    icon: const Icon(Icons.email_outlined, size: 18),
+                    label: const Text('Email Report'),
+                  ),
+                ],
               ],
             ),
           ),

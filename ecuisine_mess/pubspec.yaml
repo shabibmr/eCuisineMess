@@ -27,6 +27,7 @@ dependencies:
   win32: ^5.5.4
   ffi: ^2.2.0
   path: ^1.9.1
+  mailer: ^7.2.0
   firebase_core: ^4.15.0
   cloud_firestore: ^6.10.0
 

@@ -1,9 +1,11 @@
 import 'package:ecuisine_mess/core/utils/status.dart';
 import 'package:ecuisine_mess/features/reports/domain/entities/report_entities.dart';
 import 'package:ecuisine_mess/features/reports/presentation/cubit/report_cubit.dart';
+import 'package:ecuisine_mess/features/reports/presentation/widgets/email_report_dialog.dart';
 import 'package:ecuisine_mess/shared/widgets/reports/report_frame.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 /// Wires a [ReportCubit] to a [ReportFrame]: generate, export, snackbar notice.
 class ReportTab<T> extends StatelessWidget {
@@ -53,6 +55,27 @@ class ReportTab<T> extends StatelessWidget {
           summary: data != null && summary != null ? summary!(data) : null,
           onGenerate: () => cubit.generate(buildQuery()),
           onExport: state.query == null ? null : cubit.exportCsv,
+          onEmail: state.query == null
+              ? null
+              : () {
+                  final query = state.query!;
+                  final kind = cubit.kind;
+                  final title = '${kind.displayName} Report';
+                  final filtersList = query.params.entries
+                      .map((e) => '${e.key}: ${e.value}')
+                      .join(', ');
+                  final periodDesc = filtersList.isNotEmpty ? filtersList : 'Standard Period';
+                  final stamp = DateFormat('yyyyMMdd_HHmmss').format(DateTime.now());
+                  final suggestedFileName = '${kind.fileStem}_$stamp.csv';
+
+                  showEmailReportDialog(
+                    context: context,
+                    reportTitle: title,
+                    periodDescription: periodDesc,
+                    fetchCsvBytes: () => cubit.getCsvBytes(),
+                    suggestedFileName: suggestedFileName,
+                  );
+                },
           child: data == null ? const SizedBox.shrink() : result(data),
         );
       },

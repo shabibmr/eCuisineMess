@@ -1,90 +1,134 @@
-# Implementation Plan — eCuisine Mess Module (Master)
+# Implementation Plan — Email Service Module (Flutter BLoC DI + Firestore Client)
 
-**Last rewritten:** 2026-10-05  
-**Live-stack scope:** MariaDB + FastAPI + Flutter (`ecuisine_mess/`). Skip `mock-ui/` edits and `frappe_app/` (parked).  
-**IDs:** UUID (`CHAR(36)`); no master `*_code` columns.
+## 1. Feature Summary
+Implementation of an asynchronous, client-side **Email Service Module** in the Flutter app (`ecuisine_mess`) capable of sending emails with attachments (pipe-delimited CSV reports, PDFs, or arbitrary files) from anywhere in the application.
 
----
-
-## Layer plans (source of truth going forward)
-
-| Layer | Plan | Status |
-|---|---|---|
-| **History (Phases 1–5)** | This file §Completed | **Done** |
-| **Flutter front-end (next)** | [`ecuisine_mess/docs/implementation-plan.md`](ecuisine_mess/docs/implementation-plan.md) · [Mess_Flutter_Tasks_Register.md](Mess_Flutter_Tasks_Register.md) | **FE-0 + FE-1 + FE-2 + FE-3 Done** |
-| **Backend remaining** | [`backend_api/docs/implementation-plan.md`](backend_api/docs/implementation-plan.md) | Planned (correctness, roles, menus, reports) |
-| **Roadmap / gaps** | [`docs/08-gap-analysis-roadmap.md`](docs/08-gap-analysis-roadmap.md) | P0–P6 |
-| **Common specs** | [`docs/`](docs/README.md) | Authoritative for product/API/UX |
-| **Flutter architecture** | [`ecuisine_mess/docs/`](ecuisine_mess/docs/README.md) | BLoC + GoRouter + feature-first |
+### Key Architectural Constraints
+1. **NO GetIt**: Dependency injection is handled purely via **`flutter_bloc`** (`RepositoryProvider` and `BlocProvider` at the app root).
+2. **Direct Firestore Client**: SMTP settings are stored in Cloud Firestore (document `settings/smtp`) and fetched directly by the Flutter client (with local `SharedPreferences` cache fallback), without needing MariaDB or backend API endpoints for SMTP config.
+3. **Callable from Anywhere**: Accessible via `context.read<EmailService>()`, `context.read<EmailBloc>()`, or `EmailService.current` static accessor for non-UI contexts.
+4. **Asynchronous & Non-Blocking**: Dispatched in the background using `package:mailer` so the UI remains fluid.
 
 ---
 
-## Completed work (do not re-open)
+## 2. Architecture & DI Flow
 
-| Phase | Theme | Register | Outcome |
-|---|---|---|---|
-| **1** | Users / login | [Mess_LiveStack_Tasks_Register](Mess_LiveStack_Tasks_Register.md) | `mess_users` + sessions; `POST /auth/login`; Flutter login; seed `admin`/`admin123` |
-| **2** | Item Category | LiveStack | `mess_item_categories`; Flutter categories screen; items FK |
-| **3** | App shell (Flutter) | [Mess_AppShell_Tasks_Register](Mess_AppShell_Tasks_Register.md) T-301–319 | Shared HTTP client, 401→login, persisted API URL, nav registry, `MasterPage` / form dialog |
-| **4** | Backend foundation | [Mess_BackendFoundation_Tasks_Register](Mess_BackendFoundation_Tasks_Register.md) T-401–426 | `core/` · `routers/` · `schemas/` · `services/`; pool + `transaction()`; CRUD + counter + 4 reports |
-| **5** | Items + seed-only UOM | [Mess_Items_Tasks_Register](Mess_Items_Tasks_Register.md) T-501–516 | `mess_uoms`; `GET /uoms`; Flutter Items with Category + UOM |
-
-**Also done (related):** UUID cutover (`003`); per-cuisine meal times DB/API (`005`); mock-ui M0–M5 for demos (reference only).
-
-### Flutter today (strangler progress)
-
-`flutter_bloc` + `go_router` + `get_it` + `dio` for **auth, settings, item_categories, items, members, counter, bills, cuisines, meal_times**. Legacy Provider/`http` remains for Reports until FE-4. **Missing vs spec:** Dashboard, Daily Menu, full Reports, roles, dark mode.
-
----
-
-## Next: Flutter front-end rebuild (FE-0 … FE-6)
-
-Full detail, files, gates, and open-question locks:  
-→ **[`ecuisine_mess/docs/implementation-plan.md`](ecuisine_mess/docs/implementation-plan.md)**
-
-| FE phase | Theme | Depends on backend | Exit |
-|---|---|---|---|
-| **FE-0** ✅ | Core + Dio + GoRouter + Auth/Settings + Item Categories template | — | Login on BLoC/GoRouter; analyze green |
-| **FE-1** ✅ | Counter + Bills (full UX) | Counter F1–F5 / supervisor / token race | Spec counter + cancel/reprint |
-| **FE-2** ✅ | Items+Members+Cuisines+Meal Times (FE-2a/2b) | Mapping/RFID/meal rules | Masters match mock |
-| **FE-3** ✅ | Daily menu + history | Menu save/copy/lock/history APIs | BR-D1…D8 |
-| **FE-4** | Reports ×5 + Dashboard | Members report + `/dashboard/summary` | CSV + home KPIs |
-| **FE-5** | Roles + Users admin | `mess_users.role` + route auth | Counter cannot open masters |
-| **FE-6** | Dark mode, print, kiosk, packaging | — | Pilot-ready Windows build |
-
-**Task IDs:** [Mess_Flutter_Tasks_Register.md](Mess_Flutter_Tasks_Register.md) / `.csv` (**T-601+**).
-
-**Migration strategy:** strangler — see [`ecuisine_mess/docs/migration-plan.md`](ecuisine_mess/docs/migration-plan.md). One feature per PR; `flutter run -d windows` always works.
-
-**Current slice:** FE-3 complete (T-656–T-665 Done). Next: FE-4 Reports + Dashboard.
-
----
-
-## Parallel: Backend remaining (not FE scope)
-
-Tracked in [`backend_api/docs/implementation-plan.md`](backend_api/docs/implementation-plan.md). FE-1+ need especially: `NO_MEAL_SERVICE` / `MENU_NOT_SET`, auth on business routes, supervisor verify, race-safe tokens, menu rules, dashboard + 5th report, roles.
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        App Root (app.dart)                             │
+│                                                                        │
+│  MultiRepositoryProvider (flutter_bloc DI)                             │
+│  ├── RepositoryProvider<SmtpSettingsRepository>                        │
+│  │     └── SmtpSettingsRepositoryImpl                                  │
+│  │           ├── SmtpFirestoreDataSource (Direct Firestore Client)     │
+│  │           └── SharedPreferences (Local Cache)                       │
+│  └── RepositoryProvider<EmailService>                                  │
+│        └── MailerEmailServiceImpl(settingsRepository: ...)             │
+│                                                                        │
+│  MultiBlocProvider                                                     │
+│  ├── BlocProvider<AuthBloc>                                            │
+│  ├── BlocProvider<EmailBloc>                                           │
+│  └── BlocProvider<SmtpSettingsCubit>                                   │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                  Client-Side Firestore Integration                     │
+│                                                                        │
+│  Flutter Client (Dio) ──► Cloud Firestore REST API                     │
+│                          GET/PATCH /projects/{id}/databases/           │
+│                                    (default)/documents/settings/smtp   │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                      Email Sending (package:mailer)                    │
+│                                                                        │
+│  EmailService.sendEmail(...) / sendReportEmail(...)                    │
+│  ├── Asynchronous SMTP transport (SSL / STARTTLS)                      │
+│  ├── In-memory bytes (fresh pipe-delimited CSVs) or file attachments   │
+│  └── Rich HTML email templates for daily/shift reports                 │
+└────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## Out of scope (unchanged)
+## 3. Detailed Components & File Breakdown
 
-- Editing `mock-ui/` as product delivery  
-- Frappe DocType parity until live stack complete  
-- Clay/Glass skins (Flat light+dark only)  
-- Multi-site / multi-timezone  
+### Layer 1: Configuration & Dependencies
+- `[MODIFY]` `ecuisine_mess/pubspec.yaml`
+  - Add `mailer: ^7.2.0` (SMTP client library). Note: `dio: ^5.11.1` and `flutter_bloc: ^9.1.1` are already in dependencies.
+- `[MODIFY]` `ecuisine_mess/lib/core/config/constants.dart`
+  - Add Firestore constants:
+    - `defaultFirebaseProjectId`: Project ID (configurable).
+    - `firestoreSmtpDocPath`: `'settings/smtp'`.
+    - `smtpSettingsCachePrefsKey`: `'mess_smtp_settings_cache'`.
+
+### Layer 2: Email Domain & Core Service
+- `[NEW]` `ecuisine_mess/lib/features/email/domain/entities/email_attachment.dart`
+  - Holds attachment payload: supports in-memory bytes (`List<int>? bytes`) or local file path (`String? filePath`), `fileName`, and `mimeType` (e.g., `text/csv`, `application/pdf`).
+- `[NEW]` `ecuisine_mess/lib/features/email/domain/entities/email_send_result.dart`
+  - Result status: `bool success`, `String? messageId`, `String? errorMessage`.
+- `[NEW]` `ecuisine_mess/lib/features/email/domain/services/email_service.dart`
+  - Abstract interface:
+    - `Future<EmailSendResult> sendEmail(...)`
+    - `Future<EmailSendResult> sendReportEmail(...)`
+    - `Future<EmailSendResult> testConnection(...)`
+    - `static EmailService get current`: static singleton accessor populated on startup so non-widget code or utilities can trigger emails directly.
+- `[NEW]` `ecuisine_mess/lib/features/email/data/services/mailer_email_service_impl.dart`
+  - Implementation using `package:mailer`.
+  - Non-blocking asynchronous dispatch with timeout and detailed logger.
+  - Converts `EmailAttachment` into `StreamAttachment` or `FileAttachment`.
+  - Professional HTML template generator for eCuisine Mess automated reports.
+
+### Layer 3: Firestore Settings Data Layer
+- `[NEW]` `ecuisine_mess/lib/features/email/domain/entities/smtp_settings.dart`
+  - Entity holding: `host`, `port`, `username`, `password`, `fromEmail`, `fromName`, `useTls`, `useSsl`, `supervisorEmails` (`List<String>`), and `updatedAt`.
+- `[NEW]` `ecuisine_mess/lib/features/email/data/models/smtp_settings_model.dart`
+  - JSON and Firestore Document Map converter (supports Firestore REST format `{"fields": {...}}` and standard JSON).
+- `[NEW]` `ecuisine_mess/lib/features/email/data/datasources/smtp_firestore_datasource.dart`
+  - Direct client Firestore access via Dio REST API:
+    - `GET` document `settings/smtp` directly from Firestore.
+    - `PATCH` document `settings/smtp` to save settings back from client.
+- `[NEW]` `ecuisine_mess/lib/features/email/domain/repositories/smtp_settings_repository.dart`
+  - Repository interface for retrieving and saving settings.
+- `[NEW]` `ecuisine_mess/lib/features/email/data/repositories/smtp_settings_repository_impl.dart`
+  - Implements repository: fetches from Firestore, caches in `SharedPreferences`, and falls back to cached settings if offline.
+
+### Layer 4: BLoC / Cubit State Management (flutter_bloc DI)
+- `[NEW]` `ecuisine_mess/lib/features/email/presentation/bloc/email_bloc.dart`
+  - Events: `SendEmailEvent`, `SendReportEmailEvent`.
+  - States: `EmailInitial`, `EmailSending`, `EmailSentSuccess`, `EmailFailure`.
+- `[NEW]` `ecuisine_mess/lib/features/email/presentation/cubit/smtp_settings_cubit.dart`
+  - Manages SMTP settings form, loading from Firestore, saving, and testing connection.
+- `[MODIFY]` `ecuisine_mess/lib/app.dart`
+  - Wrap app in `MultiRepositoryProvider` providing `SmtpSettingsRepository` and `EmailService`.
+  - Provide `EmailBloc` and `SmtpSettingsCubit` in `MultiBlocProvider`.
+  - **Zero GetIt usage for this feature.**
+
+### Layer 5: UI Presentation
+- `[NEW]` `ecuisine_mess/lib/features/email/presentation/widgets/smtp_settings_dialog.dart`
+  - Dialog for viewing/editing SMTP host, port, credentials, TLS/SSL, supervisor emails, and "Test Connection".
+- `[MODIFY]` `ecuisine_mess/lib/shared/widgets/layout/app_shell.dart`
+  - Add Email icon button (`Icons.email_outlined`) in app bar header next to printer and server settings.
+- `[NEW]` `ecuisine_mess/lib/features/reports/presentation/widgets/email_report_dialog.dart`
+  - Dialog to confirm supervisor recipient(s), add optional note, and trigger email send with attached pipe-delimited CSV.
+- `[MODIFY]` `ecuisine_mess/lib/features/reports/presentation/widgets/report_tab.dart`
+  - Add "Email Report" action button alongside "Export CSV".
+
+### Layer 6: Tests & Verification
+- `[NEW]` `ecuisine_mess/test/features/email/email_service_test.dart`
+  - Unit tests for attachments, result models, and service contract.
+- `[NEW]` `ecuisine_mess/test/features/email/smtp_settings_repository_test.dart`
+  - Unit tests for Firestore document parsing, cache fallback, and repository error handling.
+- Verification commands:
+  - `flutter analyze` (ensure 0 issues)
+  - `flutter test` (ensure all tests pass)
 
 ---
 
-## Approval
-
-- [x] Master index accepted  
-- [x] Flutter plan approved (2026-10-05)  
-- [x] Decisions Q1–Q10 defaults accepted  
-- [x] Flutter tasks register T-601+ created  
-- [x] FE-0 complete (see `task.md`)  
-- [x] FE-1 complete (Counter + Bills; T-621–T-635)  
-- [x] FE-2a Items + Members (T-636–T-645)  
-- [x] FE-2b Cuisines + Meal Times (T-646–T-655) — FE-2 complete  
-- [x] FE-3 Daily Menu + History (T-656–T-665) — FE-3 complete  
-
-**Next:** FE-4 Reports + Dashboard (T-666+).
+## 4. Exit Criteria
+1. `EmailService` and `SmtpSettingsRepository` are provided via `flutter_bloc`'s `RepositoryProvider` (no `GetIt`).
+2. SMTP settings are fetched directly from Cloud Firestore by the client, with local offline cache fallback.
+3. Automated reports can be emailed with attached pipe-delimited CSV files to supervisor emails asynchronously.
+4. `flutter analyze` reports zero warnings/errors, and test suite is green.

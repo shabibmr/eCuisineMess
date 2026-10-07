@@ -1,6 +1,7 @@
 import 'package:ecuisine_mess/core/router/nav_destinations.dart';
 import 'package:ecuisine_mess/core/theme/app_theme.dart';
 import 'package:ecuisine_mess/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ecuisine_mess/features/email/presentation/widgets/smtp_settings_dialog.dart';
 import 'package:ecuisine_mess/features/settings/presentation/widgets/printer_settings_dialog.dart';
 import 'package:ecuisine_mess/features/settings/presentation/widgets/server_settings_dialog.dart';
 import 'package:flutter/material.dart';
@@ -53,6 +54,11 @@ class AppShell extends StatelessWidget {
                 ),
               );
             },
+          ),
+          IconButton(
+            icon: const Icon(Icons.email_outlined),
+            tooltip: 'Email & SMTP Settings',
+            onPressed: () => showSmtpSettingsDialog(context),
           ),
           IconButton(
             icon: const Icon(Icons.print_outlined),

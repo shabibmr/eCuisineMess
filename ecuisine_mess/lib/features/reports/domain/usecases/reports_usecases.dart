@@ -66,9 +66,12 @@ class ExportReportCsv extends UseCase<String, ExportReportCsvParams> {
   final FileExportService _files;
   final DateTime Function() _clock;
 
+  Future<List<int>> getCsvBytes(ExportReportCsvParams params) =>
+      _repository.exportCsv(params.kind, params.query);
+
   @override
   Future<String> call(ExportReportCsvParams params) async {
-    final bytes = await _repository.exportCsv(params.kind, params.query);
+    final bytes = await getCsvBytes(params);
     final stamp = DateFormat('yyyyMMdd_HHmmss').format(_clock());
     return _files.save('${params.kind.fileStem}_$stamp.csv', bytes);
   }

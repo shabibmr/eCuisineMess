@@ -13,6 +13,19 @@ enum ReportKind {
 
   /// Base name for the saved CSV.
   final String fileStem;
+
+  String get displayName {
+    switch (this) {
+      case ReportKind.attendance:
+        return 'Attendance';
+      case ReportKind.itemMovement:
+        return 'Item Movement';
+      case ReportKind.timeDistribution:
+        return 'Time Distribution';
+      case ReportKind.members:
+        return 'Members Register';
+    }
+  }
 }
 
 /// Query parameters for a report, as sent to the API (empty values omitted).

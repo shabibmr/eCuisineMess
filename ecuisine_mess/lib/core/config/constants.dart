@@ -11,4 +11,8 @@ class AppConstants {
   static const Duration connectTimeout = Duration(seconds: 5);
   static const Duration receiveTimeout = Duration(seconds: 15);
   static const Duration healthTimeout = Duration(seconds: 3);
+  static const String defaultFirebaseProjectId = 'ecuisine-mess';
+  static const String firestoreSmtpDocPath = 'settings/smtp';
+  static const String smtpSettingsCachePrefsKey = 'mess_smtp_settings_cache';
+  static const String firebaseProjectIdPrefsKey = 'mess_firebase_project_id';
 }
