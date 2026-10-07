@@ -8,6 +8,9 @@ class ApiEndpoints {
 
   static String itemCategory(String id) => '/item-categories/$id';
 
+  static const String organizations = '/organizations';
+  static String organization(String id) => '/organizations/$id';
+
   static const String items = '/items';
 
   static String item(String id) => '/items/$id';

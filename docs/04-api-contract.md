@@ -88,6 +88,18 @@ Simple filter params, no envelope for now (plain JSON array). Reports return arr
 | ✅ | PUT | `/item-categories/{id}` | partial |
 | ✅ | DELETE | `/item-categories/{id}` | `{success, action:"deleted"\|"deactivated", message}` |
 
+## 4b. Organizations
+
+Organization JSON: `{id, org_name, trn, address, address_to_print, address_to_print_arabic, currency, phone, email, contact_person, website, notes, is_active, created_at, updated_at}`.
+
+| Status | Method | Path | Request / Response |
+|---|---|---|---|
+| ✅ | GET | `/organizations?search=&include_inactive=0` | `[{...organization}]` (active only by default; search matches name, TRN, phone, email) |
+| ✅ | GET | `/organizations/{id}` | single organization object |
+| ✅ | POST | `/organizations` | `{org_name, trn?, address?, address_to_print?, address_to_print_arabic?, currency="AED", phone?, email?, contact_person?, website?, notes?, is_active=1}` → `{id, message}` |
+| ✅ | PUT | `/organizations/{id}` | partial update |
+| ✅ | DELETE | `/organizations/{id}` | deletes organization |
+
 ## 5. Items
 
 Item JSON: `{id, item_name, category_id, category, category_name, uom_id, unit, uom_name, is_active, created_at, updated_at}` — `unit` and `uom_name` are the same UOM label (kept for display compatibility). **There is no writable `unit`; writes use `uom_id`.**

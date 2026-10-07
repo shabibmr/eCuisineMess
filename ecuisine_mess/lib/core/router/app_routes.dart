@@ -16,6 +16,7 @@ class AppRoutes {
   static const mealTimes = AppRoute('mealTimes', '/meal-times');
   static const items = AppRoute('items', '/items');
   static const itemCategories = AppRoute('itemCategories', '/item-categories');
+  static const organizations = AppRoute('organizations', '/organizations');
   static const menu = AppRoute('menu', '/menu');
   static const menuHistory = AppRoute('menuHistory', '/menu/history');
   static const bills = AppRoute('bills', '/bills');

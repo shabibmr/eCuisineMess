@@ -26,6 +26,7 @@ from routers import (
     bills,
     reports,
     dashboard,
+    organizations,
 )
 
 # Configure logging
@@ -128,6 +129,7 @@ app.include_router(counter.router)
 app.include_router(bills.router)
 app.include_router(reports.router)
 app.include_router(dashboard.router)
+app.include_router(organizations.router)
 
 # Mount static files for member photo uploads
 static_dir = os.path.join(os.path.dirname(__file__), "static")

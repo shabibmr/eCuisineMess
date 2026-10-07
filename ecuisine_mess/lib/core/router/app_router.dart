@@ -6,6 +6,7 @@ import 'package:ecuisine_mess/features/bills/presentation/pages/bill_list_page.d
 import 'package:ecuisine_mess/features/counter/presentation/pages/counter_page.dart';
 import 'package:ecuisine_mess/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:ecuisine_mess/features/item_categories/presentation/pages/item_category_list_page.dart';
+import 'package:ecuisine_mess/features/organizations/presentation/pages/organization_list_page.dart';
 import 'package:ecuisine_mess/features/items/presentation/pages/item_list_page.dart';
 import 'package:ecuisine_mess/features/members/presentation/pages/member_list_page.dart';
 import 'package:ecuisine_mess/features/cuisines/presentation/pages/cuisine_editor_page.dart';
@@ -113,6 +114,15 @@ class AppRouter {
                 name: AppRoutes.itemCategories.name,
                 path: AppRoutes.itemCategories.path,
                 builder: (context, state) => const ItemCategoryListPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                name: AppRoutes.organizations.name,
+                path: AppRoutes.organizations.path,
+                builder: (context, state) => const OrganizationListPage(),
               ),
             ],
           ),
