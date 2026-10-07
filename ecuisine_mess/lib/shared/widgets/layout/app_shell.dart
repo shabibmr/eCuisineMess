@@ -1,17 +1,70 @@
+import 'package:ecuisine_mess/core/di/injection.dart';
 import 'package:ecuisine_mess/core/router/nav_destinations.dart';
+import 'package:ecuisine_mess/core/services/app_update_service.dart';
 import 'package:ecuisine_mess/core/theme/app_theme.dart';
 import 'package:ecuisine_mess/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecuisine_mess/features/email/presentation/widgets/smtp_settings_dialog.dart';
 import 'package:ecuisine_mess/features/settings/presentation/widgets/printer_settings_dialog.dart';
 import 'package:ecuisine_mess/features/settings/presentation/widgets/server_settings_dialog.dart';
+import 'package:ecuisine_mess/features/update/presentation/update_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-class AppShell extends StatelessWidget {
+class AppShell extends StatefulWidget {
   const AppShell({required this.navigationShell, super.key});
 
   final StatefulNavigationShell navigationShell;
+
+  @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkForUpdates(manual: false);
+    });
+  }
+
+  Future<void> _checkForUpdates({bool manual = false}) async {
+    try {
+      if (!sl.isRegistered<AppUpdateService>()) return;
+      final updateService = sl<AppUpdateService>();
+      final result = await updateService.checkForUpdate();
+      if (!mounted) return;
+
+      if (result.hasUpdate) {
+        await UpdateDialog.show(
+          context,
+          checkResult: result,
+          updateService: updateService,
+        );
+      } else if (manual) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result.errorMessage != null
+                  ? 'Update check failed: ${result.errorMessage}'
+                  : 'eCuisine is up to date (v${result.currentVersion})',
+            ),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (manual && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to check for updates: $e'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +114,11 @@ class AppShell extends StatelessWidget {
             onPressed: () => showSmtpSettingsDialog(context),
           ),
           IconButton(
+            icon: const Icon(Icons.system_update_alt_outlined),
+            tooltip: 'Check for Updates',
+            onPressed: () => _checkForUpdates(manual: true),
+          ),
+          IconButton(
             icon: const Icon(Icons.print_outlined),
             tooltip: 'Printer Settings',
             onPressed: () => showPrinterSettingsDialog(context),
@@ -82,8 +140,8 @@ class AppShell extends StatelessWidget {
       body: Row(
         children: [
           NavigationRail(
-            selectedIndex: navigationShell.currentIndex,
-            onDestinationSelected: navigationShell.goBranch,
+            selectedIndex: widget.navigationShell.currentIndex,
+            onDestinationSelected: widget.navigationShell.goBranch,
             labelType: NavigationRailLabelType.all,
             backgroundColor: AppTheme.primary,
             selectedIconTheme: const IconThemeData(color: Colors.amber),
@@ -106,7 +164,7 @@ class AppShell extends StatelessWidget {
             ],
           ),
           const VerticalDivider(thickness: 1, width: 1),
-          Expanded(child: navigationShell),
+          Expanded(child: widget.navigationShell),
         ],
       ),
     );
