@@ -18,11 +18,19 @@ class _MainLayoutState extends State<MainLayout> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.restaurant_menu, color: Colors.amber, size: 24),
-            SizedBox(width: 12),
-            Text(
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.asset(
+                'assets/images/logo_dark.jpg',
+                width: 28,
+                height: 28,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text(
               'eCuisine Mess Billing & Management',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 0.5),
             ),

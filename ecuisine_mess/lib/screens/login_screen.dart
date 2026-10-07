@@ -49,7 +49,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.restaurant_menu, color: Colors.amber, size: 32),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            'assets/images/logo_dark.jpg',
+                            width: 36,
+                            height: 36,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                         const SizedBox(width: 12),
                         const Expanded(
                           child: Text(
