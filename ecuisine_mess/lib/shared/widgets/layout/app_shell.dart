@@ -143,6 +143,7 @@ class _AppShellState extends State<AppShell> {
             selectedIndex: widget.navigationShell.currentIndex,
             onDestinationSelected: widget.navigationShell.goBranch,
             labelType: NavigationRailLabelType.all,
+            scrollable: true,
             backgroundColor: AppTheme.primary,
             selectedIconTheme: const IconThemeData(color: Colors.amber),
             unselectedIconTheme: const IconThemeData(color: Colors.white70),

@@ -187,7 +187,7 @@ INSERT INTO `mess_daily_menus` (`id`, `menu_date`, `cuisine_id`, `meal_type`, `i
 (@menu_4, CURDATE(), @cui_ni, 'LUNCH', 0, 'North Indian combo with Paneer Butter Masala'),
 (@menu_5, CURDATE(), @cui_ar, 'LUNCH', 0, 'Chicken Mandi Platter'),
 (@menu_6, CURDATE(), @cui_co, 'LUNCH', 0, 'Continental Herb Roast')
-ON DUPLICATE KEY UPDATE `notes`=VALUES(`notes`);
+ON DUPLICATE KEY UPDATE `menu_date`=VALUES(`menu_date`), `cuisine_id`=VALUES(`cuisine_id`), `meal_type`=VALUES(`meal_type`), `is_locked`=VALUES(`is_locked`), `notes`=VALUES(`notes`);
 
 -- 8. Daily Menu Items
 INSERT INTO `mess_daily_menu_items` (`id`, `menu_id`, `item_id`, `quantity`) VALUES
@@ -203,7 +203,7 @@ ON DUPLICATE KEY UPDATE `quantity`=VALUES(`quantity`);
 INSERT INTO `mess_bills` (`id`, `bill_number`, `token_number`, `bill_date`, `bill_time`, `member_id`, `cuisine_id`, `meal_type`, `total_amount`, `status`) VALUES
 (@bill_1, CONCAT('B-', DATE_FORMAT(CURDATE(), '%Y%m%d'), '-0001'), 'B-0001', CURDATE(), '08:15:00', @mem_01, @cui_si, 'BREAKFAST', 0.00, 'SERVED'),
 (@bill_2, CONCAT('B-', DATE_FORMAT(CURDATE(), '%Y%m%d'), '-0002'), 'B-0002', CURDATE(), '08:22:00', @mem_03, @cui_ni, 'BREAKFAST', 0.00, 'SERVED')
-ON DUPLICATE KEY UPDATE `token_number`=VALUES(`token_number`);
+ON DUPLICATE KEY UPDATE `bill_number`=VALUES(`bill_number`), `token_number`=VALUES(`token_number`), `bill_date`=VALUES(`bill_date`), `bill_time`=VALUES(`bill_time`), `member_id`=VALUES(`member_id`), `cuisine_id`=VALUES(`cuisine_id`), `meal_type`=VALUES(`meal_type`);
 
 INSERT INTO `mess_bill_items` (`id`, `bill_id`, `item_id`, `item_name`, `quantity`, `unit_price`, `total_price`) VALUES
 (UUID(), @bill_1, @itm_01, 'Steamed Idli (3 pcs)', 1.00, 0.00, 0.00),
