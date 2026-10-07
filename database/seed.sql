@@ -72,6 +72,7 @@ SET @menu_6 = 'a5000001-0000-4000-8000-000000000006';
 SET @bill_1 = 'a6000001-0000-4000-8000-000000000001';
 SET @bill_2 = 'a6000001-0000-4000-8000-000000000002';
 SET @user_admin = 'a7000001-0000-4000-8000-000000000001';
+SET @org_dit = 'e0000001-0000-4000-8000-000000000001';
 
 -- 1. Item Categories
 INSERT INTO `mess_item_categories` (`id`, `category_name`, `sort_order`, `is_active`) VALUES
@@ -217,3 +218,9 @@ ON DUPLICATE KEY UPDATE `quantity`=VALUES(`quantity`);
 INSERT INTO `mess_users` (`id`, `username`, `password_hash`, `display_name`, `role`, `is_active`) VALUES
 (@user_admin, 'admin', '$2b$12$EFGKCcXkjHNvfOpJUK8gLeODDxpDmaFevnavQS6H3/i18CKGPodYK', 'Administrator', 'admin', 1)
 ON DUPLICATE KEY UPDATE `display_name`=VALUES(`display_name`), `password_hash`=VALUES(`password_hash`), `role`='admin';
+
+-- 11. Organizations
+INSERT INTO `mess_organizations` (`id`, `org_name`, `trn`, `address`, `address_to_print`, `address_to_print_arabic`, `currency`, `phone`, `email`, `contact_person`, `is_active`) VALUES
+(@org_dit, 'DIT UAE', '100200300400003', 'Dubai Investment Park, Dubai, UAE', 'DIT UAE CATERING & SERVICES LLC\nDubai Investment Park 1, P.O. Box 12345, Dubai, UAE', 'دي آي تي لخدمات التموين ذ.م.م\nمجمع دبي للاستثمار 1، ص.ب 12345، دبي، الإمارات', 'AED', '+971 4 123 4567', 'catering@dituae.com', 'Mess Supervisor', 1)
+ON DUPLICATE KEY UPDATE `org_name`=VALUES(`org_name`), `currency`=VALUES(`currency`);
+

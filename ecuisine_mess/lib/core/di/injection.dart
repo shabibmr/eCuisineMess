@@ -64,6 +64,13 @@ import 'package:ecuisine_mess/features/item_categories/domain/repositories/item_
 import 'package:ecuisine_mess/features/item_categories/domain/usecases/get_item_categories.dart';
 import 'package:ecuisine_mess/features/item_categories/domain/usecases/save_item_category.dart';
 import 'package:ecuisine_mess/features/item_categories/presentation/bloc/item_category_list_bloc.dart';
+import 'package:ecuisine_mess/features/organizations/data/datasources/organization_remote_datasource.dart';
+import 'package:ecuisine_mess/features/organizations/data/repositories/organization_repository_impl.dart';
+import 'package:ecuisine_mess/features/organizations/domain/repositories/organization_repository.dart';
+import 'package:ecuisine_mess/features/organizations/domain/usecases/delete_organization.dart';
+import 'package:ecuisine_mess/features/organizations/domain/usecases/get_organizations.dart';
+import 'package:ecuisine_mess/features/organizations/domain/usecases/save_organization.dart';
+import 'package:ecuisine_mess/features/organizations/presentation/bloc/organization_list_bloc.dart';
 import 'package:ecuisine_mess/features/items/data/datasources/item_remote_datasource.dart';
 import 'package:ecuisine_mess/features/items/data/repositories/item_repository_impl.dart';
 import 'package:ecuisine_mess/features/items/domain/repositories/item_repository.dart';
@@ -135,6 +142,7 @@ Future<void> configureDependencies({FirebaseFirestore? firestore}) async {
   _registerAuth();
   _registerSettings();
   _registerItemCategories();
+  _registerOrganizations();
   _registerItems();
   _registerMembers();
   _registerCuisines();
@@ -207,6 +215,25 @@ void _registerItemCategories() {
     () => ItemCategoryListBloc(
       getItemCategories: sl(),
       saveItemCategory: sl(),
+    ),
+  );
+}
+
+void _registerOrganizations() {
+  sl.registerLazySingleton<OrganizationRemoteDataSource>(
+    () => OrganizationRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<OrganizationRepository>(
+    () => OrganizationRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton(() => GetOrganizations(sl()));
+  sl.registerLazySingleton(() => SaveOrganization(sl()));
+  sl.registerLazySingleton(() => DeleteOrganization(sl()));
+  sl.registerFactory(
+    () => OrganizationListBloc(
+      getOrganizations: sl(),
+      saveOrganization: sl(),
+      deleteOrganization: sl(),
     ),
   );
 }

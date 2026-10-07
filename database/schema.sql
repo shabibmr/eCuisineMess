@@ -185,3 +185,25 @@ CREATE TABLE IF NOT EXISTS `mess_user_sessions` (
     INDEX `idx_session_token` (`token`),
     INDEX `idx_session_expires` (`expires_at`)
 ) ENGINE=InnoDB;
+
+-- 14. Organizations Master
+CREATE TABLE IF NOT EXISTS `mess_organizations` (
+    `id` CHAR(36) NOT NULL PRIMARY KEY,
+    `org_name` VARCHAR(150) NOT NULL,
+    `trn` VARCHAR(50) NULL COMMENT 'Tax Registration Number (UAE VAT)',
+    `address` TEXT NULL,
+    `address_to_print` TEXT NULL COMMENT 'Company header address (English) for reports and slips',
+    `address_to_print_arabic` TEXT NULL COMMENT 'Company header address (Arabic) for bilingual reports and slips',
+    `currency` VARCHAR(10) NOT NULL DEFAULT 'AED' COMMENT 'Default reporting/slip currency code (e.g. AED)',
+    `phone` VARCHAR(30) NULL,
+    `email` VARCHAR(100) NULL,
+    `contact_person` VARCHAR(100) NULL,
+    `website` VARCHAR(150) NULL,
+    `notes` VARCHAR(255) NULL,
+    `is_active` TINYINT(1) DEFAULT 1,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uk_org_name` (`org_name`),
+    INDEX `idx_org_trn` (`trn`)
+) ENGINE=InnoDB;
+
