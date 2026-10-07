@@ -1,5 +1,7 @@
 import 'package:ecuisine_mess/core/config/constants.dart';
 import 'package:ecuisine_mess/core/di/injection.dart';
+import 'package:ecuisine_mess/core/services/local_mess_services.dart';
+import 'package:ecuisine_mess/core/services/mess_server_guard.dart';
 import 'package:ecuisine_mess/features/settings/presentation/cubit/server_settings_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,6 +27,7 @@ class _ServerSettingsDialog extends StatefulWidget {
 
 class _ServerSettingsDialogState extends State<_ServerSettingsDialog> {
   late final TextEditingController _urlController;
+  bool _starting = false;
 
   @override
   void initState() {
@@ -92,12 +95,26 @@ class _ServerSettingsDialogState extends State<_ServerSettingsDialog> {
             ],
           ),
           actions: [
+            if (LocalMessServices.canOfferLocalStart)
+              TextButton(
+                onPressed: testing || _starting
+                    ? null
+                    : () async {
+                        setState(() => _starting = true);
+                        try {
+                          await startInstalledMessServer(context);
+                        } finally {
+                          if (mounted) setState(() => _starting = false);
+                        }
+                      },
+                child: const Text('Start server'),
+              ),
             TextButton(
-              onPressed: testing ? null : () => Navigator.pop(context),
+              onPressed: testing || _starting ? null : () => Navigator.pop(context),
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: testing
+              onPressed: testing || _starting
                   ? null
                   : () => context.read<ServerSettingsCubit>().saveAndApply(),
               child: const Text('Save & Apply'),

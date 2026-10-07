@@ -3,6 +3,7 @@ from datetime import date, datetime
 from fastapi import APIRouter, HTTPException, Query, Request, UploadFile, File
 from typing import Optional, List, Dict, Any
 from core.database import query, query_one, execute
+from core.paths import static_dir
 from core.security import new_id
 from core.errors import NotFoundException, MessException, RfidInUseException
 from schemas.members import MemberCreate, MemberUpdate, MemberStatusUpdate
@@ -177,7 +178,7 @@ async def upload_member_photo(
     if file and file.filename:
         ext = os.path.splitext(file.filename)[1] or ".jpg"
         filename = f"{member_id}_{int(datetime.now().timestamp())}{ext}"
-        save_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "uploads", "members")
+        save_dir = os.path.join(str(static_dir()), "uploads", "members")
         os.makedirs(save_dir, exist_ok=True)
         file_path = os.path.join(save_dir, filename)
         content = await file.read()

@@ -1,5 +1,6 @@
 import 'package:ecuisine_mess/core/di/injection.dart';
 import 'package:ecuisine_mess/core/router/app_router.dart';
+import 'package:ecuisine_mess/core/services/mess_server_guard.dart';
 import 'package:ecuisine_mess/core/theme/app_theme.dart';
 import 'package:ecuisine_mess/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecuisine_mess/features/email/data/datasources/smtp_firestore_datasource.dart';
@@ -53,15 +54,17 @@ class ECuisineMessApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           routerConfig: sl<AppRouter>().config,
           builder: (context, child) {
-            return BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) {
-                if (state is AuthUnknown) {
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  );
-                }
-                return child ?? const SizedBox.shrink();
-              },
+            return MessServerGuard(
+              child: BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  if (state is AuthUnknown) {
+                    return const Scaffold(
+                      body: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  return child ?? const SizedBox.shrink();
+                },
+              ),
             );
           },
         ),

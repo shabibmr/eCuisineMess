@@ -1,5 +1,7 @@
 # Deployment on Windows
 
+The shipped client installer is the Full Mess PC bundle in [packaging/README.md](../../packaging/README.md): Flutter exe, frozen API (WinSW service `EcuisineMessApi`), and bundled MariaDB (WinSW service `EcuisineMessDb`). Both services start at boot and restart on failure. The NSSM steps below are the manual fallback when you run the API from a Python venv.
+
 Companion to [common Windows setup](../../docs/07-windows-setup.md). This covers running the API reliably on a server PC.
 
 ## 1. Layout on the server

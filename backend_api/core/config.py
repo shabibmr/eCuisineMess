@@ -2,8 +2,15 @@ import os
 from typing import List
 from dotenv import load_dotenv
 
-# Load environment variables from .env file if present
-load_dotenv()
+from core.paths import config_file
+
+# Frozen service reads ProgramData\eCuisine Mess\config.env.
+# Dev and tests keep load_dotenv() from the process cwd.
+_config_path = config_file()
+if _config_path is not None and _config_path.is_file():
+    load_dotenv(_config_path)
+else:
+    load_dotenv()
 
 
 class Settings:

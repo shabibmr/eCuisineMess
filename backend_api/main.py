@@ -1,4 +1,3 @@
-import os
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException
@@ -10,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from core.config import settings
 from core.database import get_pool
 from core.errors import MessException
+from core.paths import static_dir
 
 # Import modular routers
 from routers import (
@@ -131,11 +131,9 @@ app.include_router(reports.router)
 app.include_router(dashboard.router)
 app.include_router(organizations.router)
 
-# Mount static files for member photo uploads
-static_dir = os.path.join(os.path.dirname(__file__), "static")
-uploads_dir = os.path.join(static_dir, "uploads", "members")
-os.makedirs(uploads_dir, exist_ok=True)
-app.mount("/static", StaticFiles(directory=static_dir), name="static")
+# Member photos. Dev uses backend_api/static. The frozen service uses ProgramData.
+_static_dir = str(static_dir())
+app.mount("/static", StaticFiles(directory=_static_dir), name="static")
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:ecuisine_mess/core/error/exceptions.dart';
 import 'package:ecuisine_mess/core/network/unauthorized_handler.dart';
+import 'package:ecuisine_mess/core/services/mess_server_signals.dart';
 
 class ErrorInterceptor extends Interceptor {
   ErrorInterceptor(this._unauthorized);
@@ -33,6 +34,7 @@ class ErrorInterceptor extends Interceptor {
         err.type == DioExceptionType.sendTimeout ||
         err.type == DioExceptionType.receiveTimeout ||
         err.type == DioExceptionType.connectionError) {
+      MessServerSignals.instance.notifyConnectionLost();
       handler.reject(
         DioException(
           requestOptions: err.requestOptions,
