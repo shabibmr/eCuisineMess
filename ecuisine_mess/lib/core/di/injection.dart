@@ -47,6 +47,16 @@ import 'package:ecuisine_mess/features/daily_menu/domain/usecases/get_menu_statu
 import 'package:ecuisine_mess/features/daily_menu/domain/usecases/save_day_menu.dart';
 import 'package:ecuisine_mess/features/daily_menu/presentation/bloc/daily_menu_editor_bloc.dart';
 import 'package:ecuisine_mess/features/daily_menu/presentation/bloc/menu_history_bloc.dart';
+import 'package:ecuisine_mess/features/dashboard/data/datasources/dashboard_remote_datasource.dart';
+import 'package:ecuisine_mess/features/dashboard/data/repositories/dashboard_repository_impl.dart';
+import 'package:ecuisine_mess/features/dashboard/domain/repositories/dashboard_repository.dart';
+import 'package:ecuisine_mess/features/dashboard/domain/usecases/get_dashboard_summary.dart';
+import 'package:ecuisine_mess/features/dashboard/presentation/bloc/dashboard_bloc.dart';
+import 'package:ecuisine_mess/features/reports/data/datasources/reports_remote_datasource.dart';
+import 'package:ecuisine_mess/features/reports/data/repositories/reports_repository_impl.dart';
+import 'package:ecuisine_mess/features/reports/domain/repositories/reports_repository.dart';
+import 'package:ecuisine_mess/features/reports/domain/usecases/reports_usecases.dart';
+import 'package:ecuisine_mess/shared/services/file_export_service.dart';
 import 'package:ecuisine_mess/features/item_categories/data/datasources/item_category_remote_datasource.dart';
 import 'package:ecuisine_mess/features/item_categories/data/repositories/item_category_repository_impl.dart';
 import 'package:ecuisine_mess/features/item_categories/domain/repositories/item_category_repository.dart';
@@ -79,6 +89,8 @@ import 'package:ecuisine_mess/features/members/domain/usecases/save_member.dart'
 import 'package:ecuisine_mess/features/members/presentation/bloc/member_list_bloc.dart';
 import 'package:ecuisine_mess/features/settings/presentation/cubit/server_settings_cubit.dart';
 import 'package:ecuisine_mess/services/api_service.dart';
+import 'package:ecuisine_mess/shared/services/printer_service.dart';
+import 'package:ecuisine_mess/shared/services/printer_settings.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -105,6 +117,9 @@ Future<void> configureDependencies() async {
     ),
   );
 
+  sl.registerLazySingleton(() => PrinterSettings(sl()));
+  sl.registerLazySingleton<PrinterService>(() => ConfiguredPrinterService(sl()));
+
   _registerAuth();
   _registerSettings();
   _registerItemCategories();
@@ -115,6 +130,8 @@ Future<void> configureDependencies() async {
   _registerDailyMenu();
   _registerCounter();
   _registerBills();
+  _registerDashboard();
+  _registerReports();
 
   sl.registerLazySingleton<AppRouter>(() => AppRouter(sl()));
 
@@ -292,6 +309,22 @@ void _registerCounter() {
   );
 }
 
+void _registerDashboard() {
+  sl.registerLazySingleton<DashboardRemoteDataSource>(
+    () => DashboardRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<DashboardRepository>(
+    () => DashboardRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton(() => GetDashboardSummary(sl()));
+  sl.registerFactory(
+    () => DashboardBloc(
+      getDashboardSummary: sl(),
+      getMealTimes: sl(),
+    ),
+  );
+}
+
 void _registerBills() {
   sl.registerLazySingleton<BillRemoteDataSource>(
     () => BillRemoteDataSourceImpl(sl()),
@@ -343,3 +376,18 @@ void _registerDailyMenu() {
 }
 
 
+
+void _registerReports() {
+  sl.registerLazySingleton<FileExportService>(DownloadsFileExportService.new);
+  sl.registerLazySingleton<ReportsRemoteDataSource>(
+    () => ReportsRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<ReportsRepository>(
+    () => ReportsRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton(() => GetAttendanceReport(sl()));
+  sl.registerLazySingleton(() => GetItemMovementReport(sl()));
+  sl.registerLazySingleton(() => GetTimeDistributionReport(sl()));
+  sl.registerLazySingleton(() => GetMembersRegister(sl()));
+  sl.registerLazySingleton(() => ExportReportCsv(sl(), sl()));
+}

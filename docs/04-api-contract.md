@@ -224,7 +224,9 @@ CSV rule: delimiter **`|`**, header row, `Content-Disposition: attachment; filen
 
 | Status | Method | Path | Response |
 |---|---|---|---|
-| ⬜ | GET | `/dashboard/summary` | `{server_time, current_meal, next_meal, served_today:{B,L,D,total}, menu_readiness:[{cuisine_id,cuisine_name,BREAKFAST,LUNCH,DINNER}], expiring_members_count}` |
+| ✅ | GET | `/dashboard/summary` | `{server_time, current_meal, next_meal, current_window, next_window, served_today:{BREAKFAST,LUNCH,DINNER,B,L,D,total}, menu_readiness:[{cuisine_id,cuisine_name,status,filled_count,total_slots,BREAKFAST,LUNCH,DINNER,slots}], served_by_cuisine:[{cuisine_id,cuisine_name,BREAKFAST,LUNCH,DINNER,total}], expiring_members_count}` |
+
+`current_window` / `next_window` are meal-time objects (or `null`). `served_by_cuisine` includes every **active** cuisine for today (zeros when no `SERVED` bills).
 
 ---
 

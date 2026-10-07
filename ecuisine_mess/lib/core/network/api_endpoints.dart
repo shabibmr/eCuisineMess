@@ -41,6 +41,11 @@ class ApiEndpoints {
 
   static String menu(String id) => '/menus/$id';
 
+  static const String dashboardSummary = '/dashboard/summary';
+
+  static String report(String path) => '/reports/$path';
+  static String reportExportCsv(String path) => '/reports/$path/export-csv';
+
   static const String counterTap = '/counter/tap';
   static const String counterIssueToken = '/counter/issue-token';
   static const String bills = '/bills';

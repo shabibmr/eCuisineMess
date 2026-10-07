@@ -3,7 +3,7 @@ import 'package:ecuisine_mess/core/router/app_routes.dart';
 import 'package:ecuisine_mess/core/shortcuts/counter_shortcuts.dart';
 import 'package:ecuisine_mess/core/utils/status.dart';
 import 'package:ecuisine_mess/features/counter/presentation/bloc/counter_bloc.dart';
-import 'package:ecuisine_mess/features/counter/presentation/cubit/meal_clock_cubit.dart';
+import 'package:ecuisine_mess/shared/cubit/meal_clock_cubit.dart';
 import 'package:ecuisine_mess/features/counter/presentation/widgets/action_bar.dart';
 import 'package:ecuisine_mess/features/counter/presentation/widgets/invoice_grid.dart';
 import 'package:ecuisine_mess/features/counter/presentation/widgets/meal_banner.dart';

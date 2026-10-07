@@ -1,0 +1,16 @@
+ID,Phase,Status,Task,Depends,Est,Done when
+T-666,A Backend,Done,Add served_by_cuisine to dashboard router,-,0.5,Summary returns per-cuisine B/L/D/total
+T-667,A Backend,Done,Extend test_dashboard_summary,T-666,0.25,run_tests.py green
+T-668,A Backend,Done,Update api-reference and 04-api-contract docs,T-666,0.25,Docs match response
+T-669,B Data/Domain,Done,Domain entities repository usecase,-,0.5,Compiles; no data imports
+T-670,B Data/Domain,Done,Model datasource repository impl + endpoint,T-669,0.75,Model tests pass
+T-671,B Data/Domain,Done,DI registerDashboard,T-670,0.25,sl<DashboardBloc> resolves
+T-672,C Presentation,Done,DashboardBloc + 60s refresh,T-671,0.75,Bloc tests pass
+T-673,C Presentation,Done,DashboardPage shell and states,T-672,0.5,States render
+T-674,C Presentation,Done,DashboardHeader,T-673,0.25,Matches mock; no raw B/L/D
+T-675,C Presentation,Done,MealTimeline with MealClockCubit,T-673,1.0,Active/Next/Closed correct
+T-676,C Presentation,Done,ServedKpiRow,T-673,0.5,Values match API
+T-677,C Presentation,Done,MenuReadinessGrid + tap to menu editor,T-673,1.0,Tap opens right slot
+T-678,C Presentation,Done,ServedByCuisineTable,T-673,0.5,Rows and totals match API
+T-679,D Routing,Done,"/ route, Home nav, shortcut indices",T-673,0.5,Login lands on /counter; Home opens /
+T-680,E Verify,Done,"Widget tests, analyze, test, manual run, docs",T-667;T-674..T-679,0.75,Gate signed

@@ -263,17 +263,102 @@ def test_time_distribution_intervals_and_peak():
 
 
 def test_dashboard_summary():
-    """T-630: GET /api/v1/dashboard/summary home operational summary."""
-    res = client.get("/api/v1/dashboard/summary")
-    assert res.status_code == 200
-    data = res.json()
-    assert "server_time" in data
-    assert "served_today" in data
-    assert "menu_readiness" in data
-    assert "expiring_members_count" in data
+    """T-630 / T-667: GET /api/v1/dashboard/summary home operational summary + served_by_cuisine."""
+    today = get_today()
+    today_str = str(today)
+    cid = new_id()
+    inactive_cid = new_id()
+    mid = new_id()
+    bid_b = new_id()
+    bid_l = new_id()
+    cname = f"DashCuisine-{uuid.uuid4().hex[:6]}"
+    inactive_name = f"DashInactive-{uuid.uuid4().hex[:6]}"
 
-    served = data["served_today"]
-    assert "BREAKFAST" in served
-    assert "LUNCH" in served
-    assert "DINNER" in served
-    assert "total" in served
+    execute(
+        "INSERT INTO mess_cuisines (id, cuisine_name, is_active) VALUES (%s, %s, 1)",
+        (cid, cname),
+    )
+    execute(
+        "INSERT INTO mess_cuisines (id, cuisine_name, is_active) VALUES (%s, %s, 0)",
+        (inactive_cid, inactive_name),
+    )
+    execute(
+        """INSERT INTO mess_members (id, name, rfid_tag, cuisine_id, status)
+           VALUES (%s, 'Dash Member', %s, %s, 'ACTIVE')""",
+        (mid, f"DASH-{uuid.uuid4().hex[:8]}", cid),
+    )
+    execute(
+        """INSERT INTO mess_bills (id, bill_number, token_number, bill_date, bill_time,
+               member_id, cuisine_id, meal_type, status)
+           VALUES (%s, %s, 'B-0099', %s, '08:00:00', %s, %s, 'BREAKFAST', 'SERVED')""",
+        (bid_b, f"BILL-{uuid.uuid4().hex[:8]}", today_str, mid, cid),
+    )
+    execute(
+        """INSERT INTO mess_bills (id, bill_number, token_number, bill_date, bill_time,
+               member_id, cuisine_id, meal_type, status)
+           VALUES (%s, %s, 'L-0099', %s, '12:45:00', %s, %s, 'LUNCH', 'SERVED')""",
+        (bid_l, f"BILL-{uuid.uuid4().hex[:8]}", today_str, mid, cid),
+    )
+
+    try:
+        res = client.get("/api/v1/dashboard/summary")
+        assert res.status_code == 200
+        data = res.json()
+        assert "server_time" in data
+        assert "current_meal" in data
+        assert "next_meal" in data
+        assert "current_window" in data
+        assert "next_window" in data
+        assert "served_today" in data
+        assert "menu_readiness" in data
+        assert "expiring_members_count" in data
+        assert "served_by_cuisine" in data
+
+        served = data["served_today"]
+        assert "BREAKFAST" in served
+        assert "LUNCH" in served
+        assert "DINNER" in served
+        assert "B" in served
+        assert "L" in served
+        assert "D" in served
+        assert "total" in served
+        assert served["BREAKFAST"] >= 1
+        assert served["LUNCH"] >= 1
+        assert served["total"] == served["BREAKFAST"] + served["LUNCH"] + served["DINNER"]
+
+        readiness = data["menu_readiness"]
+        assert isinstance(readiness, list)
+        for row in readiness:
+            assert "cuisine_id" in row
+            assert "cuisine_name" in row
+            assert "status" in row
+            assert "filled_count" in row
+            assert "BREAKFAST" in row
+            assert "LUNCH" in row
+            assert "DINNER" in row
+
+        by_cuisine = data["served_by_cuisine"]
+        assert isinstance(by_cuisine, list)
+        assert len(by_cuisine) >= 1
+
+        active_ids = {r["id"] for r in query("SELECT id FROM mess_cuisines WHERE is_active = 1")}
+        returned_ids = {r["cuisine_id"] for r in by_cuisine}
+        assert active_ids == returned_ids
+        assert inactive_cid not in returned_ids
+
+        match = next((r for r in by_cuisine if r["cuisine_id"] == cid), None)
+        assert match is not None
+        assert match["cuisine_name"] == cname
+        assert match["BREAKFAST"] == 1
+        assert match["LUNCH"] == 1
+        assert match["DINNER"] == 0
+        assert match["total"] == 2
+
+        for row in by_cuisine:
+            assert row["total"] == row["BREAKFAST"] + row["LUNCH"] + row["DINNER"]
+    finally:
+        for bid in (bid_b, bid_l):
+            execute("DELETE FROM mess_bills WHERE id = %s", (bid,))
+        execute("DELETE FROM mess_members WHERE id = %s", (mid,))
+        execute("DELETE FROM mess_cuisines WHERE id = %s", (cid,))
+        execute("DELETE FROM mess_cuisines WHERE id = %s", (inactive_cid,))

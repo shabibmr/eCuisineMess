@@ -1,6 +1,7 @@
 import 'package:ecuisine_mess/core/router/nav_destinations.dart';
 import 'package:ecuisine_mess/core/theme/app_theme.dart';
 import 'package:ecuisine_mess/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ecuisine_mess/features/settings/presentation/widgets/printer_settings_dialog.dart';
 import 'package:ecuisine_mess/features/settings/presentation/widgets/server_settings_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -44,6 +45,11 @@ class AppShell extends StatelessWidget {
                 ),
               );
             },
+          ),
+          IconButton(
+            icon: const Icon(Icons.print_outlined),
+            tooltip: 'Printer Settings',
+            onPressed: () => showPrinterSettingsDialog(context),
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),

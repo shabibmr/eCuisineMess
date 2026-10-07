@@ -1,5 +1,5 @@
 import 'package:ecuisine_mess/features/counter/domain/entities/meal_window.dart';
-import 'package:ecuisine_mess/features/counter/presentation/cubit/meal_clock_cubit.dart';
+import 'package:ecuisine_mess/shared/cubit/meal_clock_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

@@ -865,11 +865,22 @@ Every failure body also has `success: false`, `error_code` and `message`.
         "slots": {"BREAKFAST": true, "LUNCH": true, "DINNER": true}
       }
     ],
+    "served_by_cuisine": [
+      {
+        "cuisine_id": "uuid",
+        "cuisine_name": "South Indian",
+        "BREAKFAST": 40,
+        "LUNCH": 30,
+        "DINNER": 0,
+        "total": 70
+      }
+    ],
     "expiring_members_count": 14
   }
   ```
 - Field notes:
   - `current_meal` / `current_window` / `next_window` consider the windows of **all** cuisines. They are `null` when nothing is active or configured.
   - `served_today` counts `SERVED` bills only. `B`/`L`/`D` are short aliases of the full keys.
-  - `menu_readiness` is the `readiness` array from §4.5 for today.
+  - `menu_readiness` is the `readiness` array from §4.5 for today. Each row includes `status` (`FULL` / `PARTIAL` / `EMPTY`) and `filled_count` (0–3 filled meal slots).
+  - `served_by_cuisine` lists **every active cuisine** (ordered by name), with today's `SERVED` bill counts per meal and `total`. Cuisines with no serves today still appear with zeros. Inactive cuisines are omitted.
   - `expiring_members_count` counts members with stored status `ACTIVE` whose `validity_end` falls between today and today + 7 days (inclusive).

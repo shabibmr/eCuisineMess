@@ -1,9 +1,11 @@
+import 'package:ecuisine_mess/core/di/injection.dart';
 import 'package:ecuisine_mess/shared/models/token_slip_data.dart';
+import 'package:ecuisine_mess/shared/services/printer_service.dart';
 import 'package:flutter/material.dart';
 
 export 'package:ecuisine_mess/shared/models/token_slip_data.dart';
 
-class TokenSlipDialog extends StatelessWidget {
+class TokenSlipDialog extends StatefulWidget {
   const TokenSlipDialog({
     super.key,
     required this.slip,
@@ -25,6 +27,41 @@ class TokenSlipDialog extends StatelessWidget {
 
   final TokenSlipData slip;
   final bool isReprint;
+
+  @override
+  State<TokenSlipDialog> createState() => _TokenSlipDialogState();
+}
+
+class _TokenSlipDialogState extends State<TokenSlipDialog> {
+  bool _printing = false;
+  String? _error;
+
+  TokenSlipData get slip => widget.slip;
+  bool get isReprint => widget.isReprint;
+
+  @override
+  void initState() {
+    super.initState();
+    _print();
+  }
+
+  Future<void> _print() async {
+    setState(() {
+      _printing = true;
+      _error = null;
+    });
+    try {
+      await sl<PrinterService>().printSlip(slip, duplicate: isReprint);
+      if (mounted) setState(() => _printing = false);
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _printing = false;
+          _error = e.toString();
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,11 +168,16 @@ class TokenSlipDialog extends StatelessWidget {
                     'Meal / Cuisine:',
                     style: TextStyle(color: Colors.black54, fontSize: 13),
                   ),
-                  Text(
-                    '${slip.mealType} • ${slip.cuisine}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      '${slip.mealType} • ${slip.cuisine}',
+                      textAlign: TextAlign.right,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ],
@@ -214,20 +256,50 @@ class TokenSlipDialog extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.print, size: 18),
-                  label: const Text('Close & Print Slip'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F172A),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+              if (_printing)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: Text('Printing…', style: TextStyle(fontSize: 12)),
+                ),
+              if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    'Print failed: $_error',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 12, color: Colors.red),
                   ),
                 ),
+              Row(
+                children: [
+                  if (_error != null)
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _print,
+                        icon: const Icon(Icons.refresh, size: 18),
+                        label: const Text('Retry'),
+                      ),
+                    ),
+                  if (_error != null) const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed:
+                          _printing ? null : () => Navigator.of(context).pop(),
+                      icon: Icon(
+                        _error != null ? Icons.skip_next : Icons.check,
+                        size: 18,
+                      ),
+                      label: Text(_error != null ? 'Skip' : 'Close'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0F172A),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

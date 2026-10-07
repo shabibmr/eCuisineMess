@@ -5,7 +5,7 @@ import 'package:ecuisine_mess/features/items/presentation/pages/item_list_page.d
 import 'package:ecuisine_mess/features/members/presentation/pages/member_list_page.dart';
 import 'package:ecuisine_mess/features/cuisines/presentation/pages/cuisine_list_page.dart';
 import 'package:ecuisine_mess/features/meal_times/presentation/pages/meal_time_settings_page.dart';
-import 'package:ecuisine_mess/screens/reports_screen.dart';
+import 'package:ecuisine_mess/features/reports/presentation/pages/reports_page.dart';
 import 'package:flutter/material.dart';
 
 class AppDestination {
@@ -60,6 +60,6 @@ final List<AppDestination> kAppDestinations = [
   AppDestination(
     label: 'Reports',
     icon: Icons.analytics_outlined,
-    builder: () => const ReportsScreen(),
+    builder: () => const ReportsPage(),
   ),
 ];

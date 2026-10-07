@@ -7,6 +7,7 @@ class AppRoute {
 
 class AppRoutes {
   static const login = AppRoute('login', '/login');
+  static const home = AppRoute('home', '/');
   static const counter = AppRoute('counter', '/counter');
   static const members = AppRoute('members', '/members');
   static const cuisines = AppRoute('cuisines', '/cuisines');

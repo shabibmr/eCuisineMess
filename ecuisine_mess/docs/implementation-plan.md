@@ -72,7 +72,7 @@ widgets/         master_page, app_form_dialog, server_settings, supervisor_overr
 | Reports | ⚠ 2 basic | `reports` ×5 | FE-4 |
 | Meal Times | ✅ BLoC settings (FE-2b) | `meal_times` | Done |
 | Daily Menu / History | ⬜ | `daily_menu` | FE-3 |
-| Dashboard | ⬜ | `dashboard` | FE-4 |
+| Dashboard | ✅ BLoC + Home `/` (FE-4a) | `dashboard` | Done |
 | Users admin | ⬜ | `users` | FE-5 |
 | Dark mode / print / kiosk | ⬜ | polish | FE-6 |
 

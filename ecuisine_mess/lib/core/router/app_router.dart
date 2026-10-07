@@ -4,6 +4,7 @@ import 'package:ecuisine_mess/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:ecuisine_mess/features/auth/presentation/pages/login_page.dart';
 import 'package:ecuisine_mess/features/bills/presentation/pages/bill_list_page.dart';
 import 'package:ecuisine_mess/features/counter/presentation/pages/counter_page.dart';
+import 'package:ecuisine_mess/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:ecuisine_mess/features/item_categories/presentation/pages/item_category_list_page.dart';
 import 'package:ecuisine_mess/features/items/presentation/pages/item_list_page.dart';
 import 'package:ecuisine_mess/features/members/presentation/pages/member_list_page.dart';
@@ -12,7 +13,7 @@ import 'package:ecuisine_mess/features/cuisines/presentation/pages/cuisine_list_
 import 'package:ecuisine_mess/features/meal_times/presentation/pages/meal_time_settings_page.dart';
 import 'package:ecuisine_mess/features/daily_menu/presentation/pages/daily_menu_editor_page.dart';
 import 'package:ecuisine_mess/features/daily_menu/presentation/pages/menu_history_page.dart';
-import 'package:ecuisine_mess/screens/reports_screen.dart';
+import 'package:ecuisine_mess/features/reports/presentation/pages/reports_page.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/app_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +38,15 @@ class AppRouter {
           return AppShell(navigationShell: navigationShell);
         },
         branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                name: AppRoutes.home.name,
+                path: AppRoutes.home.path,
+                builder: (context, state) => const DashboardPage(),
+              ),
+            ],
+          ),
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -154,7 +164,7 @@ class AppRouter {
               GoRoute(
                 name: AppRoutes.reports.name,
                 path: AppRoutes.reports.path,
-                builder: (context, state) => const ReportsScreen(),
+                builder: (context, state) => const ReportsPage(),
               ),
             ],
           ),

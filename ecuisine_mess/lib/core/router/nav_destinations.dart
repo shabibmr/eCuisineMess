@@ -16,6 +16,11 @@ class NavDestination {
 /// Order matches shell branch indices.
 const List<NavDestination> kNavDestinations = [
   NavDestination(
+    label: 'Home',
+    icon: Icons.dashboard_outlined,
+    route: AppRoutes.home,
+  ),
+  NavDestination(
     label: 'Counter (Kiosk)',
     icon: Icons.point_of_sale,
     route: AppRoutes.counter,
