@@ -13,9 +13,8 @@ class StartupCoordinator {
   StartupCoordinator._();
 
   static Future<void> start() async {
-    // Firebase is non-critical for local operation, but initialize it in the
-    // background so cloud-backed features can use the native Firestore client.
-    unawaited(FirebaseInitializer.initialize());
+    // Ensure Firebase is initialized for cloud-backed features.
+    await FirebaseInitializer.initialize();
     sl<AuthBloc>().add(const AuthStarted());
   }
 }

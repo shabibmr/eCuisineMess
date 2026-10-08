@@ -96,6 +96,7 @@ import 'package:ecuisine_mess/features/members/domain/usecases/get_members.dart'
 import 'package:ecuisine_mess/features/members/domain/usecases/save_member.dart';
 import 'package:ecuisine_mess/features/members/presentation/bloc/member_list_bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:ecuisine_mess/features/settings/presentation/cubit/server_settings_cubit.dart';
 import 'package:ecuisine_mess/services/api_service.dart';
 import 'package:ecuisine_mess/shared/services/firestore_service.dart';
@@ -133,10 +134,20 @@ Future<void> configureDependencies({FirebaseFirestore? firestore}) async {
   // Cloud Firestore
   if (firestore != null) {
     sl.registerSingleton<FirebaseFirestore>(firestore);
+    sl.registerLazySingleton<FirestoreService>(() => FirestoreService(firestore: sl()));
   } else {
-    sl.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
+    sl.registerLazySingleton<FirebaseFirestore>(() {
+      if (Firebase.apps.isNotEmpty) {
+        return FirebaseFirestore.instance;
+      }
+      throw FirebaseException(
+        plugin: 'cloud_firestore',
+        message:
+            'Firebase has not been initialized. Ensure FirebaseInitializer.initialize() has completed.',
+      );
+    });
+    sl.registerLazySingleton<FirestoreService>(() => FirestoreService());
   }
-  sl.registerLazySingleton<FirestoreService>(() => FirestoreService(firestore: sl()));
   sl.registerLazySingleton<AppUpdateService>(() => AppUpdateService(firestoreService: sl()));
 
   _registerAuth();
