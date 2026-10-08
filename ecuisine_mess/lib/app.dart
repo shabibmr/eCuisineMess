@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class ECuisineMessApp extends StatelessWidget {
   const ECuisineMessApp({super.key});
 
