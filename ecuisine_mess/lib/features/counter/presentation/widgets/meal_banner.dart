@@ -5,83 +5,97 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MealBanner extends StatelessWidget {
   const MealBanner({super.key, this.mealWindow});
-
   final MealWindow? mealWindow;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: const Color(0xFF0F172A),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            const Icon(Icons.restaurant, color: Colors.amber, size: 28),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+    final scheme = Theme.of(context).colorScheme;
+    final active = mealWindow != null;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.primaryContainer,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: scheme.primary.withValues(alpha: .18)),
+      ),
+      padding: const EdgeInsets.fromLTRB(18, 14, 18, 14),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: scheme.primary.withValues(alpha: .10),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(Icons.restaurant_rounded, color: scheme.primary),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  active ? mealWindow!.name : 'Loading meal window…',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w750,
+                  ),
+                ),
+                if (active)
                   Text(
-                    mealWindow != null
-                        ? '${mealWindow!.name} (${mealWindow!.mealType})'
-                        : 'Loading meal window...',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                    '${mealWindow!.mealType}  ·  ${mealWindow!.startTime} – ${mealWindow!.endTime}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
                     ),
                   ),
-                  Text(
-                    mealWindow != null
-                        ? 'Window: ${mealWindow!.startTime} - ${mealWindow!.endTime}'
-                        : '',
-                    style: const TextStyle(fontSize: 13, color: Colors.white70),
-                  ),
-                ],
-              ),
+              ],
             ),
-            BlocBuilder<MealClockCubit, String>(
-              builder: (context, clock) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 16),
-                  child: Text(
-                    clock,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      fontFeatures: [FontFeature.tabularFigures()],
-                    ),
+          ),
+          BlocBuilder<MealClockCubit, String>(
+            builder: (context, clock) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(
+                  color: scheme.surface,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: scheme.outlineVariant),
+                ),
+                child: Text(
+                  clock,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: [FontFeature.tabularFigures()],
                   ),
-                );
-              },
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 10),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+            decoration: BoxDecoration(
+              color: scheme.tertiaryContainer,
+              borderRadius: BorderRadius.circular(8),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: const Color(0xFF10B981).withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.greenAccent),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.circle, size: 10, color: Colors.greenAccent),
-                  SizedBox(width: 6),
-                  Text(
-                    'COUNTER READY',
-                    style: TextStyle(
-                      color: Colors.greenAccent,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                    ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.circle, size: 8, color: scheme.tertiary),
+                const SizedBox(width: 6),
+                Text(
+                  'READY',
+                  style: TextStyle(
+                    color: scheme.onTertiaryContainer,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 11,
+                    letterSpacing: .6,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
