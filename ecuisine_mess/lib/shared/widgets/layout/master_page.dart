@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Shared chrome for master list screens: title, actions, loading / error / empty / child.
+/// Shared page chrome for list, report and management screens.
 class MasterPage extends StatelessWidget {
   const MasterPage({
     super.key,
@@ -29,12 +29,15 @@ class MasterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.fromLTRB(28, 22, 28, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
                 child: Column(
@@ -42,62 +45,98 @@ class MasterPage extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w750,
+                        letterSpacing: -0.4,
                       ),
                     ),
-                    if (subtitle != null && subtitle!.isNotEmpty)
+                    if (subtitle != null && subtitle!.isNotEmpty) ...[
+                      const SizedBox(height: 3),
                       Text(
                         subtitle!,
-                        style: const TextStyle(color: Colors.black54),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
+                    ],
                   ],
                 ),
               ),
-              ...?actions,
+              if (actions != null) ...actions!,
             ],
           ),
           if (toolbar != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
             toolbar!,
           ],
-          const SizedBox(height: 16),
-          Expanded(child: _body()),
+          const SizedBox(height: 18),
+          Expanded(child: _body(context)),
         ],
       ),
     );
   }
 
-  Widget _body() {
+  Widget _body(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     if (loading) {
       return const Center(child: CircularProgressIndicator());
     }
+
     if (error != null) {
+      return Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 460),
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: scheme.errorContainer,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: scheme.error.withValues(alpha: .25)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.cloud_off_rounded, color: scheme.error, size: 30),
+              const SizedBox(height: 10),
+              Text(
+                error!,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: scheme.onErrorContainer),
+              ),
+              if (onRetry != null) ...[
+                const SizedBox(height: 14),
+                FilledButton.tonalIcon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Retry'),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              error!,
-              style: const TextStyle(color: Colors.red),
-              textAlign: TextAlign.center,
+            Icon(
+              Icons.inbox_outlined,
+              size: 40,
+              color: scheme.onSurfaceVariant,
             ),
-            if (onRetry != null) ...[
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: onRetry,
-                icon: const Icon(Icons.refresh, size: 18),
-                label: const Text('Retry'),
-              ),
-            ],
+            const SizedBox(height: 10),
+            Text(
+              emptyMessage,
+              style: TextStyle(color: scheme.onSurfaceVariant),
+            ),
           ],
         ),
       );
     }
-    if (isEmpty) {
-      return Center(child: Text(emptyMessage));
-    }
+
     return child;
   }
 }
