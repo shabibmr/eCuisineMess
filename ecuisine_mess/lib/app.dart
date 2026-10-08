@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'main.dart' show initializeFirebase;
 
 class ECuisineMessApp extends StatelessWidget {
   const ECuisineMessApp({super.key});
@@ -47,7 +46,7 @@ class ECuisineMessApp extends StatelessWidget {
             create: (context) => SmtpSettingsCubit(
               repository: context.read<SmtpSettingsRepository>(),
               emailService: context.read<EmailService>(),
-            )..loadSettings(),
+            ),
           ),
         ],
         child: MaterialApp.router(
@@ -56,7 +55,6 @@ class ECuisineMessApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           routerConfig: sl<AppRouter>().config,
           builder: (context, child) {
-            initializeFirebase();
             return MessServerGuard(
               child: BlocBuilder<AuthBloc, AuthState>(
                 builder: (context, state) {
