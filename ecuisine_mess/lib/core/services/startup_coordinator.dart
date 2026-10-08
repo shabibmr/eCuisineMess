@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:ecuisine_mess/core/services/firebase_initializer.dart';
 import 'package:ecuisine_mess/core/di/injection.dart';
+import 'package:ecuisine_mess/core/services/firebase_initializer.dart';
 import 'package:ecuisine_mess/features/auth/presentation/bloc/auth_bloc.dart';
 
 /// Dispatches non-critical startup work after the Flutter shell is rendered.
