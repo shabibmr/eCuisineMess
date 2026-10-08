@@ -1,8 +1,10 @@
 import 'package:ecuisine_mess/app.dart';
 import 'package:ecuisine_mess/core/di/injection.dart';
-import 'package:ecuisine_mess/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ecuisine_mess/core/services/startup_coordinator.dart';
 import 'package:ecuisine_mess/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 Future<void> main() async {
@@ -13,7 +15,7 @@ Future<void> main() async {
   runApp(const ECuisineMessApp());
 
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    sl<AuthBloc>().add(const AuthStarted());
+    unawaited(StartupCoordinator.start());
   });
 }
 
