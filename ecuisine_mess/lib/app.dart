@@ -45,7 +45,7 @@ class ECuisineMessApp extends StatelessWidget {
             create: (context) => SmtpSettingsCubit(
               repository: context.read<SmtpSettingsRepository>(),
               emailService: context.read<EmailService>(),
-            )..loadSettings(),
+            ),
           ),
         ],
         child: MaterialApp.router(

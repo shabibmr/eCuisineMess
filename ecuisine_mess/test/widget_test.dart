@@ -19,11 +19,11 @@ void main() {
   });
 
   testWidgets('App shows login when no session', (WidgetTester tester) async {
+    await tester.pumpWidget(const ECuisineMessApp());
+
     final auth = sl<AuthBloc>();
     auth.add(const AuthStarted());
     await auth.stream.firstWhere((state) => state is! AuthUnknown);
-
-    await tester.pumpWidget(const ECuisineMessApp());
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
