@@ -48,227 +48,16 @@ class _OrganizationListViewState extends State<_OrganizationListView> {
     Organization? existing,
   }) async {
     final bloc = context.read<OrganizationListBloc>();
-    final formKey = GlobalKey<FormState>();
 
-    final nameCtrl = TextEditingController(text: existing?.orgName ?? '');
-    final trnCtrl = TextEditingController(text: existing?.trn ?? '');
-    final addressCtrl = TextEditingController(text: existing?.address ?? '');
-    final addressPrintEnCtrl =
-        TextEditingController(text: existing?.addressToPrint ?? '');
-    final addressPrintArCtrl =
-        TextEditingController(text: existing?.addressToPrintArabic ?? '');
-    final currencyCtrl =
-        TextEditingController(text: existing?.currency ?? 'AED');
-    final phoneCtrl = TextEditingController(text: existing?.phone ?? '');
-    final emailCtrl = TextEditingController(text: existing?.email ?? '');
-    final contactCtrl =
-        TextEditingController(text: existing?.contactPerson ?? '');
-    final websiteCtrl = TextEditingController(text: existing?.website ?? '');
-    final notesCtrl = TextEditingController(text: existing?.notes ?? '');
-    var isActive = existing?.isActive ?? true;
-
-    final isEdit = existing != null;
-
-    final ok = await showAppFormDialog(
+    final params = await showDialog<SaveOrganizationParams>(
       context: context,
-      title: isEdit ? 'Edit Organization' : 'Add Organization',
-      formKey: formKey,
-      confirmLabel: isEdit ? 'Update' : 'Save',
-      body: StatefulBuilder(
-        builder: (ctx, setLocal) {
-          return SingleChildScrollView(
-            child: SizedBox(
-              width: 540,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextFormField(
-                    controller: nameCtrl,
-                    autofocus: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Organization Name *',
-                      hintText: 'e.g. DIT UAE',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Required' : null,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: TextFormField(
-                          controller: trnCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Tax Registration Number (TRN)',
-                            hintText: '100200300400003',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 1,
-                        child: TextFormField(
-                          controller: currencyCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Currency *',
-                            hintText: 'AED',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (v) =>
-                              (v == null || v.trim().isEmpty) ? 'Required' : null,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: addressPrintEnCtrl,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: 'Print Header Address (English)',
-                      hintText: 'Header address printed on reports & slips',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: addressPrintArCtrl,
-                    maxLines: 2,
-                    textDirection: TextDirection.rtl,
-                    decoration: const InputDecoration(
-                      labelText: 'Print Header Address (Arabic)',
-                      hintText: 'عنوان الترويسة للتقارير والإيصالات',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: phoneCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Phone',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextFormField(
-                          controller: emailCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: contactCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Contact Person',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextFormField(
-                          controller: websiteCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Website',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: addressCtrl,
-                    maxLines: 2,
-                    decoration: const InputDecoration(
-                      labelText: 'Physical Address',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: notesCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Notes',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  AppSwitchTile(
-                    title: 'Active',
-                    value: isActive,
-                    onChanged: (v) => setLocal(() => isActive = v),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+      barrierDismissible: false,
+      builder: (_) => _OrganizationFormDialog(existing: existing),
     );
 
-    if (ok == true) {
-      bloc.add(
-        OrganizationSaveRequested(
-          SaveOrganizationParams(
-            id: existing?.id,
-            orgName: nameCtrl.text.trim(),
-            trn: trnCtrl.text.trim().isEmpty ? null : trnCtrl.text.trim(),
-            address: addressCtrl.text.trim().isEmpty
-                ? null
-                : addressCtrl.text.trim(),
-            addressToPrint: addressPrintEnCtrl.text.trim().isEmpty
-                ? null
-                : addressPrintEnCtrl.text.trim(),
-            addressToPrintArabic: addressPrintArCtrl.text.trim().isEmpty
-                ? null
-                : addressPrintArCtrl.text.trim(),
-            currency: currencyCtrl.text.trim().isEmpty
-                ? 'AED'
-                : currencyCtrl.text.trim().toUpperCase(),
-            phone: phoneCtrl.text.trim().isEmpty ? null : phoneCtrl.text.trim(),
-            email: emailCtrl.text.trim().isEmpty ? null : emailCtrl.text.trim(),
-            contactPerson: contactCtrl.text.trim().isEmpty
-                ? null
-                : contactCtrl.text.trim(),
-            website: websiteCtrl.text.trim().isEmpty
-                ? null
-                : websiteCtrl.text.trim(),
-            notes: notesCtrl.text.trim().isEmpty ? null : notesCtrl.text.trim(),
-            isActive: isActive,
-          ),
-        ),
-      );
+    if (params != null && context.mounted) {
+      bloc.add(OrganizationSaveRequested(params));
     }
-
-    nameCtrl.dispose();
-    trnCtrl.dispose();
-    addressCtrl.dispose();
-    addressPrintEnCtrl.dispose();
-    addressPrintArCtrl.dispose();
-    currencyCtrl.dispose();
-    phoneCtrl.dispose();
-    emailCtrl.dispose();
-    contactCtrl.dispose();
-    websiteCtrl.dispose();
-    notesCtrl.dispose();
   }
 
   Future<void> _confirmDelete(
@@ -474,6 +263,259 @@ class _OrganizationListViewState extends State<_OrganizationListView> {
                     ),
         );
       },
+    );
+  }
+}
+
+
+class _OrganizationFormDialog extends StatefulWidget {
+  const _OrganizationFormDialog({this.existing});
+
+  final Organization? existing;
+
+  @override
+  State<_OrganizationFormDialog> createState() =>
+      _OrganizationFormDialogState();
+}
+
+class _OrganizationFormDialogState extends State<_OrganizationFormDialog> {
+  final _formKey = GlobalKey<FormState>();
+
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _trnCtrl;
+  late final TextEditingController _addressCtrl;
+  late final TextEditingController _addressPrintEnCtrl;
+  late final TextEditingController _addressPrintArCtrl;
+  late final TextEditingController _currencyCtrl;
+  late final TextEditingController _phoneCtrl;
+  late final TextEditingController _emailCtrl;
+  late final TextEditingController _contactCtrl;
+  late final TextEditingController _websiteCtrl;
+  late final TextEditingController _notesCtrl;
+  late bool _isActive;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existing;
+    _nameCtrl = TextEditingController(text: existing?.orgName ?? '');
+    _trnCtrl = TextEditingController(text: existing?.trn ?? '');
+    _addressCtrl = TextEditingController(text: existing?.address ?? '');
+    _addressPrintEnCtrl =
+        TextEditingController(text: existing?.addressToPrint ?? '');
+    _addressPrintArCtrl =
+        TextEditingController(text: existing?.addressToPrintArabic ?? '');
+    _currencyCtrl = TextEditingController(text: existing?.currency ?? 'AED');
+    _phoneCtrl = TextEditingController(text: existing?.phone ?? '');
+    _emailCtrl = TextEditingController(text: existing?.email ?? '');
+    _contactCtrl =
+        TextEditingController(text: existing?.contactPerson ?? '');
+    _websiteCtrl = TextEditingController(text: existing?.website ?? '');
+    _notesCtrl = TextEditingController(text: existing?.notes ?? '');
+    _isActive = existing?.isActive ?? true;
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _trnCtrl.dispose();
+    _addressCtrl.dispose();
+    _addressPrintEnCtrl.dispose();
+    _addressPrintArCtrl.dispose();
+    _currencyCtrl.dispose();
+    _phoneCtrl.dispose();
+    _emailCtrl.dispose();
+    _contactCtrl.dispose();
+    _websiteCtrl.dispose();
+    _notesCtrl.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_formKey.currentState?.validate() != true) return;
+    Navigator.of(context).pop(
+      SaveOrganizationParams(
+        id: widget.existing?.id,
+        orgName: _nameCtrl.text.trim(),
+        trn: _trnCtrl.text.trim().isEmpty ? null : _trnCtrl.text.trim(),
+        address: _addressCtrl.text.trim().isEmpty
+            ? null
+            : _addressCtrl.text.trim(),
+        addressToPrint: _addressPrintEnCtrl.text.trim().isEmpty
+            ? null
+            : _addressPrintEnCtrl.text.trim(),
+        addressToPrintArabic: _addressPrintArCtrl.text.trim().isEmpty
+            ? null
+            : _addressPrintArCtrl.text.trim(),
+        currency: _currencyCtrl.text.trim().isEmpty
+            ? 'AED'
+            : _currencyCtrl.text.trim().toUpperCase(),
+        phone: _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
+        email: _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
+        contactPerson: _contactCtrl.text.trim().isEmpty
+            ? null
+            : _contactCtrl.text.trim(),
+        website: _websiteCtrl.text.trim().isEmpty
+            ? null
+            : _websiteCtrl.text.trim(),
+        notes: _notesCtrl.text.trim().isEmpty ? null : _notesCtrl.text.trim(),
+        isActive: _isActive,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEdit = widget.existing != null;
+    return AppFormDialog(
+      title: isEdit ? 'Edit Organization' : 'Add Organization',
+      formKey: _formKey,
+      confirmLabel: isEdit ? 'Update' : 'Save',
+      onConfirm: _submit,
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextFormField(
+            controller: _nameCtrl,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Organization Name *',
+              hintText: 'e.g. DIT UAE',
+              border: OutlineInputBorder(),
+            ),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Required' : null,
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: TextFormField(
+                  controller: _trnCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Tax Registration Number (TRN)',
+                    hintText: '100200300400003',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 1,
+                child: TextFormField(
+                  controller: _currencyCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Currency *',
+                    hintText: 'AED',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _addressPrintEnCtrl,
+            maxLines: 2,
+            decoration: const InputDecoration(
+              labelText: 'Print Header Address (English)',
+              hintText: 'Header address printed on reports & slips',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _addressPrintArCtrl,
+            maxLines: 2,
+            textDirection: TextDirection.rtl,
+            decoration: const InputDecoration(
+              labelText: 'Print Header Address (Arabic)',
+              hintText: 'عنوان الترويسة للتقارير والإيصالات',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _phoneCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextFormField(
+                  controller: _emailCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return null;
+                    if (!v.contains('@')) return 'Enter a valid email';
+                    return null;
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _contactCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Contact Person',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextFormField(
+                  controller: _websiteCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Website',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _addressCtrl,
+            maxLines: 2,
+            decoration: const InputDecoration(
+              labelText: 'Physical Address',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _notesCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Notes',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 8),
+          AppSwitchTile(
+            title: 'Active',
+            value: _isActive,
+            onChanged: (v) => setState(() => _isActive = v),
+          ),
+        ],
+      ),
     );
   }
 }

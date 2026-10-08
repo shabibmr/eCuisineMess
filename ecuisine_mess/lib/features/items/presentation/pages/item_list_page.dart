@@ -31,220 +31,32 @@ class ItemListPage extends StatelessWidget {
 class _ItemListView extends StatelessWidget {
   const _ItemListView();
 
-  Future<void> _showAddDialog(BuildContext context) async {
+  Future<void> _openFormDialog(BuildContext context, [Item? item]) async {
     final bloc = context.read<ItemListBloc>();
     final state = bloc.state;
-    final activeCategories = state.activeCategories;
-    final uoms = state.uoms;
 
-    if (activeCategories.isEmpty || uoms.isEmpty) {
+    if (item == null &&
+        (state.activeCategories.isEmpty || state.uoms.isEmpty)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Need at least one category and UOM')),
       );
       return;
     }
 
-    final nameCtrl = TextEditingController();
-    String? categoryId = activeCategories.first.id;
-    String? uomId = uoms
-        .firstWhere(
-          (u) => u.name == 'Nos',
-          orElse: () => uoms.first,
-        )
-        .id;
-    final formKey = GlobalKey<FormState>();
-
-    final ok = await showAppFormDialog(
+    final params = await showDialog<SaveItemParams>(
       context: context,
-      title: 'Add Item',
-      formKey: formKey,
-      confirmLabel: 'Save',
-      body: StatefulBuilder(
-        builder: (ctx, setLocal) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: nameCtrl,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required' : null,
-              ),
-              const SizedBox(height: 12),
-              AppDropdown<String>(
-                key: ValueKey('add-cat-$categoryId'),
-                value: categoryId,
-                label: 'Category',
-                items: activeCategories
-                    .map(
-                      (c) => AppDropdownItem(
-                        value: c.id,
-                        label: c.name,
-                      ),
-                    )
-                    .toList(),
-                onChanged: (v) => setLocal(() => categoryId = v),
-                validator: (v) => v == null ? 'Required' : null,
-              ),
-              const SizedBox(height: 12),
-              AppDropdown<String>(
-                key: ValueKey('add-uom-$uomId'),
-                value: uomId,
-                label: 'UOM',
-                items: uoms
-                    .map(
-                      (u) => AppDropdownItem(
-                        value: u.id,
-                        label: u.name,
-                      ),
-                    )
-                    .toList(),
-                onChanged: (v) => setLocal(() => uomId = v),
-                validator: (v) => v == null ? 'Required' : null,
-              ),
-            ],
-          );
-        },
+      barrierDismissible: false,
+      builder: (_) => _ItemFormDialog(
+        item: item,
+        categories: state.categories,
+        activeCategories: state.activeCategories,
+        uoms: state.uoms,
       ),
     );
 
-    if (ok != true) {
-      nameCtrl.dispose();
-      return;
+    if (params != null && context.mounted) {
+      bloc.add(ItemSaveRequested(params));
     }
-
-    bloc.add(
-      ItemSaveRequested(
-        SaveItemParams(
-          name: nameCtrl.text.trim(),
-          categoryId: categoryId!,
-          uomId: uomId!,
-        ),
-      ),
-    );
-    nameCtrl.dispose();
-  }
-
-  Future<void> _showEditDialog(BuildContext context, Item item) async {
-    final bloc = context.read<ItemListBloc>();
-    final state = bloc.state;
-    final categories = state.categories;
-    final activeCategories = state.activeCategories;
-    final uoms = state.uoms;
-
-    final nameCtrl = TextEditingController(text: item.name);
-    var categoryId = item.categoryId;
-    if (categoryId == null || !categories.any((c) => c.id == categoryId)) {
-      categoryId =
-          activeCategories.isNotEmpty ? activeCategories.first.id : null;
-    }
-    var uomId = item.uomId;
-    if (uomId == null || !uoms.any((u) => u.id == uomId)) {
-      Uom? match;
-      for (final u in uoms) {
-        if (u.name == item.uomName) {
-          match = u;
-          break;
-        }
-      }
-      match ??= uoms.isNotEmpty ? uoms.first : null;
-      uomId = match?.id;
-    }
-    var isActive = item.isActive;
-    final formKey = GlobalKey<FormState>();
-
-    final categoryChoices = <ItemCategory>[
-      ...activeCategories,
-      if (categoryId != null &&
-          !activeCategories.any((c) => c.id == categoryId))
-        categories.firstWhere((c) => c.id == categoryId),
-    ];
-
-    final ok = await showAppFormDialog(
-      context: context,
-      title: 'Edit Item',
-      formKey: formKey,
-      confirmLabel: 'Update',
-      body: StatefulBuilder(
-        builder: (ctx, setLocal) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: nameCtrl,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required' : null,
-              ),
-              const SizedBox(height: 12),
-              AppDropdown<String>(
-                key: ValueKey('edit-cat-$categoryId'),
-                value: categoryId,
-                label: 'Category',
-                items: categoryChoices
-                    .map(
-                      (c) => AppDropdownItem(
-                        value: c.id,
-                        label: c.name,
-                      ),
-                    )
-                    .toList(),
-                onChanged: (v) => setLocal(() => categoryId = v),
-                validator: (v) => v == null ? 'Required' : null,
-              ),
-              const SizedBox(height: 12),
-              AppDropdown<String>(
-                key: ValueKey('edit-uom-$uomId'),
-                value: uomId,
-                label: 'UOM',
-                items: uoms
-                    .map(
-                      (u) => AppDropdownItem(
-                        value: u.id,
-                        label: u.name,
-                      ),
-                    )
-                    .toList(),
-                onChanged: (v) => setLocal(() => uomId = v),
-                validator: (v) => v == null ? 'Required' : null,
-              ),
-              const SizedBox(height: 8),
-              AppSwitchTile(
-                title: 'Active',
-                value: isActive,
-                onChanged: (v) => setLocal(() => isActive = v),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-
-    if (ok != true) {
-      nameCtrl.dispose();
-      return;
-    }
-
-    bloc.add(
-      ItemSaveRequested(
-        SaveItemParams(
-          id: item.id,
-          name: nameCtrl.text.trim(),
-          categoryId: categoryId!,
-          uomId: uomId!,
-          isActive: isActive,
-        ),
-      ),
-    );
-    nameCtrl.dispose();
   }
 
   @override
@@ -295,7 +107,7 @@ class _ItemListView extends StatelessWidget {
             const SizedBox(width: 8),
             AppCreateButton(
               label: 'Add Item',
-              onPressed: () => _showAddDialog(context),
+              onPressed: () => _openFormDialog(context),
             ),
           ],
           child: AppSeparatedListCard(
@@ -303,7 +115,7 @@ class _ItemListView extends StatelessWidget {
             itemBuilder: (_, i) {
               final item = state.items[i];
               return InkWell(
-                onDoubleTap: () => _showEditDialog(context, item),
+                onDoubleTap: () => _openFormDialog(context, item),
                 child: ListTile(
                   leading: CircleAvatar(
                     child: Text(
@@ -328,3 +140,160 @@ class _ItemListView extends StatelessWidget {
     );
   }
 }
+
+class _ItemFormDialog extends StatefulWidget {
+  const _ItemFormDialog({
+    this.item,
+    required this.categories,
+    required this.activeCategories,
+    required this.uoms,
+  });
+
+  final Item? item;
+  final List<ItemCategory> categories;
+  final List<ItemCategory> activeCategories;
+  final List<Uom> uoms;
+
+  @override
+  State<_ItemFormDialog> createState() => _ItemFormDialogState();
+}
+
+class _ItemFormDialogState extends State<_ItemFormDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameCtrl;
+  String? _categoryId;
+  String? _uomId;
+  late bool _isActive;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtrl = TextEditingController(text: widget.item?.name ?? '');
+    _isActive = widget.item?.isActive ?? true;
+
+    if (widget.item == null) {
+      _categoryId = widget.activeCategories.isNotEmpty
+          ? widget.activeCategories.first.id
+          : null;
+      _uomId = widget.uoms
+          .firstWhere(
+            (u) => u.name == 'Nos',
+            orElse: () => widget.uoms.first,
+          )
+          .id;
+    } else {
+      _categoryId = widget.item!.categoryId;
+      if (_categoryId == null ||
+          !widget.categories.any((c) => c.id == _categoryId)) {
+        _categoryId = widget.activeCategories.isNotEmpty
+            ? widget.activeCategories.first.id
+            : null;
+      }
+      _uomId = widget.item!.uomId;
+      if (_uomId == null || !widget.uoms.any((u) => u.id == _uomId)) {
+        Uom? match;
+        for (final u in widget.uoms) {
+          if (u.name == widget.item!.uomName) {
+            match = u;
+            break;
+          }
+        }
+        match ??= widget.uoms.isNotEmpty ? widget.uoms.first : null;
+        _uomId = match?.id;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_formKey.currentState?.validate() != true) return;
+    Navigator.of(context).pop(
+      SaveItemParams(
+        id: widget.item?.id,
+        name: _nameCtrl.text.trim(),
+        categoryId: _categoryId!,
+        uomId: _uomId!,
+        isActive: _isActive,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEdit = widget.item != null;
+    final categoryChoices = <ItemCategory>[
+      ...widget.activeCategories,
+      if (_categoryId != null &&
+          !widget.activeCategories.any((c) => c.id == _categoryId))
+        widget.categories.firstWhere((c) => c.id == _categoryId),
+    ];
+
+    return AppFormDialog(
+      title: isEdit ? 'Edit Item' : 'Add Item',
+      formKey: _formKey,
+      confirmLabel: isEdit ? 'Update' : 'Save',
+      onConfirm: _submit,
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: _nameCtrl,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Name',
+              border: OutlineInputBorder(),
+            ),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Required' : null,
+          ),
+          const SizedBox(height: 12),
+          AppDropdown<String>(
+            key: ValueKey('${isEdit ? "edit" : "add"}-cat-$_categoryId'),
+            value: _categoryId,
+            label: 'Category',
+            items: categoryChoices
+                .map(
+                  (c) => AppDropdownItem(
+                    value: c.id,
+                    label: c.name,
+                  ),
+                )
+                .toList(),
+            onChanged: (v) => setState(() => _categoryId = v),
+            validator: (v) => v == null ? 'Required' : null,
+          ),
+          const SizedBox(height: 12),
+          AppDropdown<String>(
+            key: ValueKey('${isEdit ? "edit" : "add"}-uom-$_uomId'),
+            value: _uomId,
+            label: 'UOM',
+            items: widget.uoms
+                .map(
+                  (u) => AppDropdownItem(
+                    value: u.id,
+                    label: u.name,
+                  ),
+                )
+                .toList(),
+            onChanged: (v) => setState(() => _uomId = v),
+            validator: (v) => v == null ? 'Required' : null,
+          ),
+          if (isEdit) ...[
+            const SizedBox(height: 8),
+            AppSwitchTile(
+              title: 'Active',
+              value: _isActive,
+              onChanged: (v) => setState(() => _isActive = v),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+

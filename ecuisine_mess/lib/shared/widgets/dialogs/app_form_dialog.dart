@@ -58,6 +58,7 @@ class AppFormDialog extends StatelessWidget {
     this.minWidth = 420.0,
     this.maxWidth = 560.0,
     this.leadingTitleIcon,
+    this.onConfirm,
   });
 
   final String title;
@@ -68,6 +69,7 @@ class AppFormDialog extends StatelessWidget {
   final double minWidth;
   final double maxWidth;
   final Widget? leadingTitleIcon;
+  final VoidCallback? onConfirm;
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +114,11 @@ class AppFormDialog extends StatelessWidget {
         FilledButton(
           onPressed: () {
             if (formKey.currentState?.validate() == true) {
-              Navigator.of(context).pop(true);
+              if (onConfirm != null) {
+                onConfirm!();
+              } else {
+                Navigator.of(context).pop(true);
+              }
             }
           },
           child: Text(confirmLabel),

@@ -51,302 +51,22 @@ class _MemberListView extends StatelessWidget {
     final bloc = context.read<MemberListBloc>();
     final cuisines = bloc.state.cuisines;
     final activeCuisines = bloc.state.activeCuisines;
-    final isEdit = member != null;
 
-    final nameCtrl = TextEditingController(text: member?.name ?? '');
-    final rfidCtrl = TextEditingController(text: member?.rfidTag ?? '');
-    final phoneCtrl = TextEditingController(text: member?.phone ?? '');
-    final emailCtrl = TextEditingController(text: member?.email ?? '');
-    final today = DateTime.now();
-    var validityStart =
-        member?.validityStart.isNotEmpty == true
-            ? member!.validityStart
-            : _fmtDate(today);
-    var validityEnd = member?.validityEnd.isNotEmpty == true
-        ? member!.validityEnd
-        : _fmtDate(today.add(const Duration(days: 30)));
-    String? cuisineId = member?.cuisineId;
-    if (cuisineId != null &&
-        cuisineId.isNotEmpty &&
-        !cuisines.any((c) => c.id == cuisineId)) {
-      cuisineId = null;
-    }
-    var status = member?.status.toUpperCase() == 'SUSPENDED'
-        ? 'SUSPENDED'
-        : 'ACTIVE';
-    String? rfidError;
-    var rfidChecking = false;
-    final formKey = GlobalKey<FormState>();
-
-    final cuisineChoices = <CuisineOption>[
-      ...activeCuisines,
-      if (cuisineId != null &&
-          !activeCuisines.any((c) => c.id == cuisineId))
-        cuisines.firstWhere((c) => c.id == cuisineId),
-    ];
-
-    final checkRfid = sl<CheckRfidAvailable>();
-
-    Future<bool> validateRfid(StateSetter setLocal) async {
-      final tag = rfidCtrl.text.trim();
-      if (tag.isEmpty) {
-        setLocal(() => rfidError = 'Required');
-        return false;
-      }
-      setLocal(() {
-        rfidChecking = true;
-        rfidError = null;
-      });
-      try {
-        final result = await checkRfid(
-          CheckRfidAvailableParams(
-            tag: tag,
-            excludeMemberId: member?.id,
-          ),
-        );
-        if (!result.available) {
-          final who = result.conflictingMemberName ?? 'another member';
-          setLocal(() {
-            rfidChecking = false;
-            rfidError = 'RFID tag already used by $who';
-          });
-          return false;
-        }
-        setLocal(() {
-          rfidChecking = false;
-          rfidError = null;
-        });
-        return true;
-      } on Failure catch (e) {
-        setLocal(() {
-          rfidChecking = false;
-          rfidError = e.message;
-        });
-        return false;
-      } catch (e) {
-        setLocal(() {
-          rfidChecking = false;
-          rfidError = e.toString();
-        });
-        return false;
-      }
-    }
-
-    final ok = await showDialog<bool>(
+    final params = await showDialog<SaveMemberParams>(
       context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setLocal) {
-            return AlertDialog(
-              title: Text(isEdit ? 'Edit Member' : 'Add Member'),
-              content: SizedBox(
-                width: 420,
-                child: Form(
-                  key: formKey,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextFormField(
-                          controller: nameCtrl,
-                          autofocus: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Name',
-                            border: OutlineInputBorder(),
-                          ),
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Required'
-                              : null,
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                controller: rfidCtrl,
-                                decoration: InputDecoration(
-                                  labelText: 'RFID tag',
-                                  border: const OutlineInputBorder(),
-                                  errorText: rfidError,
-                                ),
-                                validator: (v) =>
-                                    (v == null || v.trim().isEmpty)
-                                        ? 'Required'
-                                        : null,
-                                onChanged: (_) {
-                                  if (rfidError != null) {
-                                    setLocal(() => rfidError = null);
-                                  }
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4),
-                              child: OutlinedButton(
-                                onPressed: rfidChecking
-                                    ? null
-                                    : () => validateRfid(setLocal),
-                                child: rfidChecking
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : const Text('Check'),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: phoneCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Phone',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.phone,
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: emailCtrl,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                        const SizedBox(height: 12),
-                        AppDropdown<String?>(
-                          key: ValueKey('cuisine-$cuisineId'),
-                          value: cuisineId,
-                          label: 'Cuisine',
-                          placeholderLabel: '— None —',
-                          items: cuisineChoices
-                              .map(
-                                (c) => AppDropdownItem<String?>(
-                                  value: c.id,
-                                  label: c.name,
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (v) => setLocal(() => cuisineId = v),
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: AppDatePickerField(
-                                label: 'Validity start',
-                                value: _parseDate(validityStart),
-                                onChanged: (v) =>
-                                    setLocal(() => validityStart = _fmtDate(v)),
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime(2040),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: AppDatePickerField(
-                                label: 'Validity end',
-                                value: _parseDate(validityEnd),
-                                onChanged: (v) =>
-                                    setLocal(() => validityEnd = _fmtDate(v)),
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime(2040),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        AppDropdown<String>(
-                          key: ValueKey('status-$status'),
-                          value: status,
-                          label: 'Status',
-                          items: const [
-                            AppDropdownItem(
-                              value: 'ACTIVE',
-                              label: 'ACTIVE',
-                            ),
-                            AppDropdownItem(
-                              value: 'SUSPENDED',
-                              label: 'SUSPENDED',
-                            ),
-                          ],
-                          onChanged: (v) {
-                            if (v != null) setLocal(() => status = v);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Cancel'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (!formKey.currentState!.validate()) return;
-                    final start = _parseDate(validityStart);
-                    final end = _parseDate(validityEnd);
-                    if (start != null && end != null && start.isAfter(end)) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Validity start must be on or before end',
-                          ),
-                        ),
-                      );
-                      return;
-                    }
-                    final rfidOk = await validateRfid(setLocal);
-                    if (!rfidOk) return;
-                    if (ctx.mounted) Navigator.pop(ctx, true);
-                  },
-                  child: Text(isEdit ? 'Update' : 'Save'),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    if (ok != true) {
-      nameCtrl.dispose();
-      rfidCtrl.dispose();
-      phoneCtrl.dispose();
-      emailCtrl.dispose();
-      return;
-    }
-
-    bloc.add(
-      MemberSaveRequested(
-        SaveMemberParams(
-          id: member?.id,
-          name: nameCtrl.text.trim(),
-          rfidTag: rfidCtrl.text.trim(),
-          phone: phoneCtrl.text.trim().isEmpty ? null : phoneCtrl.text.trim(),
-          email: emailCtrl.text.trim().isEmpty ? null : emailCtrl.text.trim(),
-          cuisineId: cuisineId,
-          validityStart: validityStart,
-          validityEnd: validityEnd,
-          status: status,
-        ),
+      barrierDismissible: false,
+      builder: (_) => _MemberFormDialog(
+        member: member,
+        cuisines: cuisines,
+        activeCuisines: activeCuisines,
       ),
     );
 
-    nameCtrl.dispose();
-    rfidCtrl.dispose();
-    phoneCtrl.dispose();
-    emailCtrl.dispose();
+    if (params != null && context.mounted) {
+      bloc.add(MemberSaveRequested(params));
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -503,6 +223,317 @@ class _MemberListView extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+
+class _MemberFormDialog extends StatefulWidget {
+  const _MemberFormDialog({
+    this.member,
+    required this.cuisines,
+    required this.activeCuisines,
+  });
+
+  final Member? member;
+  final List<CuisineOption> cuisines;
+  final List<CuisineOption> activeCuisines;
+
+  @override
+  State<_MemberFormDialog> createState() => _MemberFormDialogState();
+}
+
+class _MemberFormDialogState extends State<_MemberFormDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _rfidCtrl;
+  late final TextEditingController _phoneCtrl;
+  late final TextEditingController _emailCtrl;
+  late String _validityStart;
+  late String _validityEnd;
+  String? _cuisineId;
+  late String _status;
+  String? _rfidError;
+  bool _rfidChecking = false;
+
+  late final CheckRfidAvailable _checkRfid;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkRfid = sl<CheckRfidAvailable>();
+    final member = widget.member;
+    _nameCtrl = TextEditingController(text: member?.name ?? '');
+    _rfidCtrl = TextEditingController(text: member?.rfidTag ?? '');
+    _phoneCtrl = TextEditingController(text: member?.phone ?? '');
+    _emailCtrl = TextEditingController(text: member?.email ?? '');
+
+    final today = DateTime.now();
+    _validityStart = member?.validityStart.isNotEmpty == true
+        ? member!.validityStart
+        : _MemberListView._fmtDate(today);
+    _validityEnd = member?.validityEnd.isNotEmpty == true
+        ? member!.validityEnd
+        : _MemberListView._fmtDate(today.add(const Duration(days: 30)));
+
+    _cuisineId = member?.cuisineId;
+    if (_cuisineId != null &&
+        _cuisineId!.isNotEmpty &&
+        !widget.cuisines.any((c) => c.id == _cuisineId)) {
+      _cuisineId = null;
+    }
+
+    _status = member?.status.toUpperCase() == 'SUSPENDED'
+        ? 'SUSPENDED'
+        : 'ACTIVE';
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _rfidCtrl.dispose();
+    _phoneCtrl.dispose();
+    _emailCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<bool> _validateRfid() async {
+    final tag = _rfidCtrl.text.trim();
+    if (tag.isEmpty) {
+      setState(() => _rfidError = 'Required');
+      return false;
+    }
+    setState(() {
+      _rfidChecking = true;
+      _rfidError = null;
+    });
+    try {
+      final result = await _checkRfid(
+        CheckRfidAvailableParams(
+          tag: tag,
+          excludeMemberId: widget.member?.id,
+        ),
+      );
+      if (!result.available) {
+        final who = result.conflictingMemberName ?? 'another member';
+        if (mounted) {
+          setState(() {
+            _rfidChecking = false;
+            _rfidError = 'RFID tag already used by $who';
+          });
+        }
+        return false;
+      }
+      if (mounted) {
+        setState(() {
+          _rfidChecking = false;
+          _rfidError = null;
+        });
+      }
+      return true;
+    } on Failure catch (e) {
+      if (mounted) {
+        setState(() {
+          _rfidChecking = false;
+          _rfidError = e.message;
+        });
+      }
+      return false;
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _rfidChecking = false;
+          _rfidError = e.toString();
+        });
+      }
+      return false;
+    }
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    final start = _MemberListView._parseDate(_validityStart);
+    final end = _MemberListView._parseDate(_validityEnd);
+    if (start != null && end != null && start.isAfter(end)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Validity start must be on or before end'),
+        ),
+      );
+      return;
+    }
+    final rfidOk = await _validateRfid();
+    if (!rfidOk) return;
+
+    if (!mounted) return;
+    Navigator.of(context).pop(
+      SaveMemberParams(
+        id: widget.member?.id,
+        name: _nameCtrl.text.trim(),
+        rfidTag: _rfidCtrl.text.trim(),
+        phone: _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
+        email: _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
+        cuisineId: _cuisineId,
+        validityStart: _validityStart,
+        validityEnd: _validityEnd,
+        status: _status,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEdit = widget.member != null;
+    final cuisineChoices = <CuisineOption>[
+      ...widget.activeCuisines,
+      if (_cuisineId != null &&
+          !widget.activeCuisines.any((c) => c.id == _cuisineId))
+        widget.cuisines.firstWhere((c) => c.id == _cuisineId),
+    ];
+
+    return AlertDialog(
+      title: Text(isEdit ? 'Edit Member' : 'Add Member'),
+      content: SizedBox(
+        width: 420,
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _nameCtrl,
+                  autofocus: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) =>
+                      (v == null || v.trim().isEmpty) ? 'Required' : null,
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _rfidCtrl,
+                  decoration: InputDecoration(
+                    labelText: 'RFID Tag',
+                    border: const OutlineInputBorder(),
+                    errorText: _rfidError,
+                    suffixIcon: _rfidChecking
+                        ? const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        : null,
+                  ),
+                  onChanged: (_) {
+                    if (_rfidError != null) {
+                      setState(() => _rfidError = null);
+                    }
+                  },
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _phoneCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone (optional)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _emailCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Email (optional)',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return null;
+                    if (!v.contains('@')) return 'Enter a valid email';
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 12),
+                AppDropdown<String?>(
+                  key: ValueKey('cuisine-$_cuisineId'),
+                  value: _cuisineId,
+                  label: 'Cuisine',
+                  placeholderLabel: '— None —',
+                  items: cuisineChoices
+                      .map(
+                        (c) => AppDropdownItem<String?>(
+                          value: c.id,
+                          label: c.name,
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) => setState(() => _cuisineId = v),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppDatePickerField(
+                        label: 'Validity start',
+                        value: _MemberListView._parseDate(_validityStart),
+                        onChanged: (v) => setState(
+                          () => _validityStart = _MemberListView._fmtDate(v),
+                        ),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2040),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: AppDatePickerField(
+                        label: 'Validity end',
+                        value: _MemberListView._parseDate(_validityEnd),
+                        onChanged: (v) => setState(
+                          () => _validityEnd = _MemberListView._fmtDate(v),
+                        ),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2040),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                AppDropdown<String>(
+                  key: ValueKey('status-$_status'),
+                  value: _status,
+                  label: 'Status',
+                  items: const [
+                    AppDropdownItem(
+                      value: 'ACTIVE',
+                      label: 'ACTIVE',
+                    ),
+                    AppDropdownItem(
+                      value: 'SUSPENDED',
+                      label: 'SUSPENDED',
+                    ),
+                  ],
+                  onChanged: (v) {
+                    if (v != null) setState(() => _status = v);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _submit,
+          child: Text(isEdit ? 'Update' : 'Save'),
+        ),
+      ],
     );
   }
 }

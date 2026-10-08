@@ -39,32 +39,19 @@ class _ItemCategoriesScreenState extends State<ItemCategoriesScreen> {
   }
 
   Future<void> _showAddDialog() async {
-    final nameCtrl = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-    final ok = await showAppFormDialog(
+    final data = await showDialog<_CategoryFormData>(
       context: context,
-      title: 'Add Item Category',
-      formKey: formKey,
-      confirmLabel: 'Save',
-      body: TextFormField(
-        controller: nameCtrl,
-        autofocus: true,
-        decoration: const InputDecoration(
-          labelText: 'Name',
-          hintText: 'Snack',
-          border: OutlineInputBorder(),
-        ),
-        validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+      barrierDismissible: false,
+      builder: (_) => _LegacyCategoryFormDialog(
+        defaultSortOrder: _categories.length + 1,
       ),
     );
-    if (ok != true) {
-      nameCtrl.dispose();
-      return;
-    }
+    if (data == null) return;
+
     try {
       await _api.createItemCategory(
-        categoryName: nameCtrl.text.trim(),
-        sortOrder: _categories.length + 1,
+        categoryName: data.name,
+        sortOrder: data.sortOrder,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -78,74 +65,26 @@ class _ItemCategoriesScreenState extends State<ItemCategoriesScreen> {
           SnackBar(content: Text(e.toString())),
         );
       }
-    } finally {
-      nameCtrl.dispose();
     }
   }
 
   Future<void> _showEditDialog(ItemCategory category) async {
-    final nameCtrl = TextEditingController(text: category.categoryName);
-    final sortCtrl = TextEditingController(text: '${category.sortOrder}');
-    var isActive = category.isActive;
-    final formKey = GlobalKey<FormState>();
-
-    final ok = await showAppFormDialog(
+    final data = await showDialog<_CategoryFormData>(
       context: context,
-      title: 'Edit Item Category',
-      formKey: formKey,
-      confirmLabel: 'Update',
-      body: StatefulBuilder(
-        builder: (ctx, setLocal) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: nameCtrl,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: sortCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Sort order',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Required';
-                  if (int.tryParse(v.trim()) == null) return 'Enter a number';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 8),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Active'),
-                value: isActive,
-                onChanged: (v) => setLocal(() => isActive = v),
-              ),
-            ],
-          );
-        },
+      barrierDismissible: false,
+      builder: (_) => _LegacyCategoryFormDialog(
+        category: category,
+        defaultSortOrder: category.sortOrder,
       ),
     );
-    if (ok != true) {
-      nameCtrl.dispose();
-      sortCtrl.dispose();
-      return;
-    }
+    if (data == null) return;
 
     try {
       await _api.updateItemCategory(
         id: category.id,
-        categoryName: nameCtrl.text.trim(),
-        sortOrder: int.parse(sortCtrl.text.trim()),
-        isActive: isActive ? 1 : 0,
+        categoryName: data.name,
+        sortOrder: data.sortOrder,
+        isActive: data.isActive ? 1 : 0,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -159,9 +98,6 @@ class _ItemCategoriesScreenState extends State<ItemCategoriesScreen> {
           SnackBar(content: Text(e.toString())),
         );
       }
-    } finally {
-      nameCtrl.dispose();
-      sortCtrl.dispose();
     }
   }
 
@@ -203,6 +139,120 @@ class _ItemCategoriesScreenState extends State<ItemCategoriesScreen> {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+
+class _CategoryFormData {
+  final String name;
+  final int sortOrder;
+  final bool isActive;
+  const _CategoryFormData({
+    required this.name,
+    required this.sortOrder,
+    required this.isActive,
+  });
+}
+
+class _LegacyCategoryFormDialog extends StatefulWidget {
+  const _LegacyCategoryFormDialog({
+    this.category,
+    required this.defaultSortOrder,
+  });
+
+  final ItemCategory? category;
+  final int defaultSortOrder;
+
+  @override
+  State<_LegacyCategoryFormDialog> createState() =>
+      _LegacyCategoryFormDialogState();
+}
+
+class _LegacyCategoryFormDialogState extends State<_LegacyCategoryFormDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _sortCtrl;
+  late bool _isActive;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtrl = TextEditingController(text: widget.category?.categoryName ?? '');
+    _sortCtrl = TextEditingController(
+      text: widget.category != null
+          ? ''
+          : '',
+    );
+    _isActive = widget.category?.isActive ?? true;
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _sortCtrl.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_formKey.currentState?.validate() != true) return;
+    final sort = int.tryParse(_sortCtrl.text.trim()) ?? widget.defaultSortOrder;
+    Navigator.of(context).pop(
+      _CategoryFormData(
+        name: _nameCtrl.text.trim(),
+        sortOrder: sort,
+        isActive: _isActive,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEdit = widget.category != null;
+    return AppFormDialog(
+      title: isEdit ? 'Edit Item Category' : 'Add Item Category',
+      formKey: _formKey,
+      confirmLabel: isEdit ? 'Update' : 'Save',
+      onConfirm: _submit,
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: _nameCtrl,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Name',
+              hintText: 'Snack',
+              border: OutlineInputBorder(),
+            ),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Required' : null,
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _sortCtrl,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Sort order',
+              border: OutlineInputBorder(),
+            ),
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) return 'Required';
+              if (int.tryParse(v.trim()) == null) return 'Enter a number';
+              return null;
+            },
+          ),
+          if (isEdit) ...[
+            const SizedBox(height: 8),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Active'),
+              value: _isActive,
+              onChanged: (v) => setState(() => _isActive = v),
+            ),
+          ],
+        ],
       ),
     );
   }
