@@ -9,6 +9,7 @@ import 'package:ecuisine_mess/features/email/presentation/widgets/smtp_settings_
 import 'package:ecuisine_mess/features/settings/presentation/widgets/printer_settings_dialog.dart';
 import 'package:ecuisine_mess/features/settings/presentation/widgets/server_settings_dialog.dart';
 import 'package:ecuisine_mess/features/update/presentation/update_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/layout/animated_nav_icon.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/user_account_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -137,8 +138,14 @@ class _AppShellState extends State<AppShell> {
             destinations: [
               for (final dest in kRailDestinations)
                 NavigationRailDestination(
-                  icon: Icon(dest.icon),
-                  selectedIcon: Icon(dest.icon),
+                  icon: AnimatedNavIcon(
+                    icon: dest.icon,
+                    isSelected: false,
+                  ),
+                  selectedIcon: AnimatedNavIcon(
+                    icon: dest.selectedIcon ?? dest.icon,
+                    isSelected: true,
+                  ),
                   label: Text(dest.label),
                 ),
             ],

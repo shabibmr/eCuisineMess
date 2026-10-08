@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('nav destinations', () {
-    test('Organizations is omitted from the rail', () {
+    test('Organization is omitted from the rail', () {
       expect(
         kNavDestinations.any((d) => d.route == AppRoutes.organizations),
         isTrue,
@@ -15,7 +15,7 @@ void main() {
       );
     });
 
-    test('rail and branch indices skip Organizations', () {
+    test('rail and branch indices skip Organization', () {
       final orgBranch = kNavDestinations.indexWhere(
         (d) => d.route == AppRoutes.organizations,
       );
@@ -27,7 +27,7 @@ void main() {
       expect(branchIndexForRail(railIndexForBranch(menuBranch)!), menuBranch);
       expect(
         kRailDestinations.map((d) => d.label),
-        isNot(contains('Organizations')),
+        isNot(contains('Organization')),
       );
     });
   });
