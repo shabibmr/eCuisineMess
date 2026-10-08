@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ecuisine_mess/core/services/firebase_initializer.dart';
 import 'package:ecuisine_mess/core/di/injection.dart';
 import 'package:ecuisine_mess/features/auth/presentation/bloc/auth_bloc.dart';
 
@@ -12,6 +13,9 @@ class StartupCoordinator {
   StartupCoordinator._();
 
   static Future<void> start() async {
+    // Firebase is non-critical for local operation, but initialize it in the
+    // background so cloud-backed features can use the native Firestore client.
+    unawaited(FirebaseInitializer.initialize());
     sl<AuthBloc>().add(const AuthStarted());
   }
 }
