@@ -1,4 +1,8 @@
 import 'package:ecuisine_mess/features/meal_times/presentation/bloc/meal_time_settings_bloc.dart';
+import 'package:ecuisine_mess/shared/widgets/badges/app_status_badge.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_save_button.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_switch_tile.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_time_picker_field.dart';
 import 'package:flutter/material.dart';
 
 class MealTimeRow extends StatefulWidget {
@@ -70,19 +74,6 @@ class _MealTimeRowState extends State<MealTimeRow> {
     super.dispose();
   }
 
-  Future<void> _pickTime({
-    required String current,
-    required ValueChanged<String> onPicked,
-  }) async {
-    final initial =
-        MealTimeRow.parseTimeOfDay(current) ?? const TimeOfDay(hour: 7, minute: 0);
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: initial,
-    );
-    if (picked != null) onPicked(MealTimeRow.toApiTime(picked));
-  }
-
   @override
   Widget build(BuildContext context) {
     final row = widget.row;
@@ -116,18 +107,19 @@ class _MealTimeRowState extends State<MealTimeRow> {
                 if (row.dirty)
                   const Padding(
                     padding: EdgeInsets.only(right: 8),
-                    child: Chip(
-                      label: Text('Unsaved'),
-                      visualDensity: VisualDensity.compact,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
+                    child: AppStatusBadge.unsaved(compact: true),
                   ),
-                Switch(
-                  value: row.isActive,
-                  onChanged:
-                      enabled ? (v) => widget.onChanged(isActive: v) : null,
+                SizedBox(
+                  width: 140,
+                  child: AppSwitchTile(
+                    title: 'Active',
+                    value: row.isActive,
+                    enabled: enabled,
+                    onChanged: enabled
+                        ? (v) => widget.onChanged(isActive: v)
+                        : null,
+                  ),
                 ),
-                const Text('Active'),
               ],
             ),
             const SizedBox(height: 12),
@@ -148,33 +140,29 @@ class _MealTimeRowState extends State<MealTimeRow> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: enabled
-                        ? () => _pickTime(
-                              current: row.startTime,
-                              onPicked: (v) =>
-                                  widget.onChanged(startTime: v),
-                            )
-                        : null,
-                    child: Text('Start ${MealTimeRow.displayTime(row.startTime)}'),
+                  child: AppTimePickerField(
+                    label: 'Start',
+                    timeString: MealTimeRow.displayTime(row.startTime),
+                    enabled: enabled,
+                    onChanged: (time, _) =>
+                        widget.onChanged(startTime: MealTimeRow.toApiTime(time)),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: enabled
-                        ? () => _pickTime(
-                              current: row.endTime,
-                              onPicked: (v) => widget.onChanged(endTime: v),
-                            )
-                        : null,
-                    child: Text('End ${MealTimeRow.displayTime(row.endTime)}'),
+                  child: AppTimePickerField(
+                    label: 'End',
+                    timeString: MealTimeRow.displayTime(row.endTime),
+                    enabled: enabled,
+                    onChanged: (time, _) =>
+                        widget.onChanged(endTime: MealTimeRow.toApiTime(time)),
                   ),
                 ),
                 const SizedBox(width: 8),
-                FilledButton.tonal(
+                AppSaveButton(
+                  label: 'Save',
+                  icon: null,
                   onPressed: enabled && row.dirty ? widget.onSave : null,
-                  child: const Text('Save'),
                 ),
               ],
             ),

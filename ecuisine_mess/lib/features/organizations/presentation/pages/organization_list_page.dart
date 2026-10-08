@@ -3,7 +3,13 @@ import 'package:ecuisine_mess/core/utils/status.dart';
 import 'package:ecuisine_mess/features/organizations/domain/entities/organization.dart';
 import 'package:ecuisine_mess/features/organizations/domain/usecases/save_organization.dart';
 import 'package:ecuisine_mess/features/organizations/presentation/bloc/organization_list_bloc.dart';
-import 'package:ecuisine_mess/shared/widgets/layout/form_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/badges/app_status_badge.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_create_button.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_refresh_button.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_confirm_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_form_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_search_field.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_switch_tile.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/master_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -205,10 +211,9 @@ class _OrganizationListViewState extends State<_OrganizationListView> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  SwitchListTile(
-                    title: const Text('Active'),
+                  AppSwitchTile(
+                    title: 'Active',
                     value: isActive,
-                    contentPadding: EdgeInsets.zero,
                     onChanged: (v) => setLocal(() => isActive = v),
                   ),
                 ],
@@ -270,30 +275,15 @@ class _OrganizationListViewState extends State<_OrganizationListView> {
     BuildContext context,
     Organization org,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await AppConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Organization'),
-        content: Text(
-          'Are you sure you want to delete "${org.orgName}"?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+      title: 'Delete Organization',
+      message: 'Are you sure you want to delete "${org.orgName}"?',
+      confirmLabel: 'Delete',
+      isDestructive: true,
     );
 
-    if (confirmed == true && context.mounted) {
+    if (confirmed && context.mounted) {
       context
           .read<OrganizationListBloc>()
           .add(OrganizationDeleteRequested(org.id));
@@ -327,38 +317,30 @@ class _OrganizationListViewState extends State<_OrganizationListView> {
           title: 'Organizations',
           subtitle: 'Manage client companies, TRN, and report print headers',
           actions: [
-            SizedBox(
+            AppSearchField(
+              controller: _searchCtrl,
               width: 240,
-              height: 40,
-              child: TextField(
-                controller: _searchCtrl,
-                decoration: InputDecoration(
-                  hintText: 'Search org, TRN...',
-                  prefixIcon: const Icon(Icons.search, size: 20),
-                  contentPadding: EdgeInsets.zero,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                onSubmitted: (query) {
-                  context.read<OrganizationListBloc>().add(
-                        OrganizationListStarted(search: query.trim()),
-                      );
-                },
-              ),
+              hintText: 'Search org, TRN...',
+              onSubmitted: (query) {
+                context.read<OrganizationListBloc>().add(
+                      OrganizationListStarted(search: query.trim()),
+                    );
+              },
+              onCleared: () {
+                context.read<OrganizationListBloc>().add(
+                      const OrganizationListStarted(),
+                    );
+              },
             ),
             const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              tooltip: 'Refresh',
+            AppRefreshButton(
               onPressed: () => context
                   .read<OrganizationListBloc>()
                   .add(const OrganizationListRefreshed()),
             ),
             const SizedBox(width: 8),
-            FilledButton.icon(
-              icon: const Icon(Icons.add),
-              label: const Text('Add Organization'),
+            AppCreateButton(
+              label: 'Add Organization',
               onPressed: () => _showOrgDialog(context),
             ),
           ],
@@ -455,28 +437,7 @@ class _OrganizationListViewState extends State<_OrganizationListView> {
                                   ),
                                 ),
                                 DataCell(
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: org.isActive
-                                          ? Colors.green.withValues(alpha: 0.12)
-                                          : Colors.grey.withValues(alpha: 0.12),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      org.isActive ? 'Active' : 'Inactive',
-                                      style: TextStyle(
-                                        color: org.isActive
-                                            ? Colors.green[800]
-                                            : Colors.grey[700],
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
+                                  AppStatusBadge.fromBool(org.isActive),
                                 ),
                                 DataCell(
                                   Row(

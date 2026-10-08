@@ -9,7 +9,9 @@ import 'package:ecuisine_mess/features/daily_menu/presentation/widgets/menu_item
 import 'package:ecuisine_mess/features/daily_menu/presentation/widgets/menu_meal_tabs.dart';
 import 'package:ecuisine_mess/features/daily_menu/presentation/widgets/menu_status_banners.dart';
 import 'package:ecuisine_mess/features/members/domain/entities/cuisine_option.dart';
-import 'package:ecuisine_mess/shared/widgets/feedback/error_banner.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_confirm_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/feedback/app_alert_banner.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_date_picker_field.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/master_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,66 +50,38 @@ class _DailyMenuEditorView extends StatelessWidget {
 
   Future<void> _confirmPendingDate(BuildContext context) async {
     final bloc = context.read<DailyMenuEditorBloc>();
-    final result = await showDialog<String>(
+    final saveFirst = await AppConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Unsaved changes'),
-        content: const Text(
+      title: 'Unsaved changes',
+      message:
           'This date has unsaved menu edits. Save before changing the date?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, 'cancel'),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, 'discard'),
-            child: const Text('Discard'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, 'save'),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+      confirmLabel: 'Save',
+      cancelLabel: 'Don\'t save',
     );
     if (!context.mounted) return;
-    switch (result) {
-      case 'save':
-        bloc.add(const DailyMenuPendingDateResolved(save: true));
-      case 'discard':
-        bloc.add(const DailyMenuPendingDateResolved(save: false));
-      default:
-        bloc.add(const DailyMenuPendingDateCancelled());
+    if (saveFirst) {
+      bloc.add(const DailyMenuPendingDateResolved(save: true));
+      return;
     }
-  }
 
-  Future<void> _pickDate(BuildContext context, String current) async {
-    final parts = current.split('-');
-    DateTime initial = DateTime.now();
-    if (parts.length == 3) {
-      final y = int.tryParse(parts[0]);
-      final m = int.tryParse(parts[1]);
-      final d = int.tryParse(parts[2]);
-      if (y != null && m != null && d != null) {
-        initial = DateTime(y, m, d);
-      }
-    }
-    final picked = await showDatePicker(
+    final discard = await AppConfirmDialog.show(
       context: context,
-      initialDate: initial,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2040),
+      title: 'Discard changes?',
+      message: 'Unsaved menu edits for this date will be lost.',
+      confirmLabel: 'Discard',
+      cancelLabel: 'Stay',
+      isDestructive: true,
     );
-    if (picked == null || !context.mounted) return;
-    context.read<DailyMenuEditorBloc>().add(
-          DailyMenuDateChanged(DailyMenuEditorBloc.formatDate(picked)),
-        );
+    if (!context.mounted) return;
+    if (discard) {
+      bloc.add(const DailyMenuPendingDateResolved(save: false));
+    } else {
+      bloc.add(const DailyMenuPendingDateCancelled());
+    }
   }
 
   Future<void> _copyFromDate(BuildContext context, String currentDate) async {
-    final formKey = GlobalKey<FormState>();
-    final dateCtrl = TextEditingController();
+    DateTime? selectedDate;
     var overwrite = false;
 
     final confirmed = await showDialog<bool>(
@@ -117,55 +91,29 @@ class _DailyMenuEditorView extends StatelessWidget {
           builder: (ctx, setLocal) {
             return AlertDialog(
               title: const Text('Copy From Date'),
-              content: Form(
-                key: formKey,
-                child: SizedBox(
-                  width: 360,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextFormField(
-                        controller: dateCtrl,
-                        decoration: InputDecoration(
-                          labelText: 'Source date (YYYY-MM-DD)',
-                          border: const OutlineInputBorder(),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.calendar_today, size: 18),
-                            onPressed: () async {
-                              final picked = await showDatePicker(
-                                context: ctx,
-                                initialDate: DateTime.now()
-                                    .subtract(const Duration(days: 1)),
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime(2040),
-                              );
-                              if (picked == null) return;
-                              dateCtrl.text =
-                                  DailyMenuEditorBloc.formatDate(picked);
-                            },
-                          ),
-                        ),
-                        validator: (v) {
-                          final value = v?.trim() ?? '';
-                          if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value)) {
-                            return 'Use YYYY-MM-DD';
-                          }
-                          if (value == currentDate) {
-                            return 'Choose a different date';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      CheckboxListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text('Overwrite existing unlocked slots'),
-                        value: overwrite,
-                        onChanged: (v) =>
-                            setLocal(() => overwrite = v ?? false),
-                      ),
-                    ],
-                  ),
+              content: SizedBox(
+                width: 360,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppDatePickerField(
+                      label: 'Source date',
+                      value: selectedDate,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2040),
+                      onChanged: (picked) =>
+                          setLocal(() => selectedDate = picked),
+                      onCleared: () => setLocal(() => selectedDate = null),
+                    ),
+                    const SizedBox(height: 12),
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Overwrite existing unlocked slots'),
+                      value: overwrite,
+                      onChanged: (v) =>
+                          setLocal(() => overwrite = v ?? false),
+                    ),
+                  ],
                 ),
               ),
               actions: [
@@ -175,7 +123,10 @@ class _DailyMenuEditorView extends StatelessWidget {
                 ),
                 FilledButton(
                   onPressed: () {
-                    if (formKey.currentState?.validate() != true) return;
+                    if (selectedDate == null) return;
+                    final formatted =
+                        DailyMenuEditorBloc.formatDate(selectedDate!);
+                    if (formatted == currentDate) return;
                     Navigator.pop(ctx, true);
                   },
                   child: const Text('Copy'),
@@ -187,9 +138,15 @@ class _DailyMenuEditorView extends StatelessWidget {
       },
     );
 
-    final fromDate = dateCtrl.text.trim();
-    dateCtrl.dispose();
-    if (confirmed != true || !context.mounted) return;
+    final picked = selectedDate;
+    if (confirmed != true || picked == null || !context.mounted) return;
+    final fromDate = DailyMenuEditorBloc.formatDate(picked);
+    if (fromDate == currentDate) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Choose a different date')),
+      );
+      return;
+    }
     context.read<DailyMenuEditorBloc>().add(
           DailyMenuCopyFromDateRequested(
             fromDate: fromDate,
@@ -366,6 +323,7 @@ class _DailyMenuEditorView extends StatelessWidget {
                   readOnly: state.isPastDate,
                   canSave: canSave,
                   dirty: state.dirty,
+                  isSaving: state.status == Status.submitting,
                   onPrevDay: () => context
                       .read<DailyMenuEditorBloc>()
                       .add(const DailyMenuDateShifted(-1)),
@@ -375,7 +333,13 @@ class _DailyMenuEditorView extends StatelessWidget {
                   onJumpToday: () => context
                       .read<DailyMenuEditorBloc>()
                       .add(const DailyMenuJumpToday()),
-                  onPickDate: () => _pickDate(context, state.menuDate),
+                  onDateChanged: (picked) => context
+                      .read<DailyMenuEditorBloc>()
+                      .add(
+                        DailyMenuDateChanged(
+                          DailyMenuEditorBloc.formatDate(picked),
+                        ),
+                      ),
                   onCopyFromDate: () =>
                       _copyFromDate(context, state.menuDate),
                   onHistory: () => context.goNamed(AppRoutes.menuHistory.name),
@@ -392,16 +356,20 @@ class _DailyMenuEditorView extends StatelessWidget {
                 ],
                 if (softError != null) ...[
                   const SizedBox(height: 10),
-                  ErrorBanner(
+                  AppAlertBanner.error(
                     message: softError,
-                    onRetry: state.conflictCode == null
-                        ? () => context.read<DailyMenuEditorBloc>().add(
-                              DailyMenuEditorStarted(
-                                menuDate: state.menuDate,
-                                cuisineId: state.selectedCuisineId,
-                                mealType: state.selectedMealType,
-                              ),
-                            )
+                    action: state.conflictCode == null
+                        ? TextButton(
+                            onPressed: () =>
+                                context.read<DailyMenuEditorBloc>().add(
+                                      DailyMenuEditorStarted(
+                                        menuDate: state.menuDate,
+                                        cuisineId: state.selectedCuisineId,
+                                        mealType: state.selectedMealType,
+                                      ),
+                                    ),
+                            child: const Text('Retry'),
+                          )
                         : null,
                   ),
                 ],

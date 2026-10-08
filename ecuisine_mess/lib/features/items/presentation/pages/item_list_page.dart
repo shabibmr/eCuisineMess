@@ -5,8 +5,14 @@ import 'package:ecuisine_mess/features/items/domain/entities/item.dart';
 import 'package:ecuisine_mess/features/items/domain/entities/uom.dart';
 import 'package:ecuisine_mess/features/items/domain/usecases/save_item.dart';
 import 'package:ecuisine_mess/features/items/presentation/bloc/item_list_bloc.dart';
-import 'package:ecuisine_mess/shared/widgets/layout/form_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/badges/app_status_badge.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_create_button.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_refresh_button.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_form_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_dropdown.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_switch_tile.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/master_page.dart';
+import 'package:ecuisine_mess/shared/widgets/tables/app_separated_list_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -69,18 +75,15 @@ class _ItemListView extends StatelessWidget {
                     (v == null || v.trim().isEmpty) ? 'Required' : null,
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
+              AppDropdown<String>(
                 key: ValueKey('add-cat-$categoryId'),
-                initialValue: categoryId,
-                decoration: const InputDecoration(
-                  labelText: 'Category',
-                  border: OutlineInputBorder(),
-                ),
+                value: categoryId,
+                label: 'Category',
                 items: activeCategories
                     .map(
-                      (c) => DropdownMenuItem(
+                      (c) => AppDropdownItem(
                         value: c.id,
-                        child: Text(c.name),
+                        label: c.name,
                       ),
                     )
                     .toList(),
@@ -88,18 +91,15 @@ class _ItemListView extends StatelessWidget {
                 validator: (v) => v == null ? 'Required' : null,
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
+              AppDropdown<String>(
                 key: ValueKey('add-uom-$uomId'),
-                initialValue: uomId,
-                decoration: const InputDecoration(
-                  labelText: 'UOM',
-                  border: OutlineInputBorder(),
-                ),
+                value: uomId,
+                label: 'UOM',
                 items: uoms
                     .map(
-                      (u) => DropdownMenuItem(
+                      (u) => AppDropdownItem(
                         value: u.id,
-                        child: Text(u.name),
+                        label: u.name,
                       ),
                     )
                     .toList(),
@@ -185,18 +185,15 @@ class _ItemListView extends StatelessWidget {
                     (v == null || v.trim().isEmpty) ? 'Required' : null,
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
+              AppDropdown<String>(
                 key: ValueKey('edit-cat-$categoryId'),
-                initialValue: categoryId,
-                decoration: const InputDecoration(
-                  labelText: 'Category',
-                  border: OutlineInputBorder(),
-                ),
+                value: categoryId,
+                label: 'Category',
                 items: categoryChoices
                     .map(
-                      (c) => DropdownMenuItem(
+                      (c) => AppDropdownItem(
                         value: c.id,
-                        child: Text(c.name),
+                        label: c.name,
                       ),
                     )
                     .toList(),
@@ -204,18 +201,15 @@ class _ItemListView extends StatelessWidget {
                 validator: (v) => v == null ? 'Required' : null,
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
+              AppDropdown<String>(
                 key: ValueKey('edit-uom-$uomId'),
-                initialValue: uomId,
-                decoration: const InputDecoration(
-                  labelText: 'UOM',
-                  border: OutlineInputBorder(),
-                ),
+                value: uomId,
+                label: 'UOM',
                 items: uoms
                     .map(
-                      (u) => DropdownMenuItem(
+                      (u) => AppDropdownItem(
                         value: u.id,
-                        child: Text(u.name),
+                        label: u.name,
                       ),
                     )
                     .toList(),
@@ -223,9 +217,8 @@ class _ItemListView extends StatelessWidget {
                 validator: (v) => v == null ? 'Required' : null,
               ),
               const SizedBox(height: 8),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Active'),
+              AppSwitchTile(
+                title: 'Active',
                 value: isActive,
                 onChanged: (v) => setLocal(() => isActive = v),
               ),
@@ -294,54 +287,41 @@ class _ItemListView extends StatelessWidget {
           isEmpty: !loading && !showError && state.items.isEmpty,
           emptyMessage: 'No items yet',
           actions: [
-            IconButton(
+            AppRefreshButton(
               onPressed: () => context
                   .read<ItemListBloc>()
                   .add(const ItemListRefreshed()),
-              icon: const Icon(Icons.refresh),
             ),
             const SizedBox(width: 8),
-            FilledButton.icon(
+            AppCreateButton(
+              label: 'Add Item',
               onPressed: () => _showAddDialog(context),
-              icon: const Icon(Icons.add),
-              label: const Text('Add Item'),
             ),
           ],
-          child: Card(
-            child: ListView.separated(
-              itemCount: state.items.length,
-              separatorBuilder: (context, index) => const Divider(height: 1),
-              itemBuilder: (_, i) {
-                final item = state.items[i];
-                return InkWell(
-                  onDoubleTap: () => _showEditDialog(context, item),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      child: Text(
-                        item.name.isNotEmpty
-                            ? item.name[0].toUpperCase()
-                            : '?',
-                      ),
+          child: AppSeparatedListCard(
+            itemCount: state.items.length,
+            itemBuilder: (_, i) {
+              final item = state.items[i];
+              return InkWell(
+                onDoubleTap: () => _showEditDialog(context, item),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    child: Text(
+                      item.name.isNotEmpty
+                          ? item.name[0].toUpperCase()
+                          : '?',
                     ),
-                    title: Text(item.name),
-                    subtitle: Text(
-                      '${item.categoryName} · ${item.uomName}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: item.isActive
-                        ? const Chip(
-                            label: Text('Active'),
-                            visualDensity: VisualDensity.compact,
-                          )
-                        : const Chip(
-                            label: Text('Inactive'),
-                            visualDensity: VisualDensity.compact,
-                          ),
                   ),
-                );
-              },
-            ),
+                  title: Text(item.name),
+                  subtitle: Text(
+                    '${item.categoryName} · ${item.uomName}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  trailing: AppStatusBadge.fromBool(item.isActive),
+                ),
+              );
+            },
           ),
         );
       },

@@ -1,5 +1,6 @@
 import 'package:ecuisine_mess/features/dashboard/domain/entities/dashboard_summary.dart';
 import 'package:ecuisine_mess/features/dashboard/presentation/utils/meal_style.dart';
+import 'package:ecuisine_mess/shared/widgets/tables/app_kpi_card.dart';
 import 'package:flutter/material.dart';
 
 /// Total plus per-meal served counts for today.
@@ -11,7 +12,7 @@ class ServedKpiRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tiles = [
-      _KpiTile(
+      AppKpiCard(
         label: 'Total served',
         value: served.total,
         caption: 'Tokens issued today',
@@ -36,75 +37,10 @@ class ServedKpiRow extends StatelessWidget {
     );
   }
 
-  Widget _mealTile(MealStyle style, int value) => _KpiTile(
-    label: style.label,
-    value: value,
-    icon: style.icon,
-    accent: style.color,
-  );
-}
-
-class _KpiTile extends StatelessWidget {
-  const _KpiTile({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.accent,
-    this.caption,
-  });
-
-  final String label;
-  final int value;
-  final IconData icon;
-  final Color accent;
-  final String? caption;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Card(
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          border: Border(left: BorderSide(color: accent, width: 3)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                Icon(icon, size: 16, color: accent),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '$value',
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                fontFeatures: [FontFeature.tabularFigures()],
-              ),
-            ),
-            if (caption != null)
-              Text(
-                caption!,
-                style: TextStyle(fontSize: 11, color: scheme.onSurfaceVariant),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _mealTile(MealStyle style, int value) => AppKpiCard(
+        label: style.label,
+        value: value,
+        icon: style.icon,
+        accent: style.color,
+      );
 }

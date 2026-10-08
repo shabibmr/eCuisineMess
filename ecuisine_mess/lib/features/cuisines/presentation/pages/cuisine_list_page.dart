@@ -3,6 +3,11 @@ import 'package:ecuisine_mess/core/utils/status.dart';
 import 'package:ecuisine_mess/features/cuisines/domain/entities/cuisine.dart';
 import 'package:ecuisine_mess/features/cuisines/presentation/bloc/cuisine_list_bloc.dart';
 import 'package:ecuisine_mess/features/cuisines/presentation/pages/cuisine_editor_page.dart';
+import 'package:ecuisine_mess/shared/widgets/badges/app_status_badge.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_create_button.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_refresh_button.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_confirm_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_search_field.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/master_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,29 +52,18 @@ class _CuisineListViewState extends State<_CuisineListView> {
   }
 
   Future<void> _confirmDelete(BuildContext context, Cuisine cuisine) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await AppConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Cuisine?'),
-        content: Text(
+      title: 'Delete Cuisine?',
+      message:
           'Are you sure you want to delete "${cuisine.cuisineName}"?\n\n'
-          'If this cuisine is linked to members or bills, it will be marked as inactive instead of deleted.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+          'If this cuisine is linked to members or bills, it will be marked as '
+          'inactive instead of deleted.',
+      confirmLabel: 'Delete',
+      isDestructive: true,
     );
 
-    if (confirmed == true && context.mounted) {
+    if (confirmed && context.mounted) {
       context.read<CuisineListBloc>().add(CuisineDeleteRequested(cuisine.id));
     }
   }
@@ -111,31 +105,13 @@ class _CuisineListViewState extends State<_CuisineListView> {
               ? 'No cuisines configured yet.'
               : 'No cuisines matching filters.',
           actions: [
-            SizedBox(
+            AppSearchField(
+              controller: _searchCtrl,
+              hintText: 'Search cuisines...',
               width: 220,
               height: 38,
-              child: TextField(
-                controller: _searchCtrl,
-                decoration: InputDecoration(
-                  isDense: true,
-                  hintText: 'Search cuisines...',
-                  prefixIcon: const Icon(Icons.search, size: 18),
-                  suffixIcon: _searchCtrl.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: 16),
-                          onPressed: () {
-                            _searchCtrl.clear();
-                            bloc.add(const CuisineSearchChanged(''));
-                          },
-                        )
-                      : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-                ),
-                onChanged: (val) => bloc.add(CuisineSearchChanged(val)),
-              ),
+              onChanged: (val) => bloc.add(CuisineSearchChanged(val)),
+              onCleared: () => bloc.add(const CuisineSearchChanged('')),
             ),
             const SizedBox(width: 8),
             FilterChip(
@@ -144,16 +120,13 @@ class _CuisineListViewState extends State<_CuisineListView> {
               onSelected: (val) => bloc.add(CuisineFilterInactiveToggled(val)),
             ),
             const SizedBox(width: 8),
-            IconButton(
-              tooltip: 'Refresh',
-              icon: const Icon(Icons.refresh),
+            AppRefreshButton(
               onPressed: () => bloc.add(const CuisineListRefreshed()),
             ),
             const SizedBox(width: 8),
-            FilledButton.icon(
+            AppCreateButton(
+              label: 'New Cuisine',
               onPressed: () => _openEditor(context),
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('New Cuisine'),
             ),
           ],
           child: ListView.separated(
@@ -194,32 +167,9 @@ class _CuisineListViewState extends State<_CuisineListView> {
                                       ),
                                     ),
                                     const SizedBox(width: 10),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: c.isActive
-                                            ? Colors.green.shade50
-                                            : Colors.grey.shade200,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: c.isActive
-                                              ? Colors.green.shade300
-                                              : Colors.grey.shade400,
-                                        ),
-                                      ),
-                                      child: Text(
-                                        c.isActive ? 'Active' : 'Inactive',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          color: c.isActive
-                                              ? Colors.green.shade800
-                                              : Colors.grey.shade700,
-                                        ),
-                                      ),
+                                    AppStatusBadge.fromBool(
+                                      c.isActive,
+                                      compact: true,
                                     ),
                                   ],
                                 ),
@@ -260,10 +210,15 @@ class _CuisineListViewState extends State<_CuisineListView> {
                               IconButton(
                                 icon: const Icon(Icons.edit_outlined, size: 20),
                                 tooltip: 'Edit & Map Items',
-                                onPressed: () => _openEditor(context, cuisineId: c.id),
+                                onPressed: () =>
+                                    _openEditor(context, cuisineId: c.id),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  size: 20,
+                                  color: Colors.red,
+                                ),
                                 tooltip: 'Delete Cuisine',
                                 onPressed: () => _confirmDelete(context, c),
                               ),

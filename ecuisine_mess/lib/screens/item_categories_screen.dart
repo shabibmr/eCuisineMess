@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ecuisine_mess/models/item_category.dart';
 import 'package:ecuisine_mess/services/api_service.dart';
-import 'package:ecuisine_mess/widgets/app_form_dialog.dart';
-import 'package:ecuisine_mess/widgets/master_page.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_form_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/layout/master_page.dart';
 
 class ItemCategoriesScreen extends StatefulWidget {
   const ItemCategoriesScreen({super.key});

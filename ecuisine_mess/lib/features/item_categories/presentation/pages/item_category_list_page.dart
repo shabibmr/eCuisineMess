@@ -3,8 +3,13 @@ import 'package:ecuisine_mess/core/utils/status.dart';
 import 'package:ecuisine_mess/features/item_categories/domain/entities/item_category.dart';
 import 'package:ecuisine_mess/features/item_categories/domain/usecases/save_item_category.dart';
 import 'package:ecuisine_mess/features/item_categories/presentation/bloc/item_category_list_bloc.dart';
-import 'package:ecuisine_mess/shared/widgets/layout/form_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/badges/app_status_badge.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_create_button.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_refresh_button.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_form_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_switch_tile.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/master_page.dart';
+import 'package:ecuisine_mess/shared/widgets/tables/app_separated_list_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -106,9 +111,8 @@ class _ItemCategoryListView extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 8),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Active'),
+              AppSwitchTile(
+                title: 'Active',
                 value: isActive,
                 onChanged: (v) => setLocal(() => isActive = v),
               ),
@@ -177,48 +181,35 @@ class _ItemCategoryListView extends StatelessWidget {
           isEmpty: !loading && !showError && state.categories.isEmpty,
           emptyMessage: 'No categories yet',
           actions: [
-            IconButton(
+            AppRefreshButton(
               onPressed: () => context
                   .read<ItemCategoryListBloc>()
                   .add(const ItemCategoryListRefreshed()),
-              icon: const Icon(Icons.refresh),
             ),
             const SizedBox(width: 8),
-            FilledButton.icon(
+            AppCreateButton(
+              label: 'Add Category',
               onPressed: () => _showAddDialog(context),
-              icon: const Icon(Icons.add),
-              label: const Text('Add Category'),
             ),
           ],
-          child: Card(
-            child: ListView.separated(
-              itemCount: state.categories.length,
-              separatorBuilder: (context, index) => const Divider(height: 1),
-              itemBuilder: (_, i) {
-                final c = state.categories[i];
-                return InkWell(
-                  onDoubleTap: () => _showEditDialog(context, c),
-                  child: ListTile(
-                    leading: CircleAvatar(child: Text('${c.sortOrder}')),
-                    title: Text(c.name),
-                    subtitle: Text(
-                      c.id,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: c.isActive
-                        ? const Chip(
-                            label: Text('Active'),
-                            visualDensity: VisualDensity.compact,
-                          )
-                        : const Chip(
-                            label: Text('Inactive'),
-                            visualDensity: VisualDensity.compact,
-                          ),
+          child: AppSeparatedListCard(
+            itemCount: state.categories.length,
+            itemBuilder: (_, i) {
+              final c = state.categories[i];
+              return InkWell(
+                onDoubleTap: () => _showEditDialog(context, c),
+                child: ListTile(
+                  leading: CircleAvatar(child: Text('${c.sortOrder}')),
+                  title: Text(c.name),
+                  subtitle: Text(
+                    c.id,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                );
-              },
-            ),
+                  trailing: AppStatusBadge.fromBool(c.isActive),
+                ),
+              );
+            },
           ),
         );
       },

@@ -1,6 +1,8 @@
 import 'package:ecuisine_mess/core/config/constants.dart';
 import 'package:ecuisine_mess/features/email/domain/entities/smtp_settings.dart';
 import 'package:ecuisine_mess/features/email/presentation/cubit/smtp_settings_cubit.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_save_button.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_password_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -36,7 +38,6 @@ class _SmtpSettingsDialogState extends State<SmtpSettingsDialog> {
 
   bool _useTls = true;
   bool _useSsl = false;
-  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -219,27 +220,9 @@ class _SmtpSettingsDialogState extends State<SmtpSettingsDialog> {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: TextFormField(
+                          child: AppPasswordField(
                             controller: _passwordController,
-                            obscureText: _obscurePassword,
-                            decoration: InputDecoration(
-                              labelText: 'Password / App Password',
-                              border: const OutlineInputBorder(),
-                              isDense: true,
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  size: 18,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
-                              ),
-                            ),
+                            label: 'Password / App Password',
                           ),
                         ),
                       ],
@@ -384,19 +367,12 @@ class _SmtpSettingsDialogState extends State<SmtpSettingsDialog> {
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancel'),
             ),
-            ElevatedButton.icon(
-              icon: isSaving
-                  ? const SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.save, size: 16),
-              label: const Text('Save to Firestore'),
-              onPressed: isSaving ? null : _save,
+            AppSaveButton(
+              label: 'Save to Firestore',
+              loadingLabel: 'Saving...',
+              isLoading: isSaving,
+              icon: Icons.save,
+              onPressed: _save,
             ),
           ],
         );

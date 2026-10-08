@@ -11,12 +11,17 @@ class DashboardHeader extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final active = currentMealName != null && currentMealName!.isNotEmpty;
 
-    return Row(
+    return Wrap(
+      spacing: 12,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
           decoration: BoxDecoration(
-            color: active ? scheme.tertiaryContainer : scheme.surfaceContainerHighest,
+            color: active
+                ? scheme.tertiaryContainer
+                : scheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -29,23 +34,23 @@ class DashboardHeader extends StatelessWidget {
               ),
               const SizedBox(width: 7),
               Text(
-                active ? currentMealName! : 'Service closed',
+                active ? 'Current service: $currentMealName' : 'Service closed',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: active ? scheme.onTertiaryContainer : scheme.onSurfaceVariant,
+                  color: active
+                      ? scheme.onTertiaryContainer
+                      : scheme.onSurfaceVariant,
                 ),
               ),
             ],
           ),
         ),
-        const Spacer(),
         FilledButton.icon(
           onPressed: () => context.go(AppRoutes.counter.path),
           icon: const Icon(Icons.point_of_sale_rounded, size: 18),
           label: const Text('Open Counter'),
         ),
-        const SizedBox(width: 8),
         OutlinedButton.icon(
           onPressed: () => context.go(AppRoutes.menu.path),
           icon: const Icon(Icons.menu_book_outlined, size: 18),

@@ -6,7 +6,14 @@ import 'package:ecuisine_mess/features/members/domain/entities/member.dart';
 import 'package:ecuisine_mess/features/members/domain/usecases/check_rfid_available.dart';
 import 'package:ecuisine_mess/features/members/domain/usecases/save_member.dart';
 import 'package:ecuisine_mess/features/members/presentation/bloc/member_list_bloc.dart';
+import 'package:ecuisine_mess/shared/widgets/badges/app_status_badge.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_create_button.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_refresh_button.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_date_picker_field.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_dropdown.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_search_field.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/master_page.dart';
+import 'package:ecuisine_mess/shared/widgets/tables/app_separated_list_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -35,21 +42,6 @@ class _MemberListView extends StatelessWidget {
   static DateTime? _parseDate(String value) {
     if (value.isEmpty) return null;
     return DateTime.tryParse(value);
-  }
-
-  Future<void> _pickDate(
-    BuildContext context, {
-    required String current,
-    required ValueChanged<String> onPicked,
-  }) async {
-    final initial = _parseDate(current) ?? DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initial,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2040),
-    );
-    if (picked != null) onPicked(_fmtDate(picked));
   }
 
   Future<void> _showMemberDialog(
@@ -228,83 +220,60 @@ class _MemberListView extends StatelessWidget {
                           keyboardType: TextInputType.emailAddress,
                         ),
                         const SizedBox(height: 12),
-                        DropdownButtonFormField<String?>(
+                        AppDropdown<String?>(
                           key: ValueKey('cuisine-$cuisineId'),
-                          initialValue: cuisineId,
-                          decoration: const InputDecoration(
-                            labelText: 'Cuisine',
-                            border: OutlineInputBorder(),
-                          ),
-                          items: [
-                            const DropdownMenuItem<String?>(
-                              value: null,
-                              child: Text('— None —'),
-                            ),
-                            ...cuisineChoices.map(
-                              (c) => DropdownMenuItem<String?>(
-                                value: c.id,
-                                child: Text(c.name),
-                              ),
-                            ),
-                          ],
+                          value: cuisineId,
+                          label: 'Cuisine',
+                          placeholderLabel: '— None —',
+                          items: cuisineChoices
+                              .map(
+                                (c) => AppDropdownItem<String?>(
+                                  value: c.id,
+                                  label: c.name,
+                                ),
+                              )
+                              .toList(),
                           onChanged: (v) => setLocal(() => cuisineId = v),
                         ),
                         const SizedBox(height: 12),
                         Row(
                           children: [
                             Expanded(
-                              child: InkWell(
-                                onTap: () => _pickDate(
-                                  ctx,
-                                  current: validityStart,
-                                  onPicked: (v) =>
-                                      setLocal(() => validityStart = v),
-                                ),
-                                child: InputDecorator(
-                                  decoration: const InputDecoration(
-                                    labelText: 'Validity start',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  child: Text(validityStart),
-                                ),
+                              child: AppDatePickerField(
+                                label: 'Validity start',
+                                value: _parseDate(validityStart),
+                                onChanged: (v) =>
+                                    setLocal(() => validityStart = _fmtDate(v)),
+                                firstDate: DateTime(2020),
+                                lastDate: DateTime(2040),
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: InkWell(
-                                onTap: () => _pickDate(
-                                  ctx,
-                                  current: validityEnd,
-                                  onPicked: (v) =>
-                                      setLocal(() => validityEnd = v),
-                                ),
-                                child: InputDecorator(
-                                  decoration: const InputDecoration(
-                                    labelText: 'Validity end',
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  child: Text(validityEnd),
-                                ),
+                              child: AppDatePickerField(
+                                label: 'Validity end',
+                                value: _parseDate(validityEnd),
+                                onChanged: (v) =>
+                                    setLocal(() => validityEnd = _fmtDate(v)),
+                                firstDate: DateTime(2020),
+                                lastDate: DateTime(2040),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
+                        AppDropdown<String>(
                           key: ValueKey('status-$status'),
-                          initialValue: status,
-                          decoration: const InputDecoration(
-                            labelText: 'Status',
-                            border: OutlineInputBorder(),
-                          ),
+                          value: status,
+                          label: 'Status',
                           items: const [
-                            DropdownMenuItem(
+                            AppDropdownItem(
                               value: 'ACTIVE',
-                              child: Text('ACTIVE'),
+                              label: 'ACTIVE',
                             ),
-                            DropdownMenuItem(
+                            AppDropdownItem(
                               value: 'SUSPENDED',
-                              child: Text('SUSPENDED'),
+                              label: 'SUSPENDED',
                             ),
                           ],
                           onChanged: (v) {
@@ -420,32 +389,23 @@ class _MemberListView extends StatelessWidget {
           isEmpty: !loading && !showError && state.members.isEmpty,
           emptyMessage: 'No members found',
           actions: [
-            IconButton(
+            AppRefreshButton(
               onPressed: () => context
                   .read<MemberListBloc>()
                   .add(const MemberListRefreshed()),
-              icon: const Icon(Icons.refresh),
             ),
             const SizedBox(width: 8),
-            FilledButton.icon(
+            AppCreateButton(
+              label: 'Add Member',
               onPressed: () => _showMemberDialog(context),
-              icon: const Icon(Icons.add),
-              label: const Text('Add Member'),
             ),
           ],
           toolbar: Row(
             children: [
               Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search),
-                    hintText: 'Search by name, RFID, or phone…',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                  ),
+                child: AppSearchField(
+                  hintText: 'Search by name, RFID, or phone…',
+                  initialValue: state.search,
                   onChanged: (val) => context
                       .read<MemberListBloc>()
                       .add(MemberListSearchChanged(val)),
@@ -454,30 +414,14 @@ class _MemberListView extends StatelessWidget {
               const SizedBox(width: 12),
               SizedBox(
                 width: 160,
-                child: DropdownButtonFormField<String?>(
-                  initialValue: state.statusFilter,
-                  decoration: const InputDecoration(
-                    labelText: 'Status',
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                  ),
+                child: AppDropdown<String?>(
+                  value: state.statusFilter,
+                  label: 'Status',
+                  placeholderLabel: 'All',
                   items: const [
-                    DropdownMenuItem<String?>(
-                      value: null,
-                      child: Text('All'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'ACTIVE',
-                      child: Text('ACTIVE'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'SUSPENDED',
-                      child: Text('SUSPENDED'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'EXPIRED',
-                      child: Text('EXPIRED'),
-                    ),
+                    AppDropdownItem(value: 'ACTIVE', label: 'ACTIVE'),
+                    AppDropdownItem(value: 'SUSPENDED', label: 'SUSPENDED'),
+                    AppDropdownItem(value: 'EXPIRED', label: 'EXPIRED'),
                   ],
                   onChanged: (v) => context
                       .read<MemberListBloc>()
@@ -486,65 +430,76 @@ class _MemberListView extends StatelessWidget {
               ),
             ],
           ),
-          child: Card(
-            child: ListView.separated(
-              itemCount: state.members.length,
-              separatorBuilder: (_, _) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final m = state.members[index];
-                final isExpired = m.isExpired;
-                final highlight = isExpired || m.isExpiringSoon;
-                return InkWell(
-                  onDoubleTap: () =>
-                      _showMemberDialog(context, member: m),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: isExpired
-                          ? Colors.red.shade100
-                          : Colors.blue.shade100,
-                      child: Icon(
-                        Icons.credit_card,
-                        color: isExpired
-                            ? Colors.red.shade800
-                            : Colors.blue.shade800,
-                      ),
-                    ),
-                    title: Text(
-                      m.name,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      'RFID: ${m.rfidTag} • Phone: ${m.phone ?? 'N/A'}',
-                    ),
-                    trailing: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          m.cuisineName ?? 'No Cuisine Assigned',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                          ),
-                        ),
-                        Text(
-                          isExpired
-                              ? 'EXPIRED'
-                              : '${m.daysLeft} days remaining',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: highlight
-                                ? Colors.red
-                                : Colors.green.shade700,
-                          ),
-                        ),
-                      ],
+          child: AppSeparatedListCard(
+            itemCount: state.members.length,
+            itemBuilder: (context, index) {
+              final m = state.members[index];
+              final isExpired = m.isExpired;
+              final highlight = isExpired || m.isExpiringSoon;
+              return InkWell(
+                onDoubleTap: () =>
+                    _showMemberDialog(context, member: m),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: isExpired
+                        ? Colors.red.shade100
+                        : Colors.blue.shade100,
+                    child: Icon(
+                      Icons.credit_card,
+                      color: isExpired
+                          ? Colors.red.shade800
+                          : Colors.blue.shade800,
                     ),
                   ),
-                );
-              },
-            ),
+                  title: Text(
+                    m.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(
+                    'RFID: ${m.rfidTag} • Phone: ${m.phone ?? 'N/A'}',
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            m.cuisineName ?? 'No Cuisine Assigned',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                          Text(
+                            isExpired
+                                ? 'EXPIRED'
+                                : '${m.daysLeft} days remaining',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: highlight
+                                  ? Colors.red
+                                  : Colors.green.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 8),
+                      AppStatusBadge(
+                        type: isExpired
+                            ? AppStatusType.expired
+                            : (m.status.toUpperCase() == 'SUSPENDED'
+                                ? AppStatusType.suspended
+                                : AppStatusType.active),
+                        compact: true,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         );
       },

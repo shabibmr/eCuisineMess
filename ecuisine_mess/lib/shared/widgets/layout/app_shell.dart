@@ -78,7 +78,7 @@ class _AppShellState extends State<AppShell> {
               child: Image.asset(
                 'assets/images/logo_dark.jpg',
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Icon(
+                errorBuilder: (_, _, _) => Icon(
                   Icons.restaurant_rounded,
                   color: scheme.primary,
                   size: 20,

@@ -3,6 +3,7 @@ import 'package:ecuisine_mess/core/di/injection.dart';
 import 'package:ecuisine_mess/core/services/local_mess_services.dart';
 import 'package:ecuisine_mess/core/services/mess_server_guard.dart';
 import 'package:ecuisine_mess/features/settings/presentation/cubit/server_settings_cubit.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_save_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -113,11 +114,13 @@ class _ServerSettingsDialogState extends State<_ServerSettingsDialog> {
               onPressed: testing || _starting ? null : () => Navigator.pop(context),
               child: const Text('Cancel'),
             ),
-            ElevatedButton(
-              onPressed: testing || _starting
+            AppSaveButton(
+              label: 'Save & Apply',
+              loadingLabel: 'Applying...',
+              isLoading: testing,
+              onPressed: _starting
                   ? null
                   : () => context.read<ServerSettingsCubit>().saveAndApply(),
-              child: const Text('Save & Apply'),
             ),
           ],
         );

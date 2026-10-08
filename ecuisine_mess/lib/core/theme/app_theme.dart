@@ -35,14 +35,14 @@ class AppTheme {
       scaffoldBackgroundColor: surface,
       visualDensity: VisualDensity.compact,
       fontFamily: 'Segoe UI',
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: surfaceContainer,
         foregroundColor: ink,
         elevation: 0,
         scrolledUnderElevation: 1,
         surfaceTintColor: Colors.transparent,
         centerTitle: false,
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           color: ink,
           fontSize: 18,
           fontWeight: FontWeight.w700,
@@ -125,17 +125,17 @@ class AppTheme {
           borderSide: const BorderSide(color: primary, width: 1.5),
         ),
       ),
-      navigationRailTheme: NavigationRailThemeData(
+      navigationRailTheme: const NavigationRailThemeData(
         backgroundColor: surfaceContainer,
-        indicatorColor: const Color(0xFFE8F0FF),
-        selectedIconTheme: const IconThemeData(color: primary),
-        unselectedIconTheme: const IconThemeData(color: Color(0xFF64748B)),
-        selectedLabelTextStyle: const TextStyle(
+        indicatorColor: Color(0xFFE8F0FF),
+        selectedIconTheme: IconThemeData(color: primary),
+        unselectedIconTheme: IconThemeData(color: Color(0xFF64748B)),
+        selectedLabelTextStyle: TextStyle(
           color: primaryDark,
           fontWeight: FontWeight.w700,
           fontSize: 11,
         ),
-        unselectedLabelTextStyle: const TextStyle(
+        unselectedLabelTextStyle: TextStyle(
           color: Color(0xFF64748B),
           fontWeight: FontWeight.w500,
           fontSize: 11,
