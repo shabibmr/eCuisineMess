@@ -9,7 +9,7 @@ enum UserAccountMenuAction {
   logout,
 }
 
-/// Account chip that opens settings, Organizations, and logout.
+/// Account chip that opens settings, Organization, and logout.
 class UserAccountMenu extends StatelessWidget {
   const UserAccountMenu({
     super.key,
@@ -35,7 +35,7 @@ class UserAccountMenu extends StatelessWidget {
           value: UserAccountMenuAction.organizations,
           child: _MenuRow(
             icon: Icons.business_outlined,
-            label: 'Organizations',
+            label: 'Organization',
           ),
         ),
         const PopupMenuDivider(),

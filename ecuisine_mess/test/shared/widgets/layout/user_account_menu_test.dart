@@ -27,14 +27,14 @@ void main() {
     await tester.tap(find.text('Administrator'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Organizations'), findsOneWidget);
+    expect(find.text('Organization'), findsOneWidget);
     expect(find.text('Email & SMTP Settings'), findsOneWidget);
     expect(find.text('Check for Updates'), findsOneWidget);
     expect(find.text('Printer Settings'), findsOneWidget);
     expect(find.text('Server Connection'), findsOneWidget);
     expect(find.text('Logout'), findsOneWidget);
 
-    await tester.tap(find.text('Organizations'));
+    await tester.tap(find.text('Organization'));
     await tester.pumpAndSettle();
 
     expect(selected, UserAccountMenuAction.organizations);

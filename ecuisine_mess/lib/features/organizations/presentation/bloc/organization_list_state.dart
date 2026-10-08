@@ -15,6 +15,10 @@ final class OrganizationListState extends Equatable {
   final String? notice;
   final String? searchQuery;
 
+  /// Single-record master: the only org, or the first if extras exist.
+  Organization? get organization =>
+      organizations.isEmpty ? null : organizations.first;
+
   OrganizationListState copyWith({
     Status? status,
     List<Organization>? organizations,
