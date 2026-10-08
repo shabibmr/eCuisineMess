@@ -90,16 +90,11 @@ class _MessServerGuardState extends State<MessServerGuard> {
     return Stack(
       children: [
         widget.child,
-        Navigator(
-          key: _dialogNavKey,
-          onGenerateRoute: (settings) {
-            return PageRouteBuilder<void>(
-              opaque: false,
-              pageBuilder: (_, _, _) => const IgnorePointer(
-                child: SizedBox.expand(),
-              ),
-            );
-          },
+        HeroControllerScope.none(
+          child: Navigator(
+            key: _dialogNavKey,
+            onGenerateRoute: (_) => _HitThroughPageRoute(),
+          ),
         ),
       ],
     );
@@ -139,4 +134,26 @@ Future<void> startInstalledMessServer(BuildContext context) async {
   ScaffoldMessenger.of(context).showSnackBar(
     const SnackBar(content: Text('Mess server is running.')),
   );
+}
+
+/// Dummy host route for [MessServerGuard]'s overlay navigator.
+///
+/// [PageRouteBuilder] is a [ModalRoute], so the default overlay includes a
+/// full-screen [ModalBarrier]. That barrier swallows mouse/touch while
+/// keyboard focus still reaches widgets underneath.
+class _HitThroughPageRoute extends PageRouteBuilder<void> {
+  _HitThroughPageRoute()
+      : super(
+          opaque: false,
+          barrierColor: null,
+          pageBuilder: (_, _, _) => const IgnorePointer(
+            child: SizedBox.expand(),
+          ),
+        );
+
+  @override
+  bool get barrierDismissible => false;
+
+  @override
+  Widget buildModalBarrier() => const IgnorePointer();
 }
