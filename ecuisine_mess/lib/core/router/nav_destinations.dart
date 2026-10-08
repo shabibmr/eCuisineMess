@@ -6,11 +6,13 @@ class NavDestination {
     required this.label,
     required this.icon,
     required this.route,
+    this.showInRail = true,
   });
 
   final String label;
   final IconData icon;
   final AppRoute route;
+  final bool showInRail;
 }
 
 /// Order matches shell branch indices.
@@ -54,6 +56,7 @@ const List<NavDestination> kNavDestinations = [
     label: 'Organizations',
     icon: Icons.business_outlined,
     route: AppRoutes.organizations,
+    showInRail: false,
   ),
   NavDestination(
     label: 'Daily Menu',
@@ -71,3 +74,24 @@ const List<NavDestination> kNavDestinations = [
     route: AppRoutes.reports,
   ),
 ];
+
+final List<NavDestination> kRailDestinations =
+    kNavDestinations.where((d) => d.showInRail).toList(growable: false);
+
+int? railIndexForBranch(int branchIndex) {
+  if (branchIndex < 0 || branchIndex >= kNavDestinations.length) {
+    return null;
+  }
+  if (!kNavDestinations[branchIndex].showInRail) return null;
+  return kNavDestinations.take(branchIndex).where((d) => d.showInRail).length;
+}
+
+int branchIndexForRail(int railIndex) {
+  var seen = -1;
+  for (var i = 0; i < kNavDestinations.length; i++) {
+    if (!kNavDestinations[i].showInRail) continue;
+    seen++;
+    if (seen == railIndex) return i;
+  }
+  return 0;
+}

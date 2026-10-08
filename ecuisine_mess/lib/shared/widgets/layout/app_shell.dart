@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:ecuisine_mess/core/di/injection.dart';
+import 'package:ecuisine_mess/core/router/app_routes.dart';
 import 'package:ecuisine_mess/core/router/nav_destinations.dart';
 import 'package:ecuisine_mess/core/services/app_update_service.dart';
 import 'package:ecuisine_mess/features/auth/presentation/bloc/auth_bloc.dart';
@@ -6,6 +9,7 @@ import 'package:ecuisine_mess/features/email/presentation/widgets/smtp_settings_
 import 'package:ecuisine_mess/features/settings/presentation/widgets/printer_settings_dialog.dart';
 import 'package:ecuisine_mess/features/settings/presentation/widgets/server_settings_dialog.dart';
 import 'package:ecuisine_mess/features/update/presentation/update_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/layout/user_account_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -105,78 +109,33 @@ class _AppShellState extends State<AppShell> {
           ],
         ),
         actions: [
-          BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              final name =
-                  state is Authenticated ? state.user.displayName : 'User';
-              return Container(
-                margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: scheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 13,
-                      backgroundColor: scheme.primaryContainer,
-                      child: Icon(
-                        Icons.person_outline,
-                        size: 16,
-                        color: scheme.primary,
-                      ),
-                    ),
-                    const SizedBox(width: 7),
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, state) {
+                final name =
+                    state is Authenticated ? state.user.displayName : 'User';
+                return UserAccountMenu(
+                  displayName: name,
+                  onSelected: (action) => _onAccountAction(context, action),
+                );
+              },
+            ),
           ),
-          _Action(
-            tooltip: 'Email & SMTP Settings',
-            icon: Icons.mail_outline_rounded,
-            onPressed: () => showSmtpSettingsDialog(context),
-          ),
-          _Action(
-            tooltip: 'Check for Updates',
-            icon: Icons.system_update_alt_rounded,
-            onPressed: () => _checkForUpdates(manual: true),
-          ),
-          _Action(
-            tooltip: 'Printer Settings',
-            icon: Icons.print_outlined,
-            onPressed: () => showPrinterSettingsDialog(context),
-          ),
-          _Action(
-            tooltip: 'Server Connection',
-            icon: Icons.cloud_outlined,
-            onPressed: () => showServerSettingsDialog(context),
-          ),
-          _Action(
-            tooltip: 'Logout',
-            icon: Icons.logout_rounded,
-            onPressed: () =>
-                context.read<AuthBloc>().add(const LogoutRequested()),
-          ),
-          const SizedBox(width: 12),
         ],
       ),
       body: Row(
         children: [
           NavigationRail(
-            selectedIndex: widget.navigationShell.currentIndex,
-            onDestinationSelected: widget.navigationShell.goBranch,
+            selectedIndex: railIndexForBranch(
+              widget.navigationShell.currentIndex,
+            ),
+            onDestinationSelected: (index) {
+              widget.navigationShell.goBranch(branchIndexForRail(index));
+            },
             scrollable: true,
             destinations: [
-              for (final dest in kNavDestinations)
+              for (final dest in kRailDestinations)
                 NavigationRailDestination(
                   icon: Icon(dest.icon),
                   selectedIcon: Icon(dest.icon),
@@ -194,25 +153,21 @@ class _AppShellState extends State<AppShell> {
       ),
     );
   }
-}
 
-class _Action extends StatelessWidget {
-  const _Action({
-    required this.tooltip,
-    required this.icon,
-    required this.onPressed,
-  });
-
-  final String tooltip;
-  final IconData icon;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: tooltip,
-      onPressed: onPressed,
-      icon: Icon(icon, size: 20),
-    );
+  void _onAccountAction(BuildContext context, UserAccountMenuAction action) {
+    switch (action) {
+      case UserAccountMenuAction.organizations:
+        context.goNamed(AppRoutes.organizations.name);
+      case UserAccountMenuAction.smtp:
+        showSmtpSettingsDialog(context);
+      case UserAccountMenuAction.updates:
+        unawaited(_checkForUpdates(manual: true));
+      case UserAccountMenuAction.printer:
+        showPrinterSettingsDialog(context);
+      case UserAccountMenuAction.server:
+        showServerSettingsDialog(context);
+      case UserAccountMenuAction.logout:
+        context.read<AuthBloc>().add(const LogoutRequested());
+    }
   }
 }
