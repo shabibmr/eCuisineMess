@@ -108,7 +108,8 @@ class AppFormDialog extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
+          // Null result stays compatible with showDialog<T> typed routes.
+          onPressed: () => Navigator.of(context).pop(),
           child: Text(cancelLabel),
         ),
         FilledButton(

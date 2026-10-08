@@ -173,5 +173,49 @@ void main() {
 
       expect(formResult, isTrue);
     });
+
+    testWidgets('cancel pops null for typed dialog routes', (tester) async {
+      _TypedFormResult? result;
+      final formKey = GlobalKey<FormState>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) => ElevatedButton(
+                onPressed: () async {
+                  result = await showDialog<_TypedFormResult>(
+                    context: ctx,
+                    builder: (_) => AppFormDialog(
+                      title: 'Add Organization',
+                      formKey: formKey,
+                      onConfirm: () {
+                        Navigator.of(ctx).pop(const _TypedFormResult('ok'));
+                      },
+                      body: const SizedBox.shrink(),
+                    ),
+                  );
+                },
+                child: const Text('Open Form'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open Form'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(result, isNull);
+    });
   });
+}
+
+class _TypedFormResult {
+  const _TypedFormResult(this.value);
+  final String value;
 }
