@@ -105,25 +105,20 @@ erDiagram
 
 ## 6. Migrations
 
-`database/migrations/` — plain numbered SQL, applied manually or via a script.
+`database/migrations/` — plain numbered SQL, applied manually or via a script. During active pre-production development, all historical migrations (001 through 007) were consolidated into a single baseline migration.
 
 | File | Purpose |
 |---|---|
-| `001_mess_users.sql` | Users + sessions |
-| `002_mess_item_categories.sql` | Category master, backfill, FK |
-| `003_uuid_ids_drop_codes.sql` | **Breaking** UUID cut-over; drops codes, **drops and reloads** the DB |
-| `004_mess_uoms.sql` | `mess_uoms` + `mess_items.uom_id` (replaces the `unit` text column) |
-| `005_cuisine_meal_times.sql` | `mess_meal_times.cuisine_id` (NOT NULL, FK CASCADE) + `UNIQUE(cuisine_id, meal_type)`; replaces the 3 global rows with 3 default windows per cuisine. Idempotent |
+| `001_initial_schema.sql` | Consolidated baseline schema + seed data (UUID primary keys, 14 tables, user roles, meal windows, default organization) |
 
 Rules for new migrations:
 
-- Name `NNN_short_description.sql`, next free number, never edit an applied file.
+- Name `NNN_short_description.sql`, next free number (e.g. `002_...`), never edit an applied file.
 - Idempotent where practical (`IF NOT EXISTS`, `INFORMATION_SCHEMA` guards).
 - Every migration is mirrored into `schema.sql` in the same commit (`schema.sql` always describes a fresh install).
-- Seed changes go in `seed.sql`.
 - Back up first: `mysqldump --routines --single-transaction ecuisine_mess > backup.sql`.
 
-## 7. Seed data (`database/seed.sql`)
+## 7. Baseline and Seed data (`database/schema.sql`)
 
 Per-cuisine meal times (5 cuisines × B 07:00–10:00 / L 12:00–15:00 / D 19:00–22:00 = 15 rows), five categories (Main, Side, Bread, Beverage, Dessert), UOMs, items (with `uom_id`), cuisines + mapping, sample members, `admin` / `admin123` (bcrypt). Menus for demo dates are seeded for counter testing.
 

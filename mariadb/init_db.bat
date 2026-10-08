@@ -57,22 +57,13 @@ echo [3/4] Creating database 'ecuisine_mess' and importing schema...
 "%BIN_DIR%\mariadb.exe" -u root -P %DB_PORT% -e "CREATE DATABASE IF NOT EXISTS ecuisine_mess CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 set "SCHEMA_FILE=%~dp0..\database\schema.sql"
-set "SEED_FILE=%~dp0..\database\seed.sql"
 
 if exist "%SCHEMA_FILE%" (
-    echo Importing schema from %SCHEMA_FILE%...
+    echo Importing schema and seed data from %SCHEMA_FILE%...
     "%BIN_DIR%\mariadb.exe" -u root -P %DB_PORT% ecuisine_mess < "%SCHEMA_FILE%"
-    echo [OK] Schema imported.
+    echo [OK] Database initialized and seeded successfully.
 ) else (
-    echo [WARN] schema.sql not found at %SCHEMA_FILE%
-)
-
-if exist "%SEED_FILE%" (
-    echo Importing seed data from %SEED_FILE%...
-    "%BIN_DIR%\mariadb.exe" -u root -P %DB_PORT% ecuisine_mess < "%SEED_FILE%"
-    echo [OK] Seed data imported.
-) else (
-    echo [WARN] seed.sql not found at %SEED_FILE%
+    echo [ERROR] schema.sql not found at %SCHEMA_FILE%
 )
 
 :: 4. Stop temporary server
