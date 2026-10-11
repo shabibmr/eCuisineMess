@@ -1,4 +1,5 @@
 import 'package:ecuisine_mess/shared/widgets/buttons/app_danger_button.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_glass_lift_dialog.dart';
 import 'package:flutter/material.dart';
 
 /// Standard confirmation modal dialog returning a `Future<bool>`.
@@ -37,7 +38,7 @@ class AppConfirmDialog extends StatelessWidget {
     bool isDestructive = false,
     IconData? icon,
   }) async {
-    final result = await showDialog<bool>(
+    final result = await showAppGlassLiftDialog<bool>(
       context: context,
       barrierDismissible: true,
       builder: (ctx) => AppConfirmDialog(
@@ -65,19 +66,32 @@ class AppConfirmDialog extends StatelessWidget {
     final headerIcon = icon ??
         (isDestructive ? Icons.warning_amber_rounded : Icons.help_outline);
 
-    return AlertDialog(
-      icon: Icon(
-        headerIcon,
-        color: isDestructive ? theme.colorScheme.error : theme.colorScheme.primary,
-        size: 28,
+    return AppGlassLiftShell(
+      maxWidth: 380,
+      header: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+        child: Column(
+          children: [
+            Icon(
+              headerIcon,
+              color: isDestructive
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.primary,
+              size: 28,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
       ),
-      title: Text(
-        title,
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
-      ),
-      content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 380),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         child: Text(
           message,
           textAlign: TextAlign.center,
@@ -87,23 +101,30 @@ class AppConfirmDialog extends StatelessWidget {
           ),
         ),
       ),
-      actionsAlignment: MainAxisAlignment.end,
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: Text(cancelLabel),
+      actions: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(cancelLabel),
+            ),
+            const SizedBox(width: 8),
+            AppHoverLift(
+              child: isDestructive
+                  ? AppDangerButton(
+                      label: confirmLabel,
+                      onPressed: () => Navigator.of(context).pop(true),
+                    )
+                  : FilledButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: Text(confirmLabel),
+                    ),
+            ),
+          ],
         ),
-        if (isDestructive)
-          AppDangerButton(
-            label: confirmLabel,
-            onPressed: () => Navigator.of(context).pop(true),
-          )
-        else
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(confirmLabel),
-          ),
-      ],
+      ),
     );
   }
 }

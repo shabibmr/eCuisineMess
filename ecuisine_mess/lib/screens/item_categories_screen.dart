@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ecuisine_mess/models/item_category.dart';
 import 'package:ecuisine_mess/services/api_service.dart';
 import 'package:ecuisine_mess/shared/widgets/dialogs/app_form_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_glass_lift_dialog.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/master_page.dart';
 
 class ItemCategoriesScreen extends StatefulWidget {
@@ -39,7 +40,7 @@ class _ItemCategoriesScreenState extends State<ItemCategoriesScreen> {
   }
 
   Future<void> _showAddDialog() async {
-    final data = await showDialog<_CategoryFormData>(
+    final data = await showAppGlassLiftDialog<_CategoryFormData>(
       context: context,
       barrierDismissible: false,
       builder: (_) => _LegacyCategoryFormDialog(
@@ -69,7 +70,7 @@ class _ItemCategoriesScreenState extends State<ItemCategoriesScreen> {
   }
 
   Future<void> _showEditDialog(ItemCategory category) async {
-    final data = await showDialog<_CategoryFormData>(
+    final data = await showAppGlassLiftDialog<_CategoryFormData>(
       context: context,
       barrierDismissible: false,
       builder: (_) => _LegacyCategoryFormDialog(

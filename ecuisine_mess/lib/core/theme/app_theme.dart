@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  /// Primary color swatch (CSS Coral).
-  static const Color primary = Color(0xFFFF7F50);
-  static const Color primaryDark = Color(0xFFB34528);
+  /// Primary color swatch (Peacock Blue).
+  static const Color primary = Color(0xFF016795);
+  static const Color primaryDark = Color(0xFF014A6B);
   static const Color ink = Color(0xFF0F172A);
   static const Color surface = Color(0xFFF6F8FC);
   static const Color surfaceContainer = Color(0xFFFFFFFF);

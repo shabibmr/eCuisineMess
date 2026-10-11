@@ -7,6 +7,7 @@ import 'package:ecuisine_mess/shared/widgets/badges/app_status_badge.dart';
 import 'package:ecuisine_mess/shared/widgets/buttons/app_create_button.dart';
 import 'package:ecuisine_mess/shared/widgets/buttons/app_refresh_button.dart';
 import 'package:ecuisine_mess/shared/widgets/dialogs/app_form_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_glass_lift_dialog.dart';
 import 'package:ecuisine_mess/shared/widgets/inputs/app_switch_tile.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/master_page.dart';
 import 'package:ecuisine_mess/shared/widgets/tables/app_separated_list_card.dart';
@@ -36,7 +37,7 @@ class _ItemCategoryListView extends StatelessWidget {
     final bloc = context.read<ItemCategoryListBloc>();
     final defaultSort = bloc.state.categories.length + 1;
 
-    final params = await showDialog<SaveItemCategoryParams>(
+    final params = await showAppGlassLiftDialog<SaveItemCategoryParams>(
       context: context,
       barrierDismissible: false,
       builder: (_) => _ItemCategoryFormDialog(

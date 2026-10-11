@@ -9,6 +9,7 @@ import 'package:ecuisine_mess/shared/widgets/badges/app_status_badge.dart';
 import 'package:ecuisine_mess/shared/widgets/buttons/app_create_button.dart';
 import 'package:ecuisine_mess/shared/widgets/buttons/app_refresh_button.dart';
 import 'package:ecuisine_mess/shared/widgets/dialogs/app_form_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_glass_lift_dialog.dart';
 import 'package:ecuisine_mess/shared/widgets/inputs/app_dropdown.dart';
 import 'package:ecuisine_mess/shared/widgets/inputs/app_switch_tile.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/master_page.dart';
@@ -43,7 +44,7 @@ class _ItemListView extends StatelessWidget {
       return;
     }
 
-    final params = await showDialog<SaveItemParams>(
+    final params = await showAppGlassLiftDialog<SaveItemParams>(
       context: context,
       barrierDismissible: false,
       builder: (_) => _ItemFormDialog(

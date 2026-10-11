@@ -1,0 +1,28 @@
+<service>
+  <id>EcuisineMessApi</id>
+  <name>eCuisine Mess API Service</name>
+  <description>FastAPI backend service for eCuisine Mess Counter Billing and Management. Starts at boot and automatically restarts on failure.</description>
+  <executable>%BASE%\mess-api.exe</executable>
+  <workingdirectory>%BASE%</workingdirectory>
+  
+  <!-- Environment variables -->
+  <env name="MESS_API_PORT" value="8000"/>
+  <env name="MESS_DATA_DIR" value="%BASE%"/>
+  <env name="MESS_CONFIG_FILE" value="%BASE%\config.env"/>
+
+  <!-- Logging configuration -->
+  <logpath>%BASE%\logs</logpath>
+  <log mode="roll-by-size">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>8</keepFiles>
+  </log>
+
+  <!-- Service lifecycle and recovery -->
+  <onfailure action="restart" delay="10 sec"/>
+  <onfailure action="restart" delay="10 sec"/>
+  <onfailure action="restart" delay="10 sec"/>
+  <resetfailure>1 day</resetfailure>
+  <startmode>Automatic</startmode>
+  <waithint>30 sec</waithint>
+  <stoptimeout>20 sec</stoptimeout>
+</service>

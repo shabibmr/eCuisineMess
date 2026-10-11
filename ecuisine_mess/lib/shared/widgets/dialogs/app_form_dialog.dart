@@ -1,3 +1,4 @@
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_glass_lift_dialog.dart';
 import 'package:flutter/material.dart';
 
 /// Consolidated, responsive form modal dialog with built-in validation support.
@@ -29,7 +30,7 @@ Future<bool> showAppFormDialog({
   bool barrierDismissible = false,
   Widget? leadingTitleIcon,
 }) async {
-  final result = await showDialog<bool>(
+  final result = await showAppGlassLiftDialog<bool>(
     context: context,
     barrierDismissible: barrierDismissible,
     builder: (ctx) => AppFormDialog(
@@ -73,32 +74,33 @@ class AppFormDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final screenSize = MediaQuery.sizeOf(context);
     final effectiveWidth = (screenSize.width * 0.9).clamp(minWidth, maxWidth);
 
-    return AlertDialog(
-      titlePadding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      actionsPadding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
-      title: Row(
-        children: [
-          if (leadingTitleIcon != null) ...[
-            leadingTitleIcon!,
-            const SizedBox(width: 10),
-          ],
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+    return AppGlassLiftShell(
+      width: effectiveWidth,
+      header: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 12),
+        child: Row(
+          children: [
+            if (leadingTitleIcon != null) ...[
+              leadingTitleIcon!,
+              const SizedBox(width: 10),
+            ],
+            Expanded(
+              child: Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-      content: SizedBox(
-        width: effectiveWidth,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         child: SingleChildScrollView(
           child: Form(
             key: formKey,
@@ -106,25 +108,34 @@ class AppFormDialog extends StatelessWidget {
           ),
         ),
       ),
-      actions: [
-        TextButton(
-          // Null result stays compatible with showDialog<T> typed routes.
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(cancelLabel),
+      actions: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(
+              // Null result stays compatible with showDialog<T> typed routes.
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(cancelLabel),
+            ),
+            const SizedBox(width: 8),
+            AppHoverLift(
+              child: FilledButton(
+                onPressed: () {
+                  if (formKey.currentState?.validate() == true) {
+                    if (onConfirm != null) {
+                      onConfirm!();
+                    } else {
+                      Navigator.of(context).pop(true);
+                    }
+                  }
+                },
+                child: Text(confirmLabel),
+              ),
+            ),
+          ],
         ),
-        FilledButton(
-          onPressed: () {
-            if (formKey.currentState?.validate() == true) {
-              if (onConfirm != null) {
-                onConfirm!();
-              } else {
-                Navigator.of(context).pop(true);
-              }
-            }
-          },
-          child: Text(confirmLabel),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:ecuisine_mess/shared/widgets/dialogs/app_confirm_dialog.dart';
 import 'package:ecuisine_mess/shared/widgets/dialogs/app_form_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_glass_lift_dialog.dart';
 import 'package:ecuisine_mess/shared/widgets/feedback/app_alert_banner.dart';
 import 'package:ecuisine_mess/shared/widgets/feedback/app_empty_state.dart';
 import 'package:ecuisine_mess/shared/widgets/inputs/app_password_field.dart';
@@ -116,6 +117,7 @@ void main() {
 
       expect(find.text('Delete Cuisine?'), findsOneWidget);
       expect(find.text('Delete'), findsOneWidget);
+      expect(find.byType(BackdropFilter), findsOneWidget);
 
       await tester.tap(find.text('Delete'));
       await tester.pumpAndSettle();
@@ -184,7 +186,7 @@ void main() {
             body: Builder(
               builder: (ctx) => ElevatedButton(
                 onPressed: () async {
-                  result = await showDialog<_TypedFormResult>(
+                  result = await showAppGlassLiftDialog<_TypedFormResult>(
                     context: ctx,
                     builder: (_) => AppFormDialog(
                       title: 'Add Organization',
