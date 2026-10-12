@@ -55,11 +55,8 @@ class ECuisineMessApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           routerConfig: sl<AppRouter>().config,
           builder: (context, child) {
-            final expiry =
-                sl.isRegistered<ExpiryService>() ? sl<ExpiryService>() : null;
-            if (expiry == null) return _guarded(child);
             return ValueListenableBuilder<bool>(
-              valueListenable: expiry.expired,
+              valueListenable: sl<ExpiryService>().expired,
               builder: (context, expired, _) => expired
                   ? const ColoredBox(
                       color: Color(0xFF0078D7),

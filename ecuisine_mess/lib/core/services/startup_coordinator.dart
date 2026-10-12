@@ -16,7 +16,7 @@ class StartupCoordinator {
   static Future<void> start() async {
     // Ensure Firebase is initialized for cloud-backed features.
     await FirebaseInitializer.initialize();
-    if (sl.isRegistered<ExpiryService>()) unawaited(sl<ExpiryService>().start());
+    unawaited(sl<ExpiryService>().start().catchError((Object _) {}));
     sl<AuthBloc>().add(const AuthStarted());
   }
 }

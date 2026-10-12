@@ -42,69 +42,78 @@ class ExpiryService {
   final String projectId;
 
   Timer? _timer;
+  Dio? _ownedDio;
+  int _ticks = 0;
 
   /// True once the current date is past the stored expiry date.
   final ValueNotifier<bool> expired = ValueNotifier<bool>(false);
 
-  /// Refreshes from Firestore now and then hourly.
+  /// Refreshes from Firestore now, re-checks the cached date every minute (so
+  /// midnight is noticed promptly) and re-fetches hourly.
   Future<void> start() async {
-    _timer ??= Timer.periodic(const Duration(hours: 1), (_) => refresh());
+    _timer ??= Timer.periodic(const Duration(minutes: 1), (_) {
+      _ticks++;
+      if (_ticks % 60 == 0) {
+        unawaited(refresh());
+      } else {
+        _evaluate();
+      }
+    });
     await refresh();
   }
 
   void dispose() {
     _timer?.cancel();
+    _ownedDio?.close();
     expired.dispose();
   }
 
-  /// Fetches the expiry date, stores it locally and re-evaluates. Silent.
+  /// Fetches the expiry date, stores it locally and re-evaluates. Never throws.
   Future<void> refresh() async {
-    DateTime? date;
-
-    // 1. Try Cloud Firestore SDK if available.
     try {
-      if (_firestore.isAvailable) {
-        final snap = await _firestore
-            .getDoc(collectionPath, docId)
-            .timeout(const Duration(seconds: 10));
-        date = parseExpiry(snap.data()?[field]);
+      DateTime? date;
+
+      // 1. Cloud Firestore SDK, when available.
+      try {
+        if (_firestore.isAvailable) {
+          final snap = await _firestore
+              .getDoc(collectionPath, docId)
+              .timeout(const Duration(seconds: 10));
+          date = parseExpiry(snap.data()?[field]);
+        }
+      } catch (_) {
+        // Fall through to the REST fallback.
+      }
+
+      // 2. Firestore REST fallback if the SDK was unavailable or failed.
+      if (date == null) {
+        try {
+          date = await _fetchFromRest();
+        } catch (_) {
+          // Silent by design; the cached value stays in effect.
+        }
+      }
+
+      if (date != null) {
+        await _prefs.setString(prefsKey, _format(date));
       }
     } catch (_) {
-      // Fall through to REST API fallback.
+      // Silent by design.
     }
-
-    // 2. Direct Firestore REST API fallback if SDK was unavailable or failed.
-    if (date == null) {
-      try {
-        date = await _fetchFromRest();
-      } catch (_) {
-        // Silent by design; fall back to the cached value.
-      }
-    }
-
-    if (date != null) {
-      await _prefs.setString(prefsKey, _format(date));
-    }
-
     _evaluate();
   }
 
   Future<DateTime?> _fetchFromRest() async {
-    final dio = _dio ?? Dio(BaseOptions(
-      connectTimeout: const Duration(seconds: 5),
-      receiveTimeout: const Duration(seconds: 5),
-    ));
+    final dio = _dio ??
+        (_ownedDio ??= Dio(BaseOptions(
+          connectTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 5),
+        )));
     final url =
         'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/$collectionPath/$docId';
     final response = await dio.get<Map<String, dynamic>>(url);
-    if (response.data != null) {
-      final fields = response.data!['fields'];
-      if (fields is Map<String, dynamic>) {
-        final fieldVal = fields[field];
-        return parseExpiry(fieldVal);
-      }
-    }
-    return null;
+    final fields = response.data?['fields'];
+    return fields is Map ? parseExpiry(fields[field]) : null;
   }
 
   void _evaluate() {
@@ -122,82 +131,65 @@ class ExpiryService {
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
 
-  static const _monthMap = <String, int>{
-    'jan': 1, 'january': 1,
-    'feb': 2, 'february': 2,
-    'mar': 3, 'march': 3,
-    'apr': 4, 'april': 4,
-    'may': 5,
-    'jun': 6, 'june': 6,
-    'jul': 7, 'july': 7,
-    'aug': 8, 'august': 8,
-    'sep': 9, 'september': 9,
-    'oct': 10, 'october': 10,
-    'nov': 11, 'november': 11,
-    'dec': 12, 'december': 12,
-  };
+  static const _months = <String>[
+    'january', 'february', 'march', 'april', 'may', 'june',
+    'july', 'august', 'september', 'october', 'november', 'december',
+  ];
 
-  /// Accepts a Firestore [Timestamp], Firestore REST field map, `yyyy-MM-dd`,
-  /// `dd-MM-yyyy`, or `dd-MMM-yyyy` (e.g. `30-oct-2026`).
+  static final _dmyRe = RegExp(r'^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$');
+  static final _dMonYRe =
+      RegExp(r'^(\d{1,2})[-/.\s]+([a-zA-Z]+)[-/.\s]+(\d{4})$');
+  static final _monDYRe =
+      RegExp(r'^([a-zA-Z]+)[-/.\s]+(\d{1,2})[-/.\s,]+(\d{4})$');
+
+  /// Builds a date-only value, or null if the day does not exist in that
+  /// month (so `31-02-2026` is rejected instead of rolling over to March).
+  static DateTime? _ymd(int y, int m, int d) {
+    final date = DateTime(y, m, d);
+    return date.year == y && date.month == m && date.day == d ? date : null;
+  }
+
+  /// Month number for a full or three-letter English month name.
+  static int? _month(String name) {
+    final n = name.toLowerCase();
+    final i = _months.indexWhere((m) => m == n || m.substring(0, 3) == n);
+    return i < 0 ? null : i + 1;
+  }
+
+  /// Accepts a Firestore [Timestamp], a Firestore REST field map, `yyyy-MM-dd`
+  /// (optionally with a time/zone), `dd-MM-yyyy`, `dd-MMM-yyyy` or
+  /// `MMM-dd-yyyy`. Instants with a zone are converted to local time.
   /// Returns a date-only local [DateTime], or null if unparseable.
   @visibleForTesting
   static DateTime? parseExpiry(Object? raw) {
-    if (raw == null) return null;
     if (raw is Timestamp) {
       final d = raw.toDate().toLocal();
       return DateTime(d.year, d.month, d.day);
     }
     if (raw is Map) {
-      if (raw['stringValue'] != null) {
-        return parseExpiry(raw['stringValue']);
-      }
-      if (raw['timestampValue'] != null) {
-        return parseExpiry(raw['timestampValue']);
-      }
+      return parseExpiry(raw['stringValue'] ?? raw['timestampValue']);
     }
-    if (raw is String) {
-      final s = raw.trim();
-      if (s.isEmpty) return null;
+    if (raw is! String) return null;
+    final s = raw.trim();
 
-      // 1. dd-MM-yyyy or dd/MM/yyyy
-      final dmy = RegExp(r'^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$').firstMatch(s);
-      if (dmy != null) {
-        final day = int.parse(dmy.group(1)!);
-        final month = int.parse(dmy.group(2)!);
-        final year = int.parse(dmy.group(3)!);
-        if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-          return DateTime(year, month, day);
-        }
-      }
-
-      // 2. dd-MMM-yyyy (e.g. 30-oct-2026, 30-Oct-2026, 30 October 2026)
-      final dMmmY = RegExp(r'^(\d{1,2})[-/.\s]+([a-zA-Z]+)[-/.\s]+(\d{4})$').firstMatch(s);
-      if (dMmmY != null) {
-        final day = int.parse(dMmmY.group(1)!);
-        final monthStr = dMmmY.group(2)!.toLowerCase();
-        final year = int.parse(dMmmY.group(3)!);
-        final month = _monthMap[monthStr];
-        if (month != null && day >= 1 && day <= 31) {
-          return DateTime(year, month, day);
-        }
-      }
-
-      // 3. MMM-dd-yyyy (e.g. oct-30-2026, October 30 2026)
-      final mmmDY = RegExp(r'^([a-zA-Z]+)[-/.\s]+(\d{1,2})[-/.\s,]+(\d{4})$').firstMatch(s);
-      if (mmmDY != null) {
-        final monthStr = mmmDY.group(1)!.toLowerCase();
-        final day = int.parse(mmmDY.group(2)!);
-        final year = int.parse(mmmDY.group(3)!);
-        final month = _monthMap[monthStr];
-        if (month != null && day >= 1 && day <= 31) {
-          return DateTime(year, month, day);
-        }
-      }
-
-      // 4. ISO-8601 strings (e.g. 2026-10-30)
-      final d = DateTime.tryParse(s);
-      if (d != null) return DateTime(d.year, d.month, d.day);
+    final dmy = _dmyRe.firstMatch(s);
+    if (dmy != null) {
+      return _ymd(int.parse(dmy[3]!), int.parse(dmy[2]!), int.parse(dmy[1]!));
     }
-    return null;
+
+    final dMonY = _dMonYRe.firstMatch(s);
+    if (dMonY != null) {
+      final m = _month(dMonY[2]!);
+      return m == null ? null : _ymd(int.parse(dMonY[3]!), m, int.parse(dMonY[1]!));
+    }
+
+    final monDY = _monDYRe.firstMatch(s);
+    if (monDY != null) {
+      final m = _month(monDY[1]!);
+      return m == null ? null : _ymd(int.parse(monDY[3]!), m, int.parse(monDY[2]!));
+    }
+
+    final d = DateTime.tryParse(s)?.toLocal();
+    return d == null ? null : DateTime(d.year, d.month, d.day);
   }
 }
