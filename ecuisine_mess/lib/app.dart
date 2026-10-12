@@ -1,5 +1,6 @@
 import 'package:ecuisine_mess/core/di/injection.dart';
 import 'package:ecuisine_mess/core/router/app_router.dart';
+import 'package:ecuisine_mess/core/services/expiry_service.dart';
 import 'package:ecuisine_mess/core/services/mess_server_guard.dart';
 import 'package:ecuisine_mess/core/theme/app_theme.dart';
 import 'package:ecuisine_mess/features/auth/presentation/bloc/auth_bloc.dart';
@@ -54,20 +55,35 @@ class ECuisineMessApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           routerConfig: sl<AppRouter>().config,
           builder: (context, child) {
-            return MessServerGuard(
-              child: BlocBuilder<AuthBloc, AuthState>(
-                builder: (context, state) {
-                  if (state is AuthUnknown) {
-                    return const Scaffold(
-                      body: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-                  return child ?? const SizedBox.shrink();
-                },
-              ),
+            final expiry =
+                sl.isRegistered<ExpiryService>() ? sl<ExpiryService>() : null;
+            if (expiry == null) return _guarded(child);
+            return ValueListenableBuilder<bool>(
+              valueListenable: expiry.expired,
+              builder: (context, expired, _) => expired
+                  ? const ColoredBox(
+                      color: Color(0xFF0078D7),
+                      child: SizedBox.expand(),
+                    )
+                  : _guarded(child),
             );
           },
         ),
+      ),
+    );
+  }
+
+  Widget _guarded(Widget? child) {
+    return MessServerGuard(
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          if (state is AuthUnknown) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          return child ?? const SizedBox.shrink();
+        },
       ),
     );
   }
