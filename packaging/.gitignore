@@ -3,3 +3,4 @@ build/
 .venv/
 third_party/*.exe
 redist/*.exe
+certs/*.pfx
