@@ -38,3 +38,6 @@ mariadb/data/
 .claude/
 .agents/
 
+# Backend runtime uploads (member photos, etc.)
+backend_api/static/uploads/
+
