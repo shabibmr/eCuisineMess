@@ -3,7 +3,7 @@
 # 2. Builds Flutter Windows release
 # 3. Freezes FastAPI backend with PyInstaller
 # 4. Digitally signs all binaries using Authenticode & RFC 3161 timestamp
-# 5. Compiles and signs the Inno Setup single installer (ecuisine_mess_full_1.0.0.exe)
+# 5. Compiles and signs the Inno Setup single installer (eCuisineMess_full_installer.exe)
 
 param(
     [switch]$SkipFlutter,
@@ -177,7 +177,7 @@ if ($iscc) {
     & "$iscc" "/Ssigntool=$signCmd" "$iss"
     if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed (exit $LASTEXITCODE)" }
     
-    $outExe = Join-Path $Packaging "dist\ecuisine_mess_full_1.0.0.exe"
+    $outExe = Join-Path $Packaging "dist\eCuisineMess_full_installer.exe"
     if (Test-Path $outExe) {
         Write-Host "`nSUCCESS! Single installer created and signed:" -ForegroundColor Green
         Write-Host "  Path: $outExe" -ForegroundColor Cyan

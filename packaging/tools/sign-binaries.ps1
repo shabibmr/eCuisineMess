@@ -41,7 +41,7 @@ if (-not $Files -or $Files.Count -eq 0) {
         (Join-Path $Root "dist\mess-api\mess-api-service.exe"),
         (Join-Path $Root "third_party\WinSW-x64.exe"),
         (Join-Path (Split-Path -Parent $Root) "ecuisine_mess\build\windows\x64\runner\Release\ecuisine_mess.exe"),
-        (Join-Path $Root "dist\ecuisine_mess_full_1.0.0.exe")
+        (Join-Path $Root "dist\eCuisineMess_full_installer.exe")
     )
 }
 

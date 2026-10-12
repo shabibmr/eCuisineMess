@@ -23,7 +23,7 @@ That:
 2. Builds the Flutter Windows release (`ecuisine_mess.exe`).
 3. Freezes `serve.py` with PyInstaller (onedir into `packaging\dist\mess-api`).
 4. Digitally signs all executables using Authenticode & SHA256 timestamp (`packaging\tools\sign-binaries.ps1`).
-5. Compiles and signs `packaging\dist\ecuisine_mess_full_1.0.0.exe` using Inno Setup 6 (`ISCC.exe`).
+5. Compiles and signs `packaging\dist\eCuisineMess_full_installer.exe` using Inno Setup 6 (`ISCC.exe`).
 
 Parameters:
 - `-SkipFlutter`: Skip rebuilding Flutter if already up-to-date.
