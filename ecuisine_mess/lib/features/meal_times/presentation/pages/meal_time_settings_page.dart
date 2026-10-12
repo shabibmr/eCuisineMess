@@ -2,6 +2,9 @@ import 'package:ecuisine_mess/core/di/injection.dart';
 import 'package:ecuisine_mess/core/utils/status.dart';
 import 'package:ecuisine_mess/features/meal_times/presentation/bloc/meal_time_settings_bloc.dart';
 import 'package:ecuisine_mess/features/meal_times/presentation/widgets/meal_time_row.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_save_button.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_confirm_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_dropdown.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/master_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,39 +25,37 @@ class MealTimeSettingsPage extends StatelessWidget {
 class _MealTimeSettingsView extends StatelessWidget {
   const _MealTimeSettingsView();
 
+  /// Three-way save/discard/cancel for cuisine switch. Uses [AppConfirmDialog]
+  /// for the destructive discard path after the user declines to save.
   Future<void> _confirmCuisineSwitch(BuildContext context) async {
     final bloc = context.read<MealTimeSettingsBloc>();
-    final result = await showDialog<String>(
+    final saveFirst = await AppConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Unsaved changes'),
-        content: const Text(
+      title: 'Unsaved changes',
+      message:
           'This cuisine has unsaved meal-time edits. Save before switching?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, 'cancel'),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, 'discard'),
-            child: const Text('Discard'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, 'save'),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+      confirmLabel: 'Save',
+      cancelLabel: 'Don\'t save',
     );
     if (!context.mounted) return;
-    switch (result) {
-      case 'save':
-        bloc.add(const MealTimePendingCuisineResolved(save: true));
-      case 'discard':
-        bloc.add(const MealTimePendingCuisineResolved(save: false));
-      default:
-        bloc.add(const MealTimePendingCuisineCancelled());
+    if (saveFirst) {
+      bloc.add(const MealTimePendingCuisineResolved(save: true));
+      return;
+    }
+
+    final discard = await AppConfirmDialog.show(
+      context: context,
+      title: 'Discard changes?',
+      message: 'Unsaved meal-time edits for this cuisine will be lost.',
+      confirmLabel: 'Discard',
+      cancelLabel: 'Stay',
+      isDestructive: true,
+    );
+    if (!context.mounted) return;
+    if (discard) {
+      bloc.add(const MealTimePendingCuisineResolved(save: false));
+    } else {
+      bloc.add(const MealTimePendingCuisineCancelled());
     }
   }
 
@@ -99,34 +100,31 @@ class _MealTimeSettingsView extends StatelessWidget {
             isEmpty: cuisines.isEmpty,
             emptyMessage: 'No active cuisines. Create a cuisine first.',
             actions: [
-              FilledButton.icon(
+              AppSaveButton(
+                label: 'Save all',
+                icon: Icons.save,
+                isLoading: state.status == Status.submitting,
                 onPressed: busy || !state.isDirty
                     ? null
                     : () => context
                         .read<MealTimeSettingsBloc>()
                         .add(const MealTimeSaveRequested()),
-                icon: const Icon(Icons.save),
-                label: const Text('Save all'),
               ),
             ],
             toolbar: cuisines.isEmpty
                 ? null
-                : DropdownButtonFormField<String>(
+                : AppDropdown<String>(
                     key: ValueKey('cuisine-$selected'),
-                    initialValue: selected != null &&
+                    value: selected != null &&
                             cuisines.any((c) => c.id == selected)
                         ? selected
                         : null,
-                    decoration: const InputDecoration(
-                      labelText: 'Cuisine',
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
+                    label: 'Cuisine',
                     items: cuisines
                         .map(
-                          (c) => DropdownMenuItem(
+                          (c) => AppDropdownItem<String>(
                             value: c.id,
-                            child: Text(c.name),
+                            label: c.name,
                           ),
                         )
                         .toList(),

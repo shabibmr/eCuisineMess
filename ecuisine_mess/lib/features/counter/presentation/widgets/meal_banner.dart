@@ -38,7 +38,7 @@ class MealBanner extends StatelessWidget {
                 Text(
                   active ? mealWindow!.name : 'Loading meal window…',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w750,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 if (active)

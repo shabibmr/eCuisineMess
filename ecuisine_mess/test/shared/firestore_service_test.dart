@@ -49,4 +49,18 @@ void main() {
 
     await sl.reset();
   });
+
+  test('configureDependencies registers FirestoreService safely without Firebase',
+      () async {
+    SharedPreferences.setMockInitialValues({});
+    await sl.reset();
+    await configureDependencies();
+
+    expect(sl.isRegistered<FirestoreService>(), isTrue);
+    final service = sl<FirestoreService>();
+    expect(service.isAvailable, isFalse);
+    expect(() => service.firestore, throwsA(isA<FirebaseException>()));
+
+    await sl.reset();
+  });
 }

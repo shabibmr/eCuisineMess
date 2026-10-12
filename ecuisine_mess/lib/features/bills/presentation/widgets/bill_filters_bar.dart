@@ -1,3 +1,6 @@
+import 'package:ecuisine_mess/shared/widgets/inputs/app_date_picker_field.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_dropdown.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_search_field.dart';
 import 'package:flutter/material.dart';
 
 class BillFiltersBar extends StatelessWidget {
@@ -10,7 +13,7 @@ class BillFiltersBar extends StatelessWidget {
     required this.billDate,
     required this.onMealTypeChanged,
     required this.onStatusChanged,
-    required this.onPickDate,
+    required this.onDateChanged,
     required this.onClearDate,
   });
 
@@ -21,84 +24,73 @@ class BillFiltersBar extends StatelessWidget {
   final String? billDate;
   final ValueChanged<String?> onMealTypeChanged;
   final ValueChanged<String?> onStatusChanged;
-  final VoidCallback onPickDate;
+  final ValueChanged<DateTime> onDateChanged;
   final VoidCallback onClearDate;
+
+  DateTime? get _parsedDate {
+    final raw = billDate;
+    if (raw == null || raw.isEmpty) return null;
+    final parts = raw.split('-');
+    if (parts.length != 3) return null;
+    final y = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    final d = int.tryParse(parts[2]);
+    if (y == null || m == null || d == null) return null;
+    return DateTime(y, m, d);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
     return Column(
       children: [
-        TextField(
+        AppSearchField(
           controller: searchController,
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.search),
-            hintText:
-                'Search by token number, bill number, or member name...',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-          ),
+          hintText: 'Search by token number, bill number, or member name...',
           onChanged: onSearchChanged,
         ),
         const SizedBox(height: 12),
         Row(
           children: [
             Expanded(
-              child: DropdownButtonFormField<String?>(
-                initialValue: mealType,
-                decoration: const InputDecoration(
-                  labelText: 'Meal',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
+              child: AppDropdown<String>(
+                key: ValueKey('meal-$mealType'),
+                value: mealType,
+                label: 'Meal',
+                placeholderLabel: 'All meals',
                 items: const [
-                  DropdownMenuItem(value: null, child: Text('All meals')),
-                  DropdownMenuItem(
-                    value: 'BREAKFAST',
-                    child: Text('Breakfast'),
-                  ),
-                  DropdownMenuItem(value: 'LUNCH', child: Text('Lunch')),
-                  DropdownMenuItem(value: 'DINNER', child: Text('Dinner')),
+                  AppDropdownItem(value: 'BREAKFAST', label: 'Breakfast'),
+                  AppDropdownItem(value: 'LUNCH', label: 'Lunch'),
+                  AppDropdownItem(value: 'DINNER', label: 'Dinner'),
                 ],
                 onChanged: onMealTypeChanged,
               ),
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: DropdownButtonFormField<String?>(
-                initialValue: status,
-                decoration: const InputDecoration(
-                  labelText: 'Status',
-                  border: OutlineInputBorder(),
-                  isDense: true,
-                ),
+              child: AppDropdown<String>(
+                key: ValueKey('status-$status'),
+                value: status,
+                label: 'Status',
+                placeholderLabel: 'All statuses',
                 items: const [
-                  DropdownMenuItem(value: null, child: Text('All statuses')),
-                  DropdownMenuItem(value: 'SERVED', child: Text('Served')),
-                  DropdownMenuItem(
-                    value: 'CANCELLED',
-                    child: Text('Cancelled'),
-                  ),
+                  AppDropdownItem(value: 'SERVED', label: 'Served'),
+                  AppDropdownItem(value: 'CANCELLED', label: 'Cancelled'),
                 ],
                 onChanged: onStatusChanged,
               ),
             ),
             const SizedBox(width: 12),
-            OutlinedButton.icon(
-              onPressed: onPickDate,
-              icon: const Icon(Icons.calendar_today, size: 16),
-              label: Text(billDate ?? 'Date'),
+            AppDatePickerField(
+              key: ValueKey('date-$billDate'),
+              label: 'Date',
+              value: _parsedDate,
+              width: 180,
+              firstDate: DateTime(now.year - 2),
+              lastDate: DateTime(now.year + 1),
+              onChanged: onDateChanged,
+              onCleared: billDate != null ? onClearDate : null,
             ),
-            if (billDate != null) ...[
-              const SizedBox(width: 4),
-              IconButton(
-                tooltip: 'Clear date',
-                onPressed: onClearDate,
-                icon: const Icon(Icons.clear, size: 18),
-              ),
-            ],
           ],
         ),
       ],

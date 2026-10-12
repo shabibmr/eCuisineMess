@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:ecuisine_mess/navigation/app_destinations.dart';
 import 'package:ecuisine_mess/providers/auth_provider.dart';
+import 'package:ecuisine_mess/shared/widgets/layout/animated_nav_icon.dart';
 import 'package:ecuisine_mess/widgets/server_settings_dialog.dart';
 
 class MainLayout extends StatefulWidget {
@@ -79,7 +80,14 @@ class _MainLayoutState extends State<MainLayout> {
             destinations: [
               for (final dest in kAppDestinations)
                 NavigationRailDestination(
-                  icon: Icon(dest.icon),
+                  icon: AnimatedNavIcon(
+                    icon: dest.icon,
+                    isSelected: false,
+                  ),
+                  selectedIcon: AnimatedNavIcon(
+                    icon: dest.selectedIcon ?? dest.icon,
+                    isSelected: true,
+                  ),
                   label: Text(dest.label),
                 ),
             ],

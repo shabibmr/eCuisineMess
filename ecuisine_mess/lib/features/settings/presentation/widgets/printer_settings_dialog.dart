@@ -2,6 +2,7 @@ import 'package:ecuisine_mess/core/di/injection.dart';
 import 'package:ecuisine_mess/shared/models/token_slip_data.dart';
 import 'package:ecuisine_mess/shared/services/printer_service.dart';
 import 'package:ecuisine_mess/shared/services/printer_settings.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_save_button.dart';
 import 'package:printing/printing.dart';
 import 'package:flutter/material.dart';
 
@@ -187,9 +188,8 @@ class _PrinterSettingsDialogState extends State<_PrinterSettingsDialog> {
           onPressed: _testing || _loading ? null : _testPrint,
           child: const Text('Test Print'),
         ),
-        ElevatedButton(
+        AppSaveButton(
           onPressed: _testing ? null : _save,
-          child: const Text('Save'),
         ),
       ],
     );

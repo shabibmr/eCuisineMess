@@ -1,4 +1,7 @@
 import 'package:ecuisine_mess/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_save_button.dart';
+import 'package:ecuisine_mess/shared/widgets/feedback/app_alert_banner.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_password_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,7 +16,6 @@ class _LoginFormState extends State<LoginForm> {
   final _userCtrl = TextEditingController(text: 'admin');
   final _passCtrl = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _obscure = true;
 
   @override
   void dispose() {
@@ -61,52 +63,25 @@ class _LoginFormState extends State<LoginForm> {
                     (v == null || v.trim().isEmpty) ? 'Enter username' : null,
               ),
               const SizedBox(height: 16),
-              TextFormField(
+              AppPasswordField(
                 controller: _passCtrl,
-                obscureText: _obscure,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscure ? Icons.visibility : Icons.visibility_off,
-                    ),
-                    onPressed: () => setState(() => _obscure = !_obscure),
-                  ),
-                ),
+                label: 'Password',
                 onFieldSubmitted: (_) => _submit(),
                 validator: (v) =>
                     (v == null || v.isEmpty) ? 'Enter password' : null,
               ),
               if (error != null) ...[
                 const SizedBox(height: 12),
-                MaterialBanner(
-                  content: Text(
-                    error,
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                  backgroundColor: Colors.red.shade700,
-                  padding: const EdgeInsets.all(12),
-                  actions: const [SizedBox.shrink()],
-                ),
+                AppAlertBanner.error(message: error),
               ],
               const SizedBox(height: 20),
-              FilledButton(
-                onPressed: busy ? null : _submit,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: busy
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Sign in'),
-                ),
+              AppSaveButton(
+                label: 'Sign in',
+                loadingLabel: 'Signing in...',
+                isLoading: busy,
+                isFullWidth: true,
+                icon: null,
+                onPressed: _submit,
               ),
             ],
           ),

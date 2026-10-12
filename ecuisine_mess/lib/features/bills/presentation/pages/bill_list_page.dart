@@ -5,8 +5,12 @@ import 'package:ecuisine_mess/features/bills/presentation/bloc/bill_list_bloc.da
 import 'package:ecuisine_mess/features/bills/presentation/widgets/bill_cancel_dialog.dart';
 import 'package:ecuisine_mess/features/bills/presentation/widgets/bill_detail_sheet.dart';
 import 'package:ecuisine_mess/features/bills/presentation/widgets/bill_filters_bar.dart';
+import 'package:ecuisine_mess/shared/widgets/badges/app_status_badge.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_refresh_button.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_confirm_dialog.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/master_page.dart';
 import 'package:ecuisine_mess/shared/widgets/print/token_slip_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/tables/app_separated_list_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -39,6 +43,17 @@ class _BillListViewState extends State<_BillListView> {
   }
 
   Future<void> _cancelBill(Bill bill) async {
+    final proceed = await AppConfirmDialog.show(
+      context: context,
+      title: 'Cancel Bill ${bill.billNumber}?',
+      message:
+          'Cancelled vouchers are marked as CANCELLED and excluded from daily '
+          'meal accounts. Continue to enter a cancellation reason?',
+      confirmLabel: 'Continue',
+      isDestructive: true,
+    );
+    if (!proceed || !mounted) return;
+
     final result = await showDialog<BillCancelResult>(
       context: context,
       builder: (_) => BillCancelDialog(billNumber: bill.billNumber),
@@ -63,19 +78,10 @@ class _BillListViewState extends State<_BillListView> {
     );
   }
 
-  Future<void> _pickDate() async {
-    final bloc = context.read<BillListBloc>();
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: now,
-      firstDate: DateTime(now.year - 2),
-      lastDate: DateTime(now.year + 1),
-    );
-    if (picked == null) return;
-    final formatted =
-        '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
-    bloc.add(BillListFiltersChanged(billDate: formatted));
+  String _formatDate(DateTime picked) {
+    return '${picked.year.toString().padLeft(4, '0')}-'
+        '${picked.month.toString().padLeft(2, '0')}-'
+        '${picked.day.toString().padLeft(2, '0')}';
   }
 
   @override
@@ -91,9 +97,7 @@ class _BillListViewState extends State<_BillListView> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.notice!)),
           );
-          context
-              .read<BillListBloc>()
-              .add(const BillListNoticeConsumed());
+          context.read<BillListBloc>().add(const BillListNoticeConsumed());
         } else if (state.status == Status.failure && state.error != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.error!)),
@@ -113,18 +117,14 @@ class _BillListViewState extends State<_BillListView> {
               'Audit trail of all issued tokens, reprints and supervisor cancellations',
           loading: loading,
           error: showError ? state.error : null,
-          onRetry: () => context
-              .read<BillListBloc>()
-              .add(const BillListRefreshed()),
+          onRetry: () =>
+              context.read<BillListBloc>().add(const BillListRefreshed()),
           isEmpty: !loading && !showError && state.bills.isEmpty,
           emptyMessage: 'No bills found',
           actions: [
-            IconButton(
-              onPressed: () => context
-                  .read<BillListBloc>()
-                  .add(const BillListRefreshed()),
-              icon: const Icon(Icons.refresh),
-              tooltip: 'Refresh',
+            AppRefreshButton(
+              onPressed: () =>
+                  context.read<BillListBloc>().add(const BillListRefreshed()),
             ),
           ],
           toolbar: BillFiltersBar(
@@ -147,90 +147,95 @@ class _BillListViewState extends State<_BillListView> {
                     clearBillStatus: val == null,
                   ),
                 ),
-            onPickDate: _pickDate,
+            onDateChanged: (picked) => context.read<BillListBloc>().add(
+                  BillListFiltersChanged(billDate: _formatDate(picked)),
+                ),
             onClearDate: () => context.read<BillListBloc>().add(
                   const BillListFiltersChanged(clearBillDate: true),
                 ),
           ),
-          child: Card(
-            child: ListView.separated(
-              itemCount: state.bills.length,
-              separatorBuilder: (_, _) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final b = state.bills[index];
-                final isCancelled = b.isCancelled;
-                return ListTile(
-                  onTap: () => showBillDetailSheet(context, b.id),
-                  leading: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isCancelled
-                          ? Colors.grey.shade200
-                          : Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: isCancelled
-                            ? Colors.grey
-                            : Colors.blue.shade300,
-                      ),
-                    ),
-                    child: Text(
-                      b.tokenNumber,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: isCancelled
-                            ? Colors.grey.shade600
-                            : Colors.blue.shade900,
-                        decoration: isCancelled
-                            ? TextDecoration.lineThrough
-                            : null,
-                      ),
+          child: AppSeparatedListCard(
+            itemCount: state.bills.length,
+            itemBuilder: (context, index) {
+              final b = state.bills[index];
+              final isCancelled = b.isCancelled;
+              return ListTile(
+                onTap: () => showBillDetailSheet(context, b.id),
+                leading: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isCancelled
+                        ? Colors.grey.shade200
+                        : Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: isCancelled ? Colors.grey : Colors.blue.shade300,
                     ),
                   ),
-                  title: Text(
-                    '${b.memberName} • ${b.cuisineName}',
+                  child: Text(
+                    b.tokenNumber,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      decoration: isCancelled
-                          ? TextDecoration.lineThrough
-                          : null,
+                      fontSize: 14,
+                      color: isCancelled
+                          ? Colors.grey.shade600
+                          : Colors.blue.shade900,
+                      decoration:
+                          isCancelled ? TextDecoration.lineThrough : null,
                     ),
                   ),
-                  subtitle: Text(
-                    '${b.billNumber} • ${b.mealType} • ${b.billDate} ${b.billTime}'
-                    '${b.isOverride ? ' • [OVERRIDE]' : ''}'
-                    '${isCancelled ? ' • [CANCELLED: ${b.overrideReason ?? 'By supervisor'}]' : ''}',
-                    style: TextStyle(
-                      color: isCancelled ? Colors.red : Colors.black54,
-                    ),
+                ),
+                title: Text(
+                  '${b.memberName} • ${b.cuisineName}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    decoration:
+                        isCancelled ? TextDecoration.lineThrough : null,
                   ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.print, size: 20),
-                        tooltip: 'Reprint Token Slip',
-                        onPressed: () => _reprint(b),
+                ),
+                subtitle: Text(
+                  '${b.billNumber} • ${b.mealType} • ${b.billDate} ${b.billTime}'
+                  '${b.isOverride ? ' • [OVERRIDE]' : ''}'
+                  '${isCancelled ? ' • [CANCELLED: ${b.overrideReason ?? 'By supervisor'}]' : ''}',
+                  style: TextStyle(
+                    color: isCancelled ? Colors.red : Colors.black54,
+                  ),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isCancelled)
+                      const Padding(
+                        padding: EdgeInsets.only(right: 8),
+                        child: AppStatusBadge.cancelled(compact: true),
+                      )
+                    else
+                      const Padding(
+                        padding: EdgeInsets.only(right: 8),
+                        child: AppStatusBadge.served(compact: true),
                       ),
-                      if (!isCancelled)
-                        IconButton(
-                          icon: const Icon(
-                            Icons.cancel_outlined,
-                            color: Colors.red,
-                            size: 20,
-                          ),
-                          tooltip: 'Cancel Bill',
-                          onPressed: () => _cancelBill(b),
+                    IconButton(
+                      icon: const Icon(Icons.print, size: 20),
+                      tooltip: 'Reprint Token Slip',
+                      onPressed: () => _reprint(b),
+                    ),
+                    if (!isCancelled)
+                      IconButton(
+                        icon: const Icon(
+                          Icons.cancel_outlined,
+                          color: Colors.red,
+                          size: 20,
                         ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                        tooltip: 'Cancel Bill',
+                        onPressed: () => _cancelBill(b),
+                      ),
+                  ],
+                ),
+              );
+            },
           ),
         );
       },

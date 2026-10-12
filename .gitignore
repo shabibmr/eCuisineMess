@@ -36,4 +36,5 @@ mariadb/data/
 
 # AI / Assistant local cache
 .claude/
+.agents/
 

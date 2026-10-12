@@ -3,8 +3,14 @@ import 'package:ecuisine_mess/core/utils/status.dart';
 import 'package:ecuisine_mess/features/item_categories/domain/entities/item_category.dart';
 import 'package:ecuisine_mess/features/item_categories/domain/usecases/save_item_category.dart';
 import 'package:ecuisine_mess/features/item_categories/presentation/bloc/item_category_list_bloc.dart';
-import 'package:ecuisine_mess/shared/widgets/layout/form_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/badges/app_status_badge.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_create_button.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_refresh_button.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_form_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/dialogs/app_glass_lift_dialog.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_switch_tile.dart';
 import 'package:ecuisine_mess/shared/widgets/layout/master_page.dart';
+import 'package:ecuisine_mess/shared/widgets/tables/app_separated_list_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -24,117 +30,25 @@ class ItemCategoryListPage extends StatelessWidget {
 class _ItemCategoryListView extends StatelessWidget {
   const _ItemCategoryListView();
 
-  Future<void> _showAddDialog(BuildContext context) async {
+  Future<void> _openFormDialog(
+    BuildContext context, [
+    ItemCategory? category,
+  ]) async {
     final bloc = context.read<ItemCategoryListBloc>();
-    final nameCtrl = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-    final ok = await showAppFormDialog(
+    final defaultSort = bloc.state.categories.length + 1;
+
+    final params = await showAppGlassLiftDialog<SaveItemCategoryParams>(
       context: context,
-      title: 'Add Item Category',
-      formKey: formKey,
-      confirmLabel: 'Save',
-      body: TextFormField(
-        controller: nameCtrl,
-        autofocus: true,
-        decoration: const InputDecoration(
-          labelText: 'Name',
-          hintText: 'Snack',
-          border: OutlineInputBorder(),
-        ),
-        validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+      barrierDismissible: false,
+      builder: (_) => _ItemCategoryFormDialog(
+        category: category,
+        defaultSortOrder: defaultSort,
       ),
     );
-    if (ok != true) {
-      nameCtrl.dispose();
-      return;
+
+    if (params != null && context.mounted) {
+      bloc.add(ItemCategorySaveRequested(params));
     }
-    final sortOrder = bloc.state.categories.length + 1;
-    bloc.add(
-      ItemCategorySaveRequested(
-        SaveItemCategoryParams(
-          name: nameCtrl.text.trim(),
-          sortOrder: sortOrder,
-          isActive: true,
-        ),
-      ),
-    );
-    nameCtrl.dispose();
-  }
-
-  Future<void> _showEditDialog(
-    BuildContext context,
-    ItemCategory category,
-  ) async {
-    final bloc = context.read<ItemCategoryListBloc>();
-    final nameCtrl = TextEditingController(text: category.name);
-    final sortCtrl = TextEditingController(text: '${category.sortOrder}');
-    var isActive = category.isActive;
-    final formKey = GlobalKey<FormState>();
-
-    final ok = await showAppFormDialog(
-      context: context,
-      title: 'Edit Item Category',
-      formKey: formKey,
-      confirmLabel: 'Update',
-      body: StatefulBuilder(
-        builder: (ctx, setLocal) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                controller: nameCtrl,
-                autofocus: true,
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: sortCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Sort order',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Required';
-                  if (int.tryParse(v.trim()) == null) return 'Enter a number';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 8),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Active'),
-                value: isActive,
-                onChanged: (v) => setLocal(() => isActive = v),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-    if (ok != true) {
-      nameCtrl.dispose();
-      sortCtrl.dispose();
-      return;
-    }
-
-    bloc.add(
-      ItemCategorySaveRequested(
-        SaveItemCategoryParams(
-          id: category.id,
-          name: nameCtrl.text.trim(),
-          sortOrder: int.parse(sortCtrl.text.trim()),
-          isActive: isActive,
-        ),
-      ),
-    );
-    nameCtrl.dispose();
-    sortCtrl.dispose();
   }
 
   @override
@@ -177,51 +91,141 @@ class _ItemCategoryListView extends StatelessWidget {
           isEmpty: !loading && !showError && state.categories.isEmpty,
           emptyMessage: 'No categories yet',
           actions: [
-            IconButton(
+            AppRefreshButton(
               onPressed: () => context
                   .read<ItemCategoryListBloc>()
                   .add(const ItemCategoryListRefreshed()),
-              icon: const Icon(Icons.refresh),
             ),
             const SizedBox(width: 8),
-            FilledButton.icon(
-              onPressed: () => _showAddDialog(context),
-              icon: const Icon(Icons.add),
-              label: const Text('Add Category'),
+            AppCreateButton(
+              label: 'Add Category',
+              onPressed: () => _openFormDialog(context),
             ),
           ],
-          child: Card(
-            child: ListView.separated(
-              itemCount: state.categories.length,
-              separatorBuilder: (context, index) => const Divider(height: 1),
-              itemBuilder: (_, i) {
-                final c = state.categories[i];
-                return InkWell(
-                  onDoubleTap: () => _showEditDialog(context, c),
-                  child: ListTile(
-                    leading: CircleAvatar(child: Text('${c.sortOrder}')),
-                    title: Text(c.name),
-                    subtitle: Text(
-                      c.id,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: c.isActive
-                        ? const Chip(
-                            label: Text('Active'),
-                            visualDensity: VisualDensity.compact,
-                          )
-                        : const Chip(
-                            label: Text('Inactive'),
-                            visualDensity: VisualDensity.compact,
-                          ),
+          child: AppSeparatedListCard(
+            itemCount: state.categories.length,
+            itemBuilder: (_, i) {
+              final c = state.categories[i];
+              return InkWell(
+                onDoubleTap: () => _openFormDialog(context, c),
+                child: ListTile(
+                  leading: CircleAvatar(child: Text('${c.sortOrder}')),
+                  title: Text(c.name),
+                  subtitle: Text(
+                    c.id,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                );
-              },
-            ),
+                  trailing: AppStatusBadge.fromBool(c.isActive),
+                ),
+              );
+            },
           ),
         );
       },
     );
   }
 }
+
+class _ItemCategoryFormDialog extends StatefulWidget {
+  const _ItemCategoryFormDialog({
+    this.category,
+    required this.defaultSortOrder,
+  });
+
+  final ItemCategory? category;
+  final int defaultSortOrder;
+
+  @override
+  State<_ItemCategoryFormDialog> createState() =>
+      _ItemCategoryFormDialogState();
+}
+
+class _ItemCategoryFormDialogState extends State<_ItemCategoryFormDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _sortCtrl;
+  late bool _isActive;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtrl = TextEditingController(text: widget.category?.name ?? '');
+    _sortCtrl = TextEditingController(
+      text: widget.category != null
+          ? '${widget.category!.sortOrder}'
+          : '${widget.defaultSortOrder}',
+    );
+    _isActive = widget.category?.isActive ?? true;
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _sortCtrl.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    if (_formKey.currentState?.validate() != true) return;
+    final sort = int.tryParse(_sortCtrl.text.trim()) ?? widget.defaultSortOrder;
+    Navigator.of(context).pop(
+      SaveItemCategoryParams(
+        id: widget.category?.id,
+        name: _nameCtrl.text.trim(),
+        sortOrder: sort,
+        isActive: _isActive,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isEdit = widget.category != null;
+    return AppFormDialog(
+      title: isEdit ? 'Edit Item Category' : 'Add Item Category',
+      formKey: _formKey,
+      confirmLabel: isEdit ? 'Update' : 'Save',
+      onConfirm: _submit,
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: _nameCtrl,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Name',
+              hintText: 'Snack',
+              border: OutlineInputBorder(),
+            ),
+            validator: (v) =>
+                (v == null || v.trim().isEmpty) ? 'Required' : null,
+          ),
+          const SizedBox(height: 12),
+          TextFormField(
+            controller: _sortCtrl,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Sort order',
+              border: OutlineInputBorder(),
+            ),
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) return 'Required';
+              if (int.tryParse(v.trim()) == null) return 'Enter a number';
+              return null;
+            },
+          ),
+          if (isEdit) ...[
+            const SizedBox(height: 8),
+            AppSwitchTile(
+              title: 'Active',
+              value: _isActive,
+              onChanged: (v) => setState(() => _isActive = v),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+

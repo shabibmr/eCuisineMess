@@ -1,3 +1,4 @@
+import 'package:ecuisine_mess/shared/widgets/buttons/app_save_button.dart';
 import 'package:flutter/material.dart';
 
 class CounterActionBar extends StatelessWidget {
@@ -66,28 +67,12 @@ class CounterActionBar extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        ElevatedButton.icon(
-          onPressed: (!canSave || busy) ? null : onSavePrint,
-          icon: busy
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-              : const Icon(Icons.print, size: 20),
-          label: const Text('Save & Issue Token (F10)'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF0F172A),
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+        AppSaveButton(
+          label: 'Save & Issue Token (F10)',
+          loadingLabel: 'Issuing...',
+          icon: Icons.print,
+          isLoading: busy,
+          onPressed: canSave ? onSavePrint : null,
         ),
       ],
     );

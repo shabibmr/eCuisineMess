@@ -1,3 +1,6 @@
+import 'package:ecuisine_mess/shared/widgets/badges/app_status_badge.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_save_button.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_date_picker_field.dart';
 import 'package:flutter/material.dart';
 
 /// Top date controls + actions (mock-ui toolbar).
@@ -12,11 +15,12 @@ class MenuDateBar extends StatelessWidget {
     required this.onPrevDay,
     required this.onNextDay,
     required this.onJumpToday,
-    required this.onPickDate,
+    required this.onDateChanged,
     required this.onCopyFromDate,
     required this.onHistory,
     required this.onReset,
     required this.onSave,
+    this.isSaving = false,
   });
 
   final String menuDate;
@@ -24,18 +28,28 @@ class MenuDateBar extends StatelessWidget {
   final bool readOnly;
   final bool canSave;
   final bool dirty;
+  final bool isSaving;
   final VoidCallback onPrevDay;
   final VoidCallback onNextDay;
   final VoidCallback onJumpToday;
-  final VoidCallback onPickDate;
+  final ValueChanged<DateTime> onDateChanged;
   final VoidCallback onCopyFromDate;
   final VoidCallback onHistory;
   final VoidCallback onReset;
   final VoidCallback onSave;
 
+  DateTime? get _parsedDate {
+    final parts = menuDate.split('-');
+    if (parts.length != 3) return null;
+    final y = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    final d = int.tryParse(parts[2]);
+    if (y == null || m == null || d == null) return null;
+    return DateTime(y, m, d);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
     return Card(
       margin: EdgeInsets.zero,
       child: Padding(
@@ -49,27 +63,21 @@ class MenuDateBar extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'Date:',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(width: 8),
                 IconButton(
                   tooltip: 'Previous day',
                   onPressed: enabled ? onPrevDay : null,
                   icon: const Icon(Icons.chevron_left),
                   visualDensity: VisualDensity.compact,
                 ),
-                OutlinedButton(
-                  onPressed: enabled ? onPickDate : null,
-                  child: Text(
-                    menuDate.isEmpty ? 'Select date' : menuDate,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
+                AppDatePickerField(
+                  key: ValueKey('menu-date-$menuDate'),
+                  label: 'Date',
+                  value: _parsedDate,
+                  width: 170,
+                  enabled: enabled,
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2040),
+                  onChanged: onDateChanged,
                 ),
                 IconButton(
                   tooltip: 'Next day',
@@ -82,15 +90,9 @@ class MenuDateBar extends StatelessWidget {
                   child: const Text('Today'),
                 ),
                 if (dirty)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4),
-                    child: Chip(
-                      label: const Text('Unsaved', style: TextStyle(fontSize: 11)),
-                      visualDensity: VisualDensity.compact,
-                      backgroundColor: scheme.secondaryContainer,
-                      side: BorderSide.none,
-                      padding: EdgeInsets.zero,
-                    ),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 4),
+                    child: AppStatusBadge.unsaved(compact: true),
                   ),
               ],
             ),
@@ -114,10 +116,11 @@ class MenuDateBar extends StatelessWidget {
                   child: const Text('Reset'),
                 ),
                 const SizedBox(width: 8),
-                FilledButton.icon(
+                AppSaveButton(
+                  label: 'Save Menu',
+                  icon: Icons.save,
+                  isLoading: isSaving,
                   onPressed: enabled && canSave ? onSave : null,
-                  icon: const Icon(Icons.save, size: 16),
-                  label: const Text('Save Menu'),
                 ),
               ],
             ),

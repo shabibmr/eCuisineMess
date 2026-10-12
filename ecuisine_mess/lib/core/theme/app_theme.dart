@@ -8,8 +8,9 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  static const Color primary = Color(0xFF2563EB);
-  static const Color primaryDark = Color(0xFF1D4ED8);
+  /// Primary color swatch (Peacock Blue).
+  static const Color primary = Color(0xFF016795);
+  static const Color primaryDark = Color(0xFF014A6B);
   static const Color ink = Color(0xFF0F172A);
   static const Color surface = Color(0xFFF6F8FC);
   static const Color surfaceContainer = Color(0xFFFFFFFF);
@@ -20,8 +21,6 @@ class AppTheme {
       seedColor: primary,
       brightness: Brightness.light,
     ).copyWith(
-      primary: primary,
-      onPrimary: Colors.white,
       surface: surface,
       onSurface: ink,
       surfaceContainer: surfaceContainer,
@@ -35,14 +34,14 @@ class AppTheme {
       scaffoldBackgroundColor: surface,
       visualDensity: VisualDensity.compact,
       fontFamily: 'Segoe UI',
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: surfaceContainer,
         foregroundColor: ink,
         elevation: 0,
         scrolledUnderElevation: 1,
         surfaceTintColor: Colors.transparent,
         centerTitle: false,
-        titleTextStyle: const TextStyle(
+        titleTextStyle: TextStyle(
           color: ink,
           fontSize: 18,
           fontWeight: FontWeight.w700,
@@ -65,8 +64,8 @@ class AppTheme {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: primary,
-          foregroundColor: Colors.white,
+          backgroundColor: scheme.primary,
+          foregroundColor: scheme.onPrimary,
           minimumSize: const Size(44, 40),
           padding: const EdgeInsets.symmetric(horizontal: 16),
           shape: RoundedRectangleBorder(
@@ -122,16 +121,16 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: primary, width: 1.5),
+          borderSide: BorderSide(color: scheme.primary, width: 1.5),
         ),
       ),
       navigationRailTheme: NavigationRailThemeData(
         backgroundColor: surfaceContainer,
-        indicatorColor: const Color(0xFFE8F0FF),
-        selectedIconTheme: const IconThemeData(color: primary),
+        indicatorColor: scheme.primaryContainer,
+        selectedIconTheme: IconThemeData(color: scheme.primary),
         unselectedIconTheme: const IconThemeData(color: Color(0xFF64748B)),
-        selectedLabelTextStyle: const TextStyle(
-          color: primaryDark,
+        selectedLabelTextStyle: TextStyle(
+          color: scheme.primary,
           fontWeight: FontWeight.w700,
           fontSize: 11,
         ),

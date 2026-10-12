@@ -3,7 +3,11 @@ import 'package:ecuisine_mess/core/utils/status.dart';
 import 'package:ecuisine_mess/features/cuisines/domain/entities/cuisine_item_mapping.dart';
 import 'package:ecuisine_mess/features/cuisines/presentation/bloc/cuisine_editor_bloc.dart';
 import 'package:ecuisine_mess/features/items/domain/entities/item.dart';
+import 'package:ecuisine_mess/shared/widgets/buttons/app_save_button.dart';
 import 'package:ecuisine_mess/shared/widgets/dual_pane_list.dart';
+import 'package:ecuisine_mess/shared/widgets/feedback/app_alert_banner.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_dropdown.dart';
+import 'package:ecuisine_mess/shared/widgets/inputs/app_switch_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -203,25 +207,14 @@ class _CuisineEditorViewState extends State<_CuisineEditorView> {
                 label: const Text('Cancel'),
               ),
               const SizedBox(width: 8),
-              FilledButton.icon(
-                onPressed: state.isSaving
-                    ? null
-                    : () {
-                        if (_formKey.currentState?.validate() == true) {
-                          bloc.add(const CuisineEditorSubmitted());
-                        }
-                      },
-                icon: state.isSaving
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.check, size: 18),
-                label: Text(state.isSaving ? 'Saving...' : 'Save Cuisine'),
+              AppSaveButton(
+                label: 'Save Cuisine',
+                isLoading: state.isSaving,
+                onPressed: () {
+                  if (_formKey.currentState?.validate() == true) {
+                    bloc.add(const CuisineEditorSubmitted());
+                  }
+                },
               ),
               const SizedBox(width: 16),
             ],
@@ -287,15 +280,14 @@ class _CuisineEditorViewState extends State<_CuisineEditorView> {
                               ),
                             ),
                             const SizedBox(width: 16),
-                            Row(
-                              children: [
-                                const Text('Active:'),
-                                Switch(
-                                  value: state.isActive,
-                                  onChanged: (val) =>
-                                      bloc.add(CuisineEditorActiveToggled(val)),
-                                ),
-                              ],
+                            SizedBox(
+                              width: 160,
+                              child: AppSwitchTile(
+                                title: 'Active',
+                                value: state.isActive,
+                                onChanged: (val) =>
+                                    bloc.add(CuisineEditorActiveToggled(val)),
+                              ),
                             ),
                           ],
                         ),
@@ -326,26 +318,24 @@ class _CuisineEditorViewState extends State<_CuisineEditorView> {
                           ),
                           const SizedBox(width: 14),
                           Expanded(
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                isDense: true,
-                                hint: const Text('Select source cuisine...', style: TextStyle(fontSize: 13)),
-                                value: _selectedCopyCuisineId,
-                                items: state.otherCuisines
-                                    .map(
-                                      (c) => DropdownMenuItem<String>(
-                                        value: c.id,
-                                        child: Text(
-                                          '${c.cuisineName} (${c.mappedItemsCount} items)',
-                                          style: const TextStyle(fontSize: 13),
-                                        ),
-                                      ),
-                                    )
-                                    .toList(),
-                                onChanged: (val) {
-                                  setState(() => _selectedCopyCuisineId = val);
-                                },
+                            child: AppDropdown<String>(
+                              key: ValueKey(
+                                'copy-cuisine-$_selectedCopyCuisineId',
                               ),
+                              value: _selectedCopyCuisineId,
+                              placeholderLabel: 'Select source cuisine...',
+                              items: state.otherCuisines
+                                  .map(
+                                    (c) => AppDropdownItem<String>(
+                                      value: c.id,
+                                      label:
+                                          '${c.cuisineName} (${c.mappedItemsCount} items)',
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (val) {
+                                setState(() => _selectedCopyCuisineId = val);
+                              },
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -371,29 +361,9 @@ class _CuisineEditorViewState extends State<_CuisineEditorView> {
 
                 // Empty warning banner
                 if (state.hasUnsavedWarning) ...[
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.amber.shade400),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.info_outline, color: Colors.amber.shade900),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            'No items mapped yet. Members assigned to this cuisine will not have entitlement items until menu items are mapped.',
-                            style: TextStyle(
-                              color: Colors.amber.shade900,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                  const AppAlertBanner.warning(
+                    message:
+                        'No items mapped yet. Members assigned to this cuisine will not have entitlement items until menu items are mapped.',
                   ),
                   const SizedBox(height: 16),
                 ],

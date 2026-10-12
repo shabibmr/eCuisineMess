@@ -124,5 +124,16 @@ void main() {
       expect(sl.isRegistered<AppUpdateService>(), isTrue);
       await sl.reset();
     });
+
+    test('configureDependencies registers AppUpdateService and resolves safely without firestore',
+        () async {
+      SharedPreferences.setMockInitialValues({});
+      await sl.reset();
+      await configureDependencies();
+
+      expect(sl.isRegistered<AppUpdateService>(), isTrue);
+      expect(() => sl<AppUpdateService>(), returnsNormally);
+      await sl.reset();
+    });
   });
 }

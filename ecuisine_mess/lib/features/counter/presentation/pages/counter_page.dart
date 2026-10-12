@@ -10,7 +10,6 @@ import 'package:ecuisine_mess/features/counter/presentation/widgets/meal_banner.
 import 'package:ecuisine_mess/features/counter/presentation/widgets/member_card.dart';
 import 'package:ecuisine_mess/features/counter/presentation/widgets/reject_banner.dart';
 import 'package:ecuisine_mess/features/counter/presentation/widgets/rfid_input_bar.dart';
-import 'package:ecuisine_mess/shared/widgets/counter/rfid_tap_simulator.dart';
 import 'package:ecuisine_mess/shared/widgets/counter/supervisor_override_dialog.dart';
 import 'package:ecuisine_mess/shared/widgets/print/token_slip_dialog.dart';
 import 'package:flutter/material.dart';
@@ -146,8 +145,6 @@ class _CounterViewState extends State<_CounterView> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   MealBanner(mealWindow: state.mealWindow),
-                  const SizedBox(height: 16),
-                  RfidTapSimulator(onScan: _onScan),
                   const SizedBox(height: 16),
                   RfidInputBar(
                     controller: _rfidController,

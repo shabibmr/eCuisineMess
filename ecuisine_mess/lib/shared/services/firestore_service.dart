@@ -1,28 +1,41 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:logger/logger.dart';
 
 /// Service providing typed helper methods and access to Cloud Firestore.
 class FirestoreService {
-  final FirebaseFirestore _firestore;
+  final FirebaseFirestore? _firestore;
   final Logger _logger;
 
   FirestoreService({
     FirebaseFirestore? firestore,
     Logger? logger,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+  })  : _firestore = firestore,
         _logger = logger ?? Logger();
 
+  /// Whether Firebase is initialized and available.
+  bool get isAvailable => _firestore != null || Firebase.apps.isNotEmpty;
+
   /// Direct access to the underlying [FirebaseFirestore] instance.
-  FirebaseFirestore get firestore => _firestore;
+  FirebaseFirestore get firestore {
+    if (_firestore != null) return _firestore;
+    if (Firebase.apps.isNotEmpty) {
+      return FirebaseFirestore.instance;
+    }
+    throw FirebaseException(
+      plugin: 'cloud_firestore',
+      message: 'Firebase has not been initialized. Ensure FirebaseInitializer.initialize() has completed.',
+    );
+  }
 
   /// Get reference to a collection.
   CollectionReference<Map<String, dynamic>> collection(String path) {
-    return _firestore.collection(path);
+    return firestore.collection(path);
   }
 
   /// Get reference to a document.
   DocumentReference<Map<String, dynamic>> doc(String path) {
-    return _firestore.doc(path);
+    return firestore.doc(path);
   }
 
   /// Fetch a document once by collection path and document ID.
@@ -31,7 +44,7 @@ class FirestoreService {
     String docId,
   ) async {
     try {
-      return await _firestore.collection(collectionPath).doc(docId).get();
+      return await firestore.collection(collectionPath).doc(docId).get();
     } catch (e, st) {
       _logger.e('Firestore getDoc error [$collectionPath/$docId]: $e', error: e, stackTrace: st);
       rethrow;
@@ -46,7 +59,7 @@ class FirestoreService {
     bool merge = false,
   }) async {
     try {
-      await _firestore
+      await firestore
           .collection(collectionPath)
           .doc(docId)
           .set(data, SetOptions(merge: merge));
@@ -62,7 +75,7 @@ class FirestoreService {
     Map<String, dynamic> data,
   ) async {
     try {
-      return await _firestore.collection(collectionPath).add(data);
+      return await firestore.collection(collectionPath).add(data);
     } catch (e, st) {
       _logger.e('Firestore addDoc error [$collectionPath]: $e', error: e, stackTrace: st);
       rethrow;
@@ -76,7 +89,7 @@ class FirestoreService {
     Map<String, dynamic> data,
   ) async {
     try {
-      await _firestore.collection(collectionPath).doc(docId).update(data);
+      await firestore.collection(collectionPath).doc(docId).update(data);
     } catch (e, st) {
       _logger.e('Firestore updateDoc error [$collectionPath/$docId]: $e', error: e, stackTrace: st);
       rethrow;
@@ -86,7 +99,7 @@ class FirestoreService {
   /// Delete a document.
   Future<void> deleteDoc(String collectionPath, String docId) async {
     try {
-      await _firestore.collection(collectionPath).doc(docId).delete();
+      await firestore.collection(collectionPath).doc(docId).delete();
     } catch (e, st) {
       _logger.e('Firestore deleteDoc error [$collectionPath/$docId]: $e', error: e, stackTrace: st);
       rethrow;
@@ -95,7 +108,7 @@ class FirestoreService {
 
   /// Stream updates from a collection query.
   Stream<QuerySnapshot<Map<String, dynamic>>> streamCollection(String collectionPath) {
-    return _firestore.collection(collectionPath).snapshots();
+    return firestore.collection(collectionPath).snapshots();
   }
 
   /// Stream updates from a single document.
@@ -103,6 +116,6 @@ class FirestoreService {
     String collectionPath,
     String docId,
   ) {
-    return _firestore.collection(collectionPath).doc(docId).snapshots();
+    return firestore.collection(collectionPath).doc(docId).snapshots();
   }
 }

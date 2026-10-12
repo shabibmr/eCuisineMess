@@ -15,25 +15,25 @@ NSSM remains the manual fallback in `backend_api/docs/deployment-windows.md`. Th
 From `packaging` on a developer PC:
 
 ```powershell
-pwsh -File .\build-bundle.ps1
+powershell -ExecutionPolicy Bypass -File .\build-bundle.ps1
 ```
 
-That builds the Flutter Windows release, freezes `serve.py` with PyInstaller (onedir), and downloads WinSW 2.12.0 and the VC++ 2015–2022 x64 redist if they are missing. Binaries are not committed.
+That:
+1. Downloads MariaDB 11.4.5 portable, WinSW 2.12.0, and VC++ redistributable if missing.
+2. Builds the Flutter Windows release (`ecuisine_mess.exe`).
+3. Freezes `serve.py` with PyInstaller (onedir into `packaging\dist\mess-api`).
+4. Digitally signs all executables using Authenticode & SHA256 timestamp (`packaging\tools\sign-binaries.ps1`).
+5. Compiles and signs `packaging\dist\ecuisine_mess_full_1.0.0.exe` using Inno Setup 6 (`ISCC.exe`).
 
-Then compile `ecuisine_mess_full.iss` with Inno Setup 6 (`ISCC.exe`). The setup file is `packaging\dist\ecuisine_mess_full_1.0.0.exe`.
+Parameters:
+- `-SkipFlutter`: Skip rebuilding Flutter if already up-to-date.
+- `-SkipApi`: Skip rebuilding PyInstaller freeze.
+- `-SkipMariaDb`: Skip MariaDB zip check.
 
-`-SkipFlutter` skips the Flutter build when `ecuisine_mess\build\windows\x64\runner\Release` is already current.
+## Database & Services Configuration
 
-## Do not install on the XAMPP dev PC
-
-The installer stops if TCP 3306 is already taken, and the first install imports `database\schema.sql` and `database\seed.sql` only when `%ProgramData%\eCuisine Mess\mariadb-data\mysql` is missing. Verify on a clean Windows user or VM:
-
-- After install and after reboot, both services are Running and Automatic.
-- Killing `mess-api.exe` comes back (service recovery).
-- With the API stopped, the Flutter app asks "Mess server is not running. Start it?" and a standard user can start it.
-- Login works. A member photo saved under ProgramData is served at `/static/...`.
-- An upgrade keeps bills and members. Uninstall with the default (keep data), then reinstall, does not wipe them.
-
-Schema changes stay a manual release-note step. The installer does not run `database\migrations`.
-
-Go-live must change `MESS_SUPERVISOR_PIN` in `config.env` (the default is `1234`) and the seed admin password.
+- **Database**: MariaDB runs on custom port **`8233`** (avoiding any conflict with XAMPP or default MySQL on port 3306).
+- **Credentials**: User `ecuisine_user` / password `MessDbPass8233!`.
+- **First Install**: Automatically creates `ecuisine_mess` and imports `database\schema.sql` and `database\seed.sql`.
+- **Upgrades / Updates**: If `%ProgramData%\eCuisine Mess\mariadb-data\mysql` already exists, database initialization and seed import are skipped, preserving all existing user data, members, and transactions.
+- **Go-Live**: Update `MESS_SUPERVISOR_PIN` and passwords in `%ProgramData%\eCuisine Mess\config.env`.

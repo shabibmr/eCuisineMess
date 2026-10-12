@@ -126,20 +126,32 @@ function Install-WinSw {
 }
 
 function Wait-DbPing {
-    param([string]$AdminExe, [int]$Seconds = 30)
+    param(
+        [string]$AdminExe,
+        [int]$Port = 8233,
+        [string]$User = "root",
+        [string]$Password = "",
+        [int]$Seconds = 30
+    )
+    $authArgs = @("-u", $User, "-P", "$Port")
+    if ($Password) { $authArgs += "-p$Password" }
     for ($i = 0; $i -lt $Seconds; $i++) {
-        & $AdminExe --protocol=tcp -u root -P 3306 ping 2>$null | Out-Null
+        & $AdminExe --protocol=tcp @authArgs ping 2>$null | Out-Null
         if ($LASTEXITCODE -eq 0) { return }
         Start-Sleep -Seconds 1
     }
-    throw "MariaDB did not answer on port 3306."
+    throw "MariaDB did not answer on port $Port."
 }
 
 function Initialize-Database {
     param(
         [string]$BinDir,
         [string]$BaseDir,
-        [string]$DataPath
+        [string]$DataPath,
+        [int]$Port = 8233,
+        [string]$DbUser = "ecuisine_user",
+        [string]$DbPass = "MessDbPass8233!",
+        [string]$DbName = "ecuisine_mess"
     )
     $marker = Join-Path $DataPath "mysql"
     if (Test-Path $marker) {
@@ -147,7 +159,7 @@ function Initialize-Database {
         return
     }
 
-    Test-PortFree -Port 3306
+    Test-PortFree -Port $Port
     $installDb = Join-Path $BinDir "mariadb-install-db.exe"
     $server = Join-Path $BinDir "mariadbd.exe"
     $client = Join-Path $BinDir "mariadb.exe"
@@ -165,22 +177,32 @@ function Initialize-Database {
     $proc = Start-Process -FilePath $server -ArgumentList @(
         "--datadir=$DataPath",
         "--basedir=$BaseDir",
-        "--port=3306",
+        "--port=$Port",
         "--bind-address=127.0.0.1",
         "--console"
     ) -PassThru -WindowStyle Hidden
     try {
-        Wait-DbPing -AdminExe $admin
-        Write-Log "Importing schema and seed"
-        & $client --protocol=tcp -u root -P 3306 -e "CREATE DATABASE IF NOT EXISTS ecuisine_mess CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-        if ($LASTEXITCODE -ne 0) { throw "CREATE DATABASE failed" }
-        cmd /c "`"$client`" --protocol=tcp -u root -P 3306 ecuisine_mess < `"$schema`""
+        Wait-DbPing -AdminExe $admin -Port $Port -User "root"
+        Write-Log "Creating database $DbName and user $DbUser on port $Port"
+        $sqlInit = @"
+CREATE DATABASE IF NOT EXISTS $DbName CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS '$DbUser'@'127.0.0.1' IDENTIFIED BY '$DbPass';
+GRANT ALL PRIVILEGES ON $DbName.* TO '$DbUser'@'127.0.0.1';
+FLUSH PRIVILEGES;
+"@
+        & $client --protocol=tcp -u root -P $Port -e "$sqlInit"
+        if ($LASTEXITCODE -ne 0) { throw "Database and user creation failed" }
+
+        Write-Log "Importing schema into $DbName"
+        cmd /c "`"$client`" --protocol=tcp -u $DbUser -p$DbPass -P $Port $DbName < `"$schema`""
         if ($LASTEXITCODE -ne 0) { throw "schema import failed" }
-        cmd /c "`"$client`" --protocol=tcp -u root -P 3306 ecuisine_mess < `"$seed`""
+
+        Write-Log "Importing seed data into $DbName"
+        cmd /c "`"$client`" --protocol=tcp -u $DbUser -p$DbPass -P $Port $DbName < `"$seed`""
         if ($LASTEXITCODE -ne 0) { throw "seed import failed" }
     }
     finally {
-        & $admin --protocol=tcp -u root -P 3306 shutdown 2>$null | Out-Null
+        & $admin --protocol=tcp -u root -P $Port shutdown 2>$null | Out-Null
         if (-not $proc.HasExited) {
             Wait-Process -Id $proc.Id -Timeout 20 -ErrorAction SilentlyContinue
         }
@@ -196,17 +218,22 @@ try {
         New-Item -ItemType Directory -Force -Path (Join-Path $DataDir $name) | Out-Null
     }
 
+    $dbPort = 8233
+    $dbUser = "ecuisine_user"
+    $dbPass = "MessDbPass8233!"
+    $dbName = "ecuisine_mess"
+
     $configPath = Join-Path $DataDir "config.env"
     if (-not (Test-Path $configPath)) {
         @"
 MESS_DB_HOST=127.0.0.1
-MESS_DB_PORT=3306
-MESS_DB_USER=root
-MESS_DB_PASSWORD=
-MESS_DB_NAME=ecuisine_mess
+MESS_DB_PORT=$dbPort
+MESS_DB_USER=$dbUser
+MESS_DB_PASSWORD=$dbPass
+MESS_DB_NAME=$dbName
 MESS_SUPERVISOR_PIN=1234
 "@ | Set-Content -Path $configPath -Encoding ascii
-        Write-Log "Wrote default config.env"
+        Write-Log "Wrote default config.env configured for port $dbPort"
     }
 
     $mariaBin = Join-Path $AppDir "mariadb\bin"
@@ -216,15 +243,15 @@ MESS_SUPERVISOR_PIN=1234
     if (-not (Test-Path $apiExe)) { throw "Missing $apiExe. Build the frozen API first." }
     if (-not (Test-Path (Join-Path $mariaBin "mariadbd.exe"))) { throw "Missing MariaDB binaries." }
 
-    Initialize-Database -BinDir $mariaBin -BaseDir $mariaBase -DataPath $dataPath
-    Test-PortFree -Port 3306
+    Initialize-Database -BinDir $mariaBin -BaseDir $mariaBase -DataPath $dataPath -Port $dbPort -DbUser $dbUser -DbPass $dbPass -DbName $dbName
+    Test-PortFree -Port $dbPort
 
     $dbXml = Join-Path $mariaBase "EcuisineMessDb.xml"
     $apiXml = Join-Path $AppDir "server\EcuisineMessApi.xml"
     Write-ServiceXml -Path $dbXml -Id "EcuisineMessDb" -DisplayName "eCuisine Mess Database" `
-        -Description "MariaDB for eCuisine Mess. Starts at boot and restarts on failure." `
+        -Description "MariaDB for eCuisine Mess on port $dbPort. Starts at boot and restarts on failure." `
         -Executable (Join-Path $mariaBin "mariadbd.exe") `
-        -Arguments "--datadir=`"$dataPath`" --basedir=`"$mariaBase`" --port=3306 --bind-address=127.0.0.1 --console" `
+        -Arguments "--datadir=`"$dataPath`" --basedir=`"$mariaBase`" --port=$dbPort --bind-address=127.0.0.1 --console" `
         -WorkDir "" -Depend ""
     Write-ServiceXml -Path $apiXml -Id "EcuisineMessApi" -DisplayName "eCuisine Mess API" `
         -Description "FastAPI backend for eCuisine Mess. Starts after MariaDB and restarts on failure." `
@@ -250,7 +277,7 @@ MESS_SUPERVISOR_PIN=1234
 
     Write-Log "Starting services"
     & (Join-Path $mariaBase "EcuisineMessDb.exe") start
-    Wait-DbPing -AdminExe (Join-Path $mariaBin "mariadb-admin.exe")
+    Wait-DbPing -AdminExe (Join-Path $mariaBin "mariadb-admin.exe") -Port $dbPort -User $dbUser -Password $dbPass
     & (Join-Path $AppDir "server\EcuisineMessApi.exe") start
 
     $healthy = $false

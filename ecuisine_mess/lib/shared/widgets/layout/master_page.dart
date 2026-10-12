@@ -46,7 +46,7 @@ class MasterPage extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w750,
+                        fontWeight: FontWeight.w700,
                         letterSpacing: -0.4,
                       ),
                     ),
@@ -62,7 +62,7 @@ class MasterPage extends StatelessWidget {
                   ],
                 ),
               ),
-              if (actions != null) ...actions!,
+              ...?actions,
             ],
           ),
           if (toolbar != null) ...[

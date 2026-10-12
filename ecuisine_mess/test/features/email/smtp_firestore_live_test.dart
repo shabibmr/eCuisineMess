@@ -33,7 +33,7 @@ void main() {
       fromName: 'eCuisine Mess System (Live Test Verified)',
       useTls: true,
       useSsl: false,
-      supervisorEmails: const [
+      supervisorEmails: [
         'supervisor1@ecuisinemess.com',
         'manager@ecuisinemess.com',
         'auditor@ecuisinemess.com',
