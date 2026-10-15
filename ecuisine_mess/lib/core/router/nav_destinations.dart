@@ -48,6 +48,7 @@ const List<NavDestination> kNavDestinations = [
     icon: Icons.schedule_outlined,
     selectedIcon: Icons.schedule,
     route: AppRoutes.mealTimes,
+    showInRail: false,
   ),
   NavDestination(
     label: 'Items',
@@ -60,6 +61,7 @@ const List<NavDestination> kNavDestinations = [
     icon: Icons.category_outlined,
     selectedIcon: Icons.category,
     route: AppRoutes.itemCategories,
+    showInRail: false,
   ),
   NavDestination(
     label: 'Organization',

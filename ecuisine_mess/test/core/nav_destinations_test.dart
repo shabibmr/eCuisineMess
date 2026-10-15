@@ -4,15 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('nav destinations', () {
-    test('Organization is omitted from the rail', () {
-      expect(
-        kNavDestinations.any((d) => d.route == AppRoutes.organizations),
-        isTrue,
-      );
-      expect(
-        kRailDestinations.any((d) => d.route == AppRoutes.organizations),
-        isFalse,
-      );
+    test('admin pages are omitted from the rail', () {
+      for (final route in [
+        AppRoutes.organizations,
+        AppRoutes.mealTimes,
+        AppRoutes.itemCategories,
+      ]) {
+        expect(kNavDestinations.any((d) => d.route == route), isTrue);
+        expect(kRailDestinations.any((d) => d.route == route), isFalse);
+      }
     });
 
     test('rail and branch indices skip Organization', () {
@@ -25,10 +25,10 @@ void main() {
 
       expect(railIndexForBranch(orgBranch), isNull);
       expect(branchIndexForRail(railIndexForBranch(menuBranch)!), menuBranch);
-      expect(
-        kRailDestinations.map((d) => d.label),
-        isNot(contains('Organization')),
-      );
+      final labels = kRailDestinations.map((d) => d.label).toList();
+      expect(labels, isNot(contains('Organization')));
+      expect(labels, isNot(contains('Meal Times')));
+      expect(labels, isNot(contains('Item Categories')));
     });
   });
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 enum UserAccountMenuAction {
   organizations,
+  mealTimes,
+  itemCategories,
   smtp,
   updates,
   printer,
@@ -9,7 +11,7 @@ enum UserAccountMenuAction {
   logout,
 }
 
-/// Account chip that opens settings, Organization, and logout.
+/// Account chip that opens Administrator pages, settings, and logout.
 class UserAccountMenu extends StatelessWidget {
   const UserAccountMenu({
     super.key,
@@ -31,11 +33,38 @@ class UserAccountMenu extends StatelessWidget {
       constraints: const BoxConstraints(minWidth: 280, maxWidth: 320),
       onSelected: onSelected,
       itemBuilder: (context) => [
+        PopupMenuItem<UserAccountMenuAction>(
+          enabled: false,
+          height: 32,
+          child: Text(
+            'ADMINISTRATOR',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.1,
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ),
         const PopupMenuItem(
           value: UserAccountMenuAction.organizations,
           child: _MenuRow(
             icon: Icons.business_outlined,
             label: 'Organization',
+          ),
+        ),
+        const PopupMenuItem(
+          value: UserAccountMenuAction.mealTimes,
+          child: _MenuRow(
+            icon: Icons.schedule_outlined,
+            label: 'Meal Times',
+          ),
+        ),
+        const PopupMenuItem(
+          value: UserAccountMenuAction.itemCategories,
+          child: _MenuRow(
+            icon: Icons.category_outlined,
+            label: 'Item Categories',
           ),
         ),
         const PopupMenuDivider(),

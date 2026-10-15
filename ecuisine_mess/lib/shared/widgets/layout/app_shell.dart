@@ -165,6 +165,10 @@ class _AppShellState extends State<AppShell> {
     switch (action) {
       case UserAccountMenuAction.organizations:
         context.goNamed(AppRoutes.organizations.name);
+      case UserAccountMenuAction.mealTimes:
+        context.goNamed(AppRoutes.mealTimes.name);
+      case UserAccountMenuAction.itemCategories:
+        context.goNamed(AppRoutes.itemCategories.name);
       case UserAccountMenuAction.smtp:
         showSmtpSettingsDialog(context);
       case UserAccountMenuAction.updates:

@@ -27,7 +27,10 @@ void main() {
     await tester.tap(find.text('Administrator'));
     await tester.pumpAndSettle();
 
+    expect(find.text('ADMINISTRATOR'), findsOneWidget);
     expect(find.text('Organization'), findsOneWidget);
+    expect(find.text('Meal Times'), findsOneWidget);
+    expect(find.text('Item Categories'), findsOneWidget);
     expect(find.text('Email & SMTP Settings'), findsOneWidget);
     expect(find.text('Check for Updates'), findsOneWidget);
     expect(find.text('Printer Settings'), findsOneWidget);
