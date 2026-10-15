@@ -86,14 +86,29 @@ var
 begin
   Redist := ExpandConstant('{tmp}\vc_redist.x64.exe');
   if FileExists(Redist) then
-    Exec(Redist, '/install /quiet /norestart', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  begin
+    if Exec(Redist, '/install /quiet /norestart', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+      Log('VC++ redistributable finished with exit code ' + IntToStr(ResultCode))
+    else
+      Log('Could not run VC++ redistributable: ' + SysErrorMessage(ResultCode));
+  end
+  else
+    Log('VC++ redistributable not bundled in this build; skipping');
 
   AppDir := ExpandConstant('{app}');
   DataDir := ExpandConstant('{#MyDataDir}');
   Script := ExpandConstant('{app}\tools\install-services.ps1');
   Args := '-NoProfile -ExecutionPolicy Bypass -File "' + Script + '" -AppDir "' + AppDir + '" -DataDir "' + DataDir + '"';
-  if (not Exec('powershell.exe', Args, '', SW_HIDE, ewWaitUntilTerminated, ResultCode)) or (ResultCode <> 0) then
-    MsgBox('The mess services did not start.' + #13#10 + 'See ' + DataDir + '\logs\install.log', mbError, MB_OK);
+  if not Exec('powershell.exe', Args, '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+  begin
+    Log('Could not launch install-services.ps1: ' + SysErrorMessage(ResultCode) + ' (code ' + IntToStr(ResultCode) + ')');
+    MsgBox('Could not run the service setup script.' + #13#10 + SysErrorMessage(ResultCode) + ' (code ' + IntToStr(ResultCode) + ')' + #13#10 + 'Script: ' + Script, mbError, MB_OK);
+  end
+  else if ResultCode <> 0 then
+  begin
+    Log('install-services.ps1 exited with code ' + IntToStr(ResultCode));
+    MsgBox('The mess services did not start (setup script exit code ' + IntToStr(ResultCode) + ').' + #13#10 + 'Details and diagnostics: ' + DataDir + '\logs\install.log', mbError, MB_OK);
+  end;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);

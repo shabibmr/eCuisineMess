@@ -69,8 +69,8 @@ Edit `config.env` in this directory:
 MESS_API_PORT=8000
 MESS_DB_HOST=127.0.0.1
 MESS_DB_PORT=3306
-MESS_DB_USER=root
-MESS_DB_PASSWORD=
+MESS_DB_USER=user2grey
+MESS_DB_PASSWORD=user2grey
 MESS_DB_NAME=ecuisine_mess
 MESS_SUPERVISOR_PIN=1234
 ```

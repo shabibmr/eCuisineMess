@@ -32,8 +32,8 @@ Parameters:
 
 ## Database & Services Configuration
 
-- **Database**: MariaDB runs on custom port **`8233`** (avoiding any conflict with XAMPP or default MySQL on port 3306).
-- **Credentials**: User `ecuisine_user` / password `MessDbPass8233!`.
+- **Database**: MariaDB runs on the standard port **`3306`** (the installer aborts if another MySQL/MariaDB/XAMPP already listens on it).
+- **Credentials**: User `user2grey` / password `user2grey`.
 - **First Install**: Automatically creates `ecuisine_mess` and imports `database\schema.sql` and `database\seed.sql`.
 - **Upgrades / Updates**: If `%ProgramData%\eCuisine Mess\mariadb-data\mysql` already exists, database initialization and seed import are skipped, preserving all existing user data, members, and transactions.
 - **Go-Live**: Update `MESS_SUPERVISOR_PIN` and passwords in `%ProgramData%\eCuisine Mess\config.env`.
