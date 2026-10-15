@@ -33,8 +33,8 @@ class _SmtpSettingsDialogState extends State<SmtpSettingsDialog> {
   late final TextEditingController _fromEmailController;
   late final TextEditingController _fromNameController;
   late final TextEditingController _supervisorEmailsController;
-  late final TextEditingController _firebaseProjectController;
   late final TextEditingController _testRecipientController;
+  late final String _firebaseProjectId;
 
   bool _useTls = true;
   bool _useSsl = false;
@@ -53,11 +53,9 @@ class _SmtpSettingsDialogState extends State<SmtpSettingsDialog> {
     _supervisorEmailsController = TextEditingController(
       text: settings.supervisorEmails.join(', '),
     );
-    _firebaseProjectController = TextEditingController(
-      text: settings.firebaseProjectId.isNotEmpty
-          ? settings.firebaseProjectId
-          : AppConstants.defaultFirebaseProjectId,
-    );
+    _firebaseProjectId = settings.firebaseProjectId.isNotEmpty
+        ? settings.firebaseProjectId
+        : AppConstants.defaultFirebaseProjectId;
     _testRecipientController = TextEditingController();
 
     _useTls = settings.useTls;
@@ -73,7 +71,6 @@ class _SmtpSettingsDialogState extends State<SmtpSettingsDialog> {
     _fromEmailController.dispose();
     _fromNameController.dispose();
     _supervisorEmailsController.dispose();
-    _firebaseProjectController.dispose();
     _testRecipientController.dispose();
     super.dispose();
   }
@@ -97,7 +94,7 @@ class _SmtpSettingsDialogState extends State<SmtpSettingsDialog> {
       useTls: _useTls,
       useSsl: _useSsl,
       supervisorEmails: supervisors,
-      firebaseProjectId: _firebaseProjectController.text.trim(),
+      firebaseProjectId: _firebaseProjectId,
       updatedAt: DateTime.now(),
     );
 
@@ -296,21 +293,6 @@ class _SmtpSettingsDialogState extends State<SmtpSettingsDialog> {
                         isDense: true,
                       ),
                       maxLines: 2,
-                    ),
-                    const Divider(height: 24),
-                    const Text(
-                      'Cloud Firestore Project:',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 6),
-                    TextFormField(
-                      controller: _firebaseProjectController,
-                      decoration: const InputDecoration(
-                        labelText: 'Firebase Project ID',
-                        hintText: 'ecuisine-mess',
-                        border: OutlineInputBorder(),
-                        isDense: true,
-                      ),
                     ),
                     const Divider(height: 24),
                     const Text(
