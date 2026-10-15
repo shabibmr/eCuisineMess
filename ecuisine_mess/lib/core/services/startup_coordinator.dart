@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ecuisine_mess/core/di/injection.dart';
+import 'package:ecuisine_mess/core/services/device_presence_service.dart';
 import 'package:ecuisine_mess/core/services/expiry_service.dart';
 import 'package:ecuisine_mess/core/services/firebase_initializer.dart';
 import 'package:ecuisine_mess/features/auth/presentation/bloc/auth_bloc.dart';
@@ -16,6 +17,7 @@ class StartupCoordinator {
   static Future<void> start() async {
     // Ensure Firebase is initialized for cloud-backed features.
     await FirebaseInitializer.initialize();
+    unawaited(sl<DevicePresenceService>().record().catchError((Object _) {}));
     unawaited(sl<ExpiryService>().start().catchError((Object _) {}));
     sl<AuthBloc>().add(const AuthStarted());
   }

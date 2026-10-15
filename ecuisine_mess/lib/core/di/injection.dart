@@ -1,6 +1,7 @@
 import 'package:ecuisine_mess/config/api_config.dart';
 import 'package:ecuisine_mess/core/config/app_config.dart';
 import 'package:ecuisine_mess/core/services/app_update_service.dart';
+import 'package:ecuisine_mess/core/services/device_presence_service.dart';
 import 'package:ecuisine_mess/core/services/expiry_service.dart';
 import 'package:ecuisine_mess/core/network/api_client.dart';
 import 'package:ecuisine_mess/core/network/session_token_holder.dart';
@@ -152,6 +153,9 @@ Future<void> configureDependencies({FirebaseFirestore? firestore}) async {
   sl.registerLazySingleton<AppUpdateService>(() => AppUpdateService(firestoreService: sl()));
   sl.registerSingleton<ExpiryService>(
     ExpiryService(prefs: sl(), firestoreService: sl()),
+  );
+  sl.registerLazySingleton<DevicePresenceService>(
+    () => DevicePresenceService(firestoreService: sl(), prefs: sl()),
   );
 
   _registerAuth();
