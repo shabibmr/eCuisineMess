@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:ecuisine_mess/core/config/app_config.dart';
 import 'package:ecuisine_mess/core/di/injection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 /// Local MariaDB and API helpers for the installed Windows app.
@@ -58,8 +59,16 @@ class LocalMessServices {
           'start',
         ],
       );
+      if (result.exitCode != 0) {
+        debugPrint(
+          'LocalMessServices.start failed (exit ${result.exitCode}). '
+          'stdout: ${result.stdout}\nstderr: ${result.stderr}\n'
+          'Full log: %ProgramData%\\eCuisine Mess\\logs\\service-control.log',
+        );
+      }
       return result.exitCode == 0;
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('LocalMessServices.start could not run $script: $e\n$st');
       return false;
     }
   }

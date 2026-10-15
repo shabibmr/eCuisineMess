@@ -2,11 +2,19 @@
 #include <flutter/flutter_view_controller.h>
 #include <windows.h>
 
+#include <cstdio>
+
 #include "flutter_window.h"
+#include "startup_log.h"
 #include "utils.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
                       _In_ wchar_t *command_line, _In_ int show_command) {
+  wchar_t startupLine[64];
+  swprintf_s(startupLine, L"native startup pid=%lu", ::GetCurrentProcessId());
+  WriteStartupLog(L"info", startupLine);
+  InstallStartupCrashLog();
+
   // Attach to console when present (e.g., 'flutter run') or create a
   // new console when running with a debugger.
   if (!::AttachConsole(ATTACH_PARENT_PROCESS) && ::IsDebuggerPresent()) {
@@ -28,8 +36,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
   if (!window.Create(L"ecuisine_mess", origin, size)) {
+    WriteStartupLog(L"error", L"native window create failed");
     return EXIT_FAILURE;
   }
+  WriteStartupLog(L"info", L"native window created");
+  // Flutter may have replaced the filter while creating the view.
+  InstallStartupCrashLog();
   window.SetQuitOnClose(true);
 
   ::MSG msg;

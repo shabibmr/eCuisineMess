@@ -73,8 +73,8 @@ CSV export: `file_selector` save dialog (`getSaveLocation`) → write bytes. Pho
 
 ## 9. Diagnostics
 
-- `logger` package → rolling file `%LOCALAPPDATA%\ecuisine_mess\logs\app.log` (redact RFID/tokens).
-- Global `FlutterError.onError` + `PlatformDispatcher.instance.onError` → log + friendly crash dialog.
+- Startup and crash lines append to `%LOCALAPPDATA%\ecuisine_mess\logs\app.log`. The Windows runner writes this file before Dart starts. The file rolls at 1 MB and keeps `app.log.1` through `app.log.3`. RFID values, tokens, PINs, and passwords are redacted.
+- `FlutterError.onError`, `PlatformDispatcher.instance.onError`, and the startup zone write Dart failures to that file. A build error still shows the in-window error widget.
 - "Copy diagnostics" button in Server Settings (API URL, health result, app version).
 
 ## 10. Performance targets (counter)
