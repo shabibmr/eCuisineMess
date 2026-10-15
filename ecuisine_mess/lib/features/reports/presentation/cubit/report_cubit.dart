@@ -3,6 +3,7 @@ import 'package:ecuisine_mess/core/usecase/usecase.dart';
 import 'package:ecuisine_mess/core/utils/status.dart';
 import 'package:ecuisine_mess/features/reports/domain/entities/report_entities.dart';
 import 'package:ecuisine_mess/features/reports/domain/usecases/reports_usecases.dart';
+import 'package:ecuisine_mess/shared/services/report_export_format.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -91,13 +92,18 @@ class ReportCubit<T> extends Cubit<ReportState<T>> {
     }
   }
 
-  /// Exports exactly what is on screen; no-op until a report was generated.
-  Future<void> exportCsv() async {
+  /// Saves the generated report as CSV. No-op until a report was generated.
+  Future<void> exportCsv() => export(ReportExportFormat.csv);
+
+  /// Saves the generated report in [format]. No-op until a report was generated.
+  Future<void> export(ReportExportFormat format) async {
     final query = state.query;
     if (query == null || state.exporting) return;
     emit(state.copyWith(exporting: true, clearNotice: true));
     try {
-      final path = await _export(ExportReportCsvParams(kind, query));
+      final path = await _export(
+        ExportReportCsvParams(kind, query, format: format),
+      );
       emit(state.copyWith(exporting: false, notice: 'Saved to $path'));
     } on Failure catch (e) {
       emit(

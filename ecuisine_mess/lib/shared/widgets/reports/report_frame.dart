@@ -1,6 +1,7 @@
+import 'package:ecuisine_mess/shared/services/report_export_format.dart';
 import 'package:flutter/material.dart';
 
-/// Shared layout for a report tab: filter bar, Generate / Export CSV actions,
+/// Shared layout for a report tab: filter bar, Generate / Export actions,
 /// then loading / error / empty / result. Holds no report logic.
 class ReportFrame extends StatelessWidget {
   const ReportFrame({
@@ -23,7 +24,7 @@ class ReportFrame extends StatelessWidget {
   final VoidCallback onGenerate;
 
   /// Null disables the button (nothing generated yet).
-  final VoidCallback? onExport;
+  final void Function(ReportExportFormat format)? onExport;
 
   /// Null disables or hides the email button.
   final VoidCallback? onEmail;
@@ -55,16 +56,10 @@ class ReportFrame extends StatelessWidget {
                   label: const Text('Generate'),
                 ),
                 const SizedBox(width: 8),
-                OutlinedButton.icon(
-                  onPressed: loading || exporting ? null : onExport,
-                  icon: exporting
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.download, size: 18),
-                  label: const Text('Export CSV'),
+                _ExportButton(
+                  enabled: onExport != null && !loading && !exporting,
+                  exporting: exporting,
+                  onSelected: onExport,
                 ),
                 if (onEmail != null) ...[
                   const SizedBox(width: 8),
@@ -120,6 +115,54 @@ class ReportFrame extends StatelessWidget {
     }
     if (isEmpty) return Center(child: Text(emptyMessage));
     return Card(child: child);
+  }
+}
+
+class _ExportButton extends StatelessWidget {
+  const _ExportButton({
+    required this.enabled,
+    required this.exporting,
+    required this.onSelected,
+  });
+
+  final bool enabled;
+  final bool exporting;
+  final void Function(ReportExportFormat format)? onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: enabled ? () => _openMenu(context) : null,
+      icon: exporting
+          ? const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.download, size: 18),
+      label: const Text('Export'),
+    );
+  }
+
+  Future<void> _openMenu(BuildContext context) async {
+    final button = context.findRenderObject() as RenderBox?;
+    final overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox?;
+    final choose = onSelected;
+    if (button == null || overlay == null || choose == null) return;
+    final origin = button.localToGlobal(Offset.zero, ancestor: overlay);
+    final selected = await showMenu<ReportExportFormat>(
+      context: context,
+      position: RelativeRect.fromRect(
+        origin & button.size,
+        Offset.zero & overlay.size,
+      ),
+      items: [
+        for (final format in ReportExportFormat.values)
+          PopupMenuItem(value: format, child: Text(format.label)),
+      ],
+    );
+    if (selected != null) choose(selected);
   }
 }
 

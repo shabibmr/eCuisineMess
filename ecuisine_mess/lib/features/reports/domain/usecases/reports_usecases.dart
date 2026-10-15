@@ -2,6 +2,8 @@ import 'package:ecuisine_mess/core/usecase/usecase.dart';
 import 'package:ecuisine_mess/features/reports/domain/entities/report_entities.dart';
 import 'package:ecuisine_mess/features/reports/domain/repositories/reports_repository.dart';
 import 'package:ecuisine_mess/shared/services/file_export_service.dart';
+import 'package:ecuisine_mess/shared/services/report_export_format.dart';
+import 'package:ecuisine_mess/shared/services/report_table_files.dart';
 import 'package:equatable/equatable.dart';
 import 'package:intl/intl.dart';
 
@@ -48,13 +50,18 @@ class GetMembersRegister extends UseCase<MembersRegister, ReportQuery> {
 }
 
 class ExportReportCsvParams extends Equatable {
-  const ExportReportCsvParams(this.kind, this.query);
+  const ExportReportCsvParams(
+    this.kind,
+    this.query, {
+    this.format = ReportExportFormat.csv,
+  });
 
   final ReportKind kind;
   final ReportQuery query;
+  final ReportExportFormat format;
 
   @override
-  List<Object?> get props => [kind, query];
+  List<Object?> get props => [kind, query, format];
 }
 
 /// Downloads the server-built CSV and saves it; returns the saved path.
@@ -71,8 +78,22 @@ class ExportReportCsv extends UseCase<String, ExportReportCsvParams> {
 
   @override
   Future<String> call(ExportReportCsvParams params) async {
-    final bytes = await getCsvBytes(params);
+    final csvBytes = await getCsvBytes(params);
+    final bytes = switch (params.format) {
+      ReportExportFormat.csv => csvBytes,
+      ReportExportFormat.excel => ReportTableFiles.xlsx(
+        csvBytes,
+        sheetName: params.kind.displayName,
+      ),
+      ReportExportFormat.pdf => await ReportTableFiles.pdf(
+        csvBytes,
+        title: '${params.kind.displayName} Report',
+      ),
+    };
     final stamp = DateFormat('yyyyMMdd_HHmmss').format(_clock());
-    return _files.save('${params.kind.fileStem}_$stamp.csv', bytes);
+    return _files.save(
+      '${params.kind.fileStem}_$stamp.${params.format.extension}',
+      bytes,
+    );
   }
 }

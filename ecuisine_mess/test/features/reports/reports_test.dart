@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:ecuisine_mess/core/di/injection.dart';
 import 'package:ecuisine_mess/core/error/failures.dart';
@@ -12,6 +14,7 @@ import 'package:ecuisine_mess/features/reports/domain/usecases/reports_usecases.
 import 'package:ecuisine_mess/features/reports/presentation/cubit/report_cubit.dart';
 import 'package:ecuisine_mess/features/reports/presentation/pages/reports_page.dart';
 import 'package:ecuisine_mess/shared/services/file_export_service.dart';
+import 'package:ecuisine_mess/shared/services/report_export_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -151,6 +154,51 @@ void main() {
       expect(files.name, 'members_register_20261006_090507.csv');
       expect(files.bytes, [1, 2, 3]);
       expect(path, endsWith('members_register_20261006_090507.csv'));
+    });
+
+    test('saves Excel and PDF built from the pipe-delimited CSV', () async {
+      final repo = _MockRepo();
+      final files = _FakeFiles();
+      final csv = utf8.encode('\uFEFFItem|Qty\n"A|B & <C>"|2\n');
+      when(() => repo.exportCsv(any(), any())).thenAnswer(
+        (_) async => Uint8List.fromList(csv),
+      );
+      final export = ExportReportCsv(
+        repo,
+        files,
+        clock: () => DateTime(2026, 10, 6, 9, 5, 7),
+      );
+      const params = ExportReportCsvParams(ReportKind.members, ReportQuery());
+
+      final xlsxPath = await export(
+        const ExportReportCsvParams(
+          ReportKind.members,
+          ReportQuery(),
+          format: ReportExportFormat.excel,
+        ),
+      );
+      expect(xlsxPath, endsWith('members_register_20261006_090507.xlsx'));
+      final zip = ZipDecoder().decodeBytes(files.bytes!);
+      final sheet = zip.files.firstWhere(
+        (file) => file.name == 'xl/worksheets/sheet1.xml',
+      );
+      final xml = utf8.decode(sheet.content);
+      expect(xml, contains('A|B &amp; &lt;C&gt;'));
+      final workbook = zip.files.firstWhere(
+        (file) => file.name == 'xl/workbook.xml',
+      );
+      expect(utf8.decode(workbook.content), contains('Members Register'));
+
+      final pdfPath = await export(
+        const ExportReportCsvParams(
+          ReportKind.itemMovement,
+          ReportQuery(),
+          format: ReportExportFormat.pdf,
+        ),
+      );
+      expect(pdfPath, endsWith('item_movement_20261006_090507.pdf'));
+      expect(utf8.decode(files.bytes!.take(5).toList()), '%PDF-');
+      expect(params.format, ReportExportFormat.csv);
     });
   });
 
@@ -374,9 +422,14 @@ void main() {
       expect(find.text('Ali'), findsOneWidget);
       verify(() => repo.getAttendance(any())).called(1);
       final export = t.widget<OutlinedButton>(
-        find.widgetWithText(OutlinedButton, 'Export CSV'),
+        find.widgetWithText(OutlinedButton, 'Export'),
       );
       expect(export.onPressed, isNotNull);
+      await t.tap(find.widgetWithText(OutlinedButton, 'Export'));
+      await t.pumpAndSettle();
+      expect(find.text('CSV'), findsOneWidget);
+      expect(find.text('Excel'), findsOneWidget);
+      expect(find.text('PDF'), findsOneWidget);
     });
 
     testWidgets('empty members register shows the empty message', (t) async {

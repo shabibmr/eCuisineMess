@@ -54,7 +54,7 @@ class ReportTab<T> extends StatelessWidget {
           isEmpty: data != null && isEmpty(data),
           summary: data != null && summary != null ? summary!(data) : null,
           onGenerate: () => cubit.generate(buildQuery()),
-          onExport: state.query == null ? null : cubit.exportCsv,
+          onExport: state.query == null ? null : cubit.export,
           onEmail: state.query == null
               ? null
               : () {
