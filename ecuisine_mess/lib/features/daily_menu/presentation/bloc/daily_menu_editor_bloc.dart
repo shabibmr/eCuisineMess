@@ -234,7 +234,7 @@ class DailyMenuEditorBloc
       itemId: mapping.itemId,
       itemName: mapping.itemName,
       unit: mapping.unit,
-      quantity: mapping.defaultQty > 0 ? mapping.defaultQty : 1,
+      quantity: 1,
       categoryId: mapping.categoryId,
       category: mapping.category,
       uomId: mapping.uomId,
@@ -268,7 +268,7 @@ class DailyMenuEditorBloc
           itemId: mapping.itemId,
           itemName: mapping.itemName,
           unit: mapping.unit,
-          quantity: mapping.defaultQty > 0 ? mapping.defaultQty : 1,
+          quantity: 1,
           categoryId: mapping.categoryId,
           category: mapping.category,
           uomId: mapping.uomId,
@@ -320,7 +320,7 @@ class DailyMenuEditorBloc
     final slot = state.slotFor(cuisineId, state.selectedMealType);
     if (slot == null || slot.isLocked) return;
 
-    final qty = event.quantity <= 0 ? 1.0 : event.quantity;
+    final qty = event.quantity < 1 ? 1.0 : event.quantity;
     final nextItems = slot.items.map((i) {
       if (i.itemId != event.itemId) return i;
       return i.copyWith(quantity: qty);
@@ -528,7 +528,7 @@ class DailyMenuEditorBloc
               .map(
                 (i) => DailyMenuItemInput(
                   itemId: i.itemId,
-                  quantity: i.quantity,
+                  quantity: i.quantity < 1 ? 1 : i.quantity,
                   notes: i.notes,
                 ),
               )

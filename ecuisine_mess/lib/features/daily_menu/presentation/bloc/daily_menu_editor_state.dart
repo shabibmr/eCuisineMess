@@ -17,7 +17,7 @@ final class MenuSlotLine extends Equatable {
       itemId: item.itemId,
       itemName: item.itemName,
       unit: item.unit,
-      quantity: item.quantity,
+      quantity: item.quantity < 1 ? 1 : item.quantity,
       notes: item.notes,
       categoryId: item.categoryId,
       category: item.category,

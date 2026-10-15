@@ -1,7 +1,6 @@
 import 'package:ecuisine_mess/features/cuisines/domain/entities/cuisine_item_mapping.dart';
 import 'package:ecuisine_mess/features/daily_menu/presentation/bloc/daily_menu_editor_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 /// Item table + mapped-item picker for the active cuisine×meal slot.
 class MenuItemGrid extends StatelessWidget {
@@ -101,7 +100,7 @@ class MenuItemGrid extends StatelessWidget {
   }
 }
 
-class _MenuItemRow extends StatefulWidget {
+class _MenuItemRow extends StatelessWidget {
   const _MenuItemRow({
     required this.index,
     required this.line,
@@ -116,47 +115,25 @@ class _MenuItemRow extends StatefulWidget {
   final ValueChanged<double> onQtyChanged;
   final VoidCallback onRemove;
 
-  @override
-  State<_MenuItemRow> createState() => _MenuItemRowState();
-}
+  static const double minQuantity = 1;
 
-class _MenuItemRowState extends State<_MenuItemRow> {
-  late final TextEditingController _qtyCtrl;
-
-  @override
-  void initState() {
-    super.initState();
-    _qtyCtrl = TextEditingController(
-      text: _formatQty(widget.line.quantity),
-    );
-  }
-
-  @override
-  void didUpdateWidget(covariant _MenuItemRow oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.line.itemId != widget.line.itemId ||
-        oldWidget.line.quantity != widget.line.quantity) {
-      final next = _formatQty(widget.line.quantity);
-      if (_qtyCtrl.text != next) {
-        _qtyCtrl.text = next;
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _qtyCtrl.dispose();
-    super.dispose();
-  }
+  double get _quantity => line.quantity < minQuantity ? minQuantity : line.quantity;
 
   static String _formatQty(double q) {
     if (q == q.roundToDouble()) return q.toInt().toString();
     return q.toString();
   }
 
+  void _step(double delta) {
+    final next = _quantity + delta;
+    if (next < minQuantity) return;
+    onQtyChanged(next);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final canDecrease = !readOnly && _quantity > minQuantity;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
       child: Row(
@@ -164,7 +141,7 @@ class _MenuItemRowState extends State<_MenuItemRow> {
           SizedBox(
             width: 28,
             child: Text(
-              '${widget.index}',
+              '$index',
               style: TextStyle(fontSize: 11, color: theme.hintColor),
             ),
           ),
@@ -173,56 +150,56 @@ class _MenuItemRowState extends State<_MenuItemRow> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.line.itemName,
+                  line.itemName,
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                if (widget.line.category != null &&
-                    widget.line.category!.isNotEmpty)
+                if (line.category != null && line.category!.isNotEmpty)
                   Text(
-                    widget.line.category!,
+                    line.category!,
                     style: TextStyle(fontSize: 11, color: theme.hintColor),
                   ),
               ],
             ),
           ),
+          IconButton(
+            tooltip: 'Decrease quantity',
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            onPressed: canDecrease ? () => _step(-1) : null,
+            icon: const Icon(Icons.remove, size: 18),
+          ),
           SizedBox(
-            width: 72,
-            child: TextField(
-              controller: _qtyCtrl,
-              enabled: !widget.readOnly,
+            width: 28,
+            child: Text(
+              _formatQty(_quantity),
+              key: ValueKey('menu-line-qty-${line.itemId}'),
               textAlign: TextAlign.center,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-              ],
-              decoration: const InputDecoration(
-                isDense: true,
-                border: OutlineInputBorder(),
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              ),
-              onChanged: (raw) {
-                final qty = double.tryParse(raw.trim());
-                if (qty == null || qty <= 0) return;
-                widget.onQtyChanged(qty);
-              },
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
             ),
           ),
-          const SizedBox(width: 12),
+          IconButton(
+            tooltip: 'Increase quantity',
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            onPressed: readOnly ? null : () => _step(1),
+            icon: const Icon(Icons.add, size: 18),
+          ),
+          const SizedBox(width: 8),
           SizedBox(
             width: 64,
             child: Text(
-              widget.line.unit,
+              line.unit,
               style: TextStyle(fontSize: 12, color: theme.hintColor),
             ),
           ),
           IconButton(
             tooltip: 'Remove',
-            onPressed: widget.readOnly ? null : widget.onRemove,
+            onPressed: readOnly ? null : onRemove,
             icon: const Icon(Icons.close, size: 18),
             visualDensity: VisualDensity.compact,
           ),
