@@ -19,7 +19,7 @@ class BillListBloc extends Bloc<BillListEvent, BillListState> {
   })  : _getBills = getBills,
         _getBill = getBill,
         _cancelBill = cancelBill,
-        super(const BillListState()) {
+        super(BillListState(billDate: formatDate(DateTime.now()))) {
     on<BillListStarted>(_onLoad);
     on<BillListRefreshed>(_onLoad);
     on<BillListFiltersChanged>(_onFiltersChanged, transformer: restartable());
@@ -32,6 +32,13 @@ class BillListBloc extends Bloc<BillListEvent, BillListState> {
   final GetBills _getBills;
   final GetBill _getBill;
   final CancelBill _cancelBill;
+
+  static String formatDate(DateTime d) {
+    final y = d.year.toString().padLeft(4, '0');
+    final m = d.month.toString().padLeft(2, '0');
+    final day = d.day.toString().padLeft(2, '0');
+    return '$y-$m-$day';
+  }
 
   Future<void> _onLoad(
     BillListEvent event,

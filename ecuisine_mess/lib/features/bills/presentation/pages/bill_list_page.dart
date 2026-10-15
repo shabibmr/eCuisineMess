@@ -120,7 +120,9 @@ class _BillListViewState extends State<_BillListView> {
           onRetry: () =>
               context.read<BillListBloc>().add(const BillListRefreshed()),
           isEmpty: !loading && !showError && state.bills.isEmpty,
-          emptyMessage: 'No bills found',
+          emptyMessage: state.billDate == null
+              ? 'No bills found'
+              : 'No bills for ${state.billDate}',
           actions: [
             AppRefreshButton(
               onPressed: () =>
